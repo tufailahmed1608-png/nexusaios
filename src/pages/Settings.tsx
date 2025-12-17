@@ -19,7 +19,9 @@ import {
   Loader2, 
   Upload,
   Check,
-  ExternalLink
+  ExternalLink,
+  BookOpen,
+  Presentation
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -211,7 +213,7 @@ const Settings = () => {
 
       <div className="max-w-4xl mx-auto px-4 py-8">
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid">
             <TabsTrigger value="profile" className="gap-2">
               <User className="h-4 w-4" />
               <span className="hidden sm:inline">Profile</span>
@@ -227,6 +229,10 @@ const Settings = () => {
             <TabsTrigger value="mcp" className="gap-2">
               <Server className="h-4 w-4" />
               <span className="hidden sm:inline">MCP</span>
+            </TabsTrigger>
+            <TabsTrigger value="resources" className="gap-2">
+              <BookOpen className="h-4 w-4" />
+              <span className="hidden sm:inline">Resources</span>
             </TabsTrigger>
           </TabsList>
 
@@ -510,6 +516,51 @@ const Settings = () => {
                   <Server className="h-4 w-4" />
                   Save MCP Settings
                 </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Resources Tab */}
+          <TabsContent value="resources" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Product Resources</CardTitle>
+                <CardDescription>
+                  Access documentation and presentation materials
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between p-4 border border-border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Presentation className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Pitch Deck</p>
+                      <p className="text-sm text-muted-foreground">View and export the product pitch deck</p>
+                    </div>
+                  </div>
+                  <Button variant="outline" className="gap-2" onClick={() => navigate('/pitch-deck')}>
+                    <ExternalLink className="h-4 w-4" />
+                    Open
+                  </Button>
+                </div>
+                
+                <div className="flex items-center justify-between p-4 border border-border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                      <BookOpen className="h-5 w-5 text-emerald-500" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Product Documentation</p>
+                      <p className="text-sm text-muted-foreground">Complete product details and specifications</p>
+                    </div>
+                  </div>
+                  <Button variant="outline" className="gap-2" onClick={() => navigate('/docs')}>
+                    <ExternalLink className="h-4 w-4" />
+                    Open
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

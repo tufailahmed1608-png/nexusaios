@@ -18,9 +18,6 @@ import {
   UserCircle,
   Activity,
   ClipboardList,
-  BookOpen,
-  Presentation,
-  X,
 } from 'lucide-react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 
@@ -121,34 +118,10 @@ const SidebarContent = ({
         })}
       </nav>
 
-      {/* Settings & Docs */}
+      {/* Settings */}
       <div className="p-4 border-t border-border space-y-1">
         <button
-          onClick={() => handleNavigate('/pitch-deck')}
-          className="nexus-sidebar-item w-full"
-        >
-          <Presentation className="w-5 h-5 flex-shrink-0" />
-          {!isCollapsed && (
-            <span className={cn('flex-1', isRTL ? 'text-right' : 'text-left')}>
-              {t('pitchDeck')}
-            </span>
-          )}
-        </button>
-
-        <button
-          onClick={() => handleNavigate('/docs')}
-          className="nexus-sidebar-item w-full"
-        >
-          <BookOpen className="w-5 h-5 flex-shrink-0" />
-          {!isCollapsed && (
-            <span className={cn('flex-1', isRTL ? 'text-right' : 'text-left')}>
-              {t('productDocs')}
-            </span>
-          )}
-        </button>
-
-        <button
-          onClick={() => handleViewChange('settings')}
+          onClick={() => handleNavigate('/settings')}
           className={cn(
             'nexus-sidebar-item w-full',
             activeView === 'settings' && 'nexus-sidebar-item-active'
