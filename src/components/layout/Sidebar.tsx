@@ -1,7 +1,7 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useIsMobile } from '@/hooks/use-mobile';
 import {
   LayoutDashboard,
   Inbox,
@@ -20,11 +20,15 @@ import {
   ClipboardList,
   BookOpen,
   Presentation,
+  X,
 } from 'lucide-react';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
 
 interface SidebarProps {
   activeView: string;
   onViewChange: (view: string) => void;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 const menuItems = [
@@ -41,19 +45,34 @@ const menuItems = [
   { id: 'team', labelKey: 'team', icon: Users },
 ];
 
-const Sidebar = ({ activeView, onViewChange }: SidebarProps) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+const SidebarContent = ({ 
+  activeView, 
+  onViewChange, 
+  isCollapsed, 
+  setIsCollapsed,
+  onItemClick 
+}: { 
+  activeView: string; 
+  onViewChange: (view: string) => void;
+  isCollapsed: boolean;
+  setIsCollapsed: (collapsed: boolean) => void;
+  onItemClick?: () => void;
+}) => {
   const { t, isRTL } = useLanguage();
   const navigate = useNavigate();
 
+  const handleViewChange = (view: string) => {
+    onViewChange(view);
+    onItemClick?.();
+  };
+
+  const handleNavigate = (path: string) => {
+    navigate(path);
+    onItemClick?.();
+  };
+
   return (
-    <aside
-      className={cn(
-        'fixed top-0 h-screen bg-card border-border flex flex-col transition-all duration-300 z-50',
-        isRTL ? 'right-0 border-l' : 'left-0 border-r',
-        isCollapsed ? 'w-20' : 'w-72'
-      )}
-    >
+    <>
       {/* Logo */}
       <div className="h-16 flex items-center px-6 border-b border-border">
         <div className="flex items-center gap-3">
@@ -78,7 +97,7 @@ const Sidebar = ({ activeView, onViewChange }: SidebarProps) => {
           return (
             <button
               key={item.id}
-              onClick={() => onViewChange(item.id)}
+              onClick={() => handleViewChange(item.id)}
               className={cn(
                 'nexus-sidebar-item w-full',
                 isActive && 'nexus-sidebar-item-active'
@@ -105,7 +124,7 @@ const Sidebar = ({ activeView, onViewChange }: SidebarProps) => {
       {/* Settings & Docs */}
       <div className="p-4 border-t border-border space-y-1">
         <button
-          onClick={() => navigate('/pitch-deck')}
+          onClick={() => handleNavigate('/pitch-deck')}
           className="nexus-sidebar-item w-full"
         >
           <Presentation className="w-5 h-5 flex-shrink-0" />
@@ -117,7 +136,7 @@ const Sidebar = ({ activeView, onViewChange }: SidebarProps) => {
         </button>
 
         <button
-          onClick={() => navigate('/docs')}
+          onClick={() => handleNavigate('/docs')}
           className="nexus-sidebar-item w-full"
         >
           <BookOpen className="w-5 h-5 flex-shrink-0" />
@@ -129,7 +148,7 @@ const Sidebar = ({ activeView, onViewChange }: SidebarProps) => {
         </button>
 
         <button
-          onClick={() => onViewChange('settings')}
+          onClick={() => handleViewChange('settings')}
           className={cn(
             'nexus-sidebar-item w-full',
             activeView === 'settings' && 'nexus-sidebar-item-active'
@@ -145,7 +164,7 @@ const Sidebar = ({ activeView, onViewChange }: SidebarProps) => {
 
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="nexus-sidebar-item w-full justify-center"
+          className="nexus-sidebar-item w-full justify-center hidden md:flex"
         >
           {isCollapsed ? (
             isRTL ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />
@@ -159,6 +178,48 @@ const Sidebar = ({ activeView, onViewChange }: SidebarProps) => {
           )}
         </button>
       </div>
+    </>
+  );
+};
+
+const Sidebar = ({ activeView, onViewChange, isOpen = false, onOpenChange }: SidebarProps) => {
+  const { isRTL } = useLanguage();
+  const isMobile = useIsMobile();
+
+  // Mobile: Sheet drawer
+  if (isMobile) {
+    return (
+      <Sheet open={isOpen} onOpenChange={onOpenChange}>
+        <SheetContent 
+          side={isRTL ? 'right' : 'left'} 
+          className="w-72 p-0 bg-card border-border"
+        >
+          <SidebarContent
+            activeView={activeView}
+            onViewChange={onViewChange}
+            isCollapsed={false}
+            setIsCollapsed={() => {}}
+            onItemClick={() => onOpenChange?.(false)}
+          />
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  // Desktop: Fixed sidebar
+  return (
+    <aside
+      className={cn(
+        'fixed top-0 h-screen bg-card border-border flex flex-col transition-all duration-300 z-50 w-72',
+        isRTL ? 'right-0 border-l' : 'left-0 border-r'
+      )}
+    >
+      <SidebarContent
+        activeView={activeView}
+        onViewChange={onViewChange}
+        isCollapsed={false}
+        setIsCollapsed={() => {}}
+      />
     </aside>
   );
 };
