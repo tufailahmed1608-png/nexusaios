@@ -8,6 +8,7 @@ import { LanguageProvider } from "@/hooks/useLanguage";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Settings from "./pages/Settings";
+import ProductDocumentation from "./pages/ProductDocumentation";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 
@@ -57,6 +58,7 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
+              <Route path="/docs" element={<ProductDocumentation />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
