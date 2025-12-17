@@ -12,6 +12,7 @@ import {
   Sparkles,
   Users,
   FolderKanban,
+  FileText,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -25,6 +26,7 @@ const menuItems = [
   { id: 'tasks', label: 'Task Board', icon: CheckSquare },
   { id: 'meetings', label: 'Meeting Hub', icon: Calendar },
   { id: 'projects', label: 'Projects', icon: FolderKanban },
+  { id: 'documents', label: 'Documents', icon: FileText },
   { id: 'strategy', label: 'Strategy', icon: BarChart3 },
   { id: 'team', label: 'Team', icon: Users },
 ];
