@@ -26,24 +26,6 @@ import {
   Brain
 } from 'lucide-react';
 
-// Import mockup images
-import authMockup from '@/assets/features/auth-mockup.png';
-import dashboardMockup from '@/assets/features/dashboard-mockup.png';
-import inboxMockup from '@/assets/features/inbox-mockup.png';
-import meetingMockup from '@/assets/features/meeting-mockup.png';
-import projectsMockup from '@/assets/features/projects-mockup.png';
-import taskboardMockup from '@/assets/features/taskboard-mockup.png';
-import teamMockup from '@/assets/features/team-mockup.png';
-import stakeholderMockup from '@/assets/features/stakeholder-mockup.png';
-import strategyMockup from '@/assets/features/strategy-mockup.png';
-import documentsMockup from '@/assets/features/documents-mockup.png';
-import reportsMockup from '@/assets/features/reports-mockup.png';
-import activityMockup from '@/assets/features/activity-mockup.png';
-import notificationsMockup from '@/assets/features/notifications-mockup.png';
-import aiChatMockup from '@/assets/features/ai-chat-mockup.png';
-import languageMockup from '@/assets/features/language-mockup.png';
-import themeMockup from '@/assets/features/theme-mockup.png';
-
 const FeaturesShowcase = () => {
   const navigate = useNavigate();
   const { isRTL } = useLanguage();
@@ -55,128 +37,144 @@ const FeaturesShowcase = () => {
       title: 'Secure Authentication',
       description: 'Enterprise-grade login system with email/password authentication, session management, and secure sign-out functionality.',
       category: 'Security',
-      color: 'bg-emerald-500/10 text-emerald-500',
-      image: authMockup
+      color: 'bg-emerald-500',
+      bgColor: 'bg-emerald-500/10',
+      borderColor: 'border-emerald-500/20'
     },
     {
       icon: LayoutDashboard,
       title: 'Executive Dashboard',
       description: 'Real-time KPI cards showing active projects, tasks in progress, team members, and completion rates. Portfolio health charts and velocity tracking.',
       category: 'Analytics',
-      color: 'bg-primary/10 text-primary',
-      image: dashboardMockup
+      color: 'bg-primary',
+      bgColor: 'bg-primary/10',
+      borderColor: 'border-primary/20'
     },
     {
       icon: Inbox,
       title: 'Smart Inbox',
       description: 'AI-powered email management with sentiment analysis, confidence scoring, escalation matrix (L1-L4), and one-click task extraction.',
       category: 'AI-Powered',
-      color: 'bg-violet-500/10 text-violet-500',
-      image: inboxMockup
+      color: 'bg-violet-500',
+      bgColor: 'bg-violet-500/10',
+      borderColor: 'border-violet-500/20'
     },
     {
       icon: Video,
       title: 'Meeting Hub',
       description: 'Transcript analyzer that converts meeting recordings into structured summaries, decisions, and action items automatically.',
       category: 'AI-Powered',
-      color: 'bg-violet-500/10 text-violet-500',
-      image: meetingMockup
+      color: 'bg-violet-500',
+      bgColor: 'bg-violet-500/10',
+      borderColor: 'border-violet-500/20'
     },
     {
       icon: FolderKanban,
       title: 'Projects View',
       description: 'Comprehensive project cards with team allocation, milestones, and interactive Gantt chart timeline visualization.',
       category: 'Management',
-      color: 'bg-blue-500/10 text-blue-500',
-      image: projectsMockup
+      color: 'bg-blue-500',
+      bgColor: 'bg-blue-500/10',
+      borderColor: 'border-blue-500/20'
     },
     {
       icon: CheckSquare,
       title: 'Task Board',
       description: 'Drag-and-drop Kanban board for task management. Tasks can be created manually or auto-extracted from emails and meetings.',
       category: 'Management',
-      color: 'bg-blue-500/10 text-blue-500',
-      image: taskboardMockup
+      color: 'bg-blue-500',
+      bgColor: 'bg-blue-500/10',
+      borderColor: 'border-blue-500/20'
     },
     {
       icon: Users,
       title: 'Team View',
       description: 'Member profiles, workload distribution charts, skills matrix, and team analytics for resource optimization.',
       category: 'Team',
-      color: 'bg-orange-500/10 text-orange-500',
-      image: teamMockup
+      color: 'bg-orange-500',
+      bgColor: 'bg-orange-500/10',
+      borderColor: 'border-orange-500/20'
     },
     {
       icon: Target,
       title: 'Stakeholder Management',
       description: 'Categorize stakeholders by influence/interest matrix. Communication plans with scheduling and channel preferences.',
       category: 'Management',
-      color: 'bg-blue-500/10 text-blue-500',
-      image: stakeholderMockup
+      color: 'bg-blue-500',
+      bgColor: 'bg-blue-500/10',
+      borderColor: 'border-blue-500/20'
     },
     {
       icon: Target,
       title: 'Strategy View',
       description: 'ROI tracking, budget vs. actuals comparison, and strategic pillar alignment dashboards for executive visibility.',
       category: 'Analytics',
-      color: 'bg-primary/10 text-primary',
-      image: strategyMockup
+      color: 'bg-primary',
+      bgColor: 'bg-primary/10',
+      borderColor: 'border-primary/20'
     },
     {
       icon: FileText,
       title: 'Documents & Templates',
       description: 'Cloud storage sync with Google Drive and OneDrive. Pre-built templates for kickoff meetings, RACI matrix, risk registers, and more.',
       category: 'Productivity',
-      color: 'bg-cyan-500/10 text-cyan-500',
-      image: documentsMockup
+      color: 'bg-cyan-500',
+      bgColor: 'bg-cyan-500/10',
+      borderColor: 'border-cyan-500/20'
     },
     {
       icon: BarChart3,
       title: 'Auto-Generated Reports',
       description: 'AI creates weekly status, monthly summaries, stakeholder updates, and risk assessments automatically from project data.',
       category: 'AI-Powered',
-      color: 'bg-violet-500/10 text-violet-500',
-      image: reportsMockup
+      color: 'bg-violet-500',
+      bgColor: 'bg-violet-500/10',
+      borderColor: 'border-violet-500/20'
     },
     {
       icon: Activity,
       title: 'Activity Tracking',
       description: 'Daily, weekly, and monthly activity metrics showing how AI reduces administrative work and increases productivity.',
       category: 'Analytics',
-      color: 'bg-primary/10 text-primary',
-      image: activityMockup
+      color: 'bg-primary',
+      bgColor: 'bg-primary/10',
+      borderColor: 'border-primary/20'
     },
     {
       icon: Bell,
       title: 'Smart Notifications',
       description: 'AI-prioritized alerts for deadlines, risks, updates, mentions, and milestones with critical/high/medium/low priority levels.',
       category: 'AI-Powered',
-      color: 'bg-violet-500/10 text-violet-500',
-      image: notificationsMockup
+      color: 'bg-violet-500',
+      bgColor: 'bg-violet-500/10',
+      borderColor: 'border-violet-500/20'
     },
     {
       icon: MessageSquare,
       title: 'AI Assistant',
       description: 'Floating chat interface powered by AI for instant help, project queries, and intelligent suggestions.',
       category: 'AI-Powered',
-      color: 'bg-violet-500/10 text-violet-500',
-      image: aiChatMockup
+      color: 'bg-violet-500',
+      bgColor: 'bg-violet-500/10',
+      borderColor: 'border-violet-500/20'
     },
     {
       icon: Globe,
       title: 'Multi-Language Support',
       description: 'Full English and Arabic support with automatic RTL layout switching and localized interface elements.',
       category: 'Accessibility',
-      color: 'bg-teal-500/10 text-teal-500',
-      image: languageMockup
+      color: 'bg-teal-500',
+      bgColor: 'bg-teal-500/10',
+      borderColor: 'border-teal-500/20'
     },
     {
       icon: isDark ? Sun : Moon,
       title: 'Theme Switching',
       description: 'Professional dark and light themes optimized for extended use with high-contrast enterprise design.',
       category: 'Accessibility',
-      color: 'bg-teal-500/10 text-teal-500',
-      image: themeMockup
+      color: 'bg-teal-500',
+      bgColor: 'bg-teal-500/10',
+      borderColor: 'border-teal-500/20'
     }
   ];
 
@@ -245,31 +243,23 @@ const FeaturesShowcase = () => {
           {filteredFeatures.map((feature, index) => (
             <Card 
               key={index} 
-              className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-border bg-card overflow-hidden"
+              className={`group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-2 ${feature.borderColor} ${feature.bgColor} bg-card/50`}
             >
-              {/* Feature Image */}
-              <div className="relative h-40 overflow-hidden bg-muted">
-                <img 
-                  src={feature.image} 
-                  alt={`${feature.title} mockup`}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-card/80 to-transparent" />
-              </div>
-              
-              <CardHeader className="pb-3 pt-4">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className={`w-10 h-10 rounded-lg ${feature.color} flex items-center justify-center`}>
-                    <feature.icon className="h-5 w-5" />
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between mb-4">
+                  <div className={`w-12 h-12 rounded-xl ${feature.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
+                    <feature.icon className="h-6 w-6 text-white" />
                   </div>
-                  <Badge variant="secondary" className="text-xs">
+                  <Badge variant="outline" className="text-xs font-medium">
                     {feature.category}
                   </Badge>
                 </div>
-                <CardTitle className="text-lg text-card-foreground">{feature.title}</CardTitle>
+                <CardTitle className="text-lg text-card-foreground leading-tight">
+                  {feature.title}
+                </CardTitle>
               </CardHeader>
               <CardContent className="pt-0">
-                <CardDescription className="text-sm leading-relaxed">
+                <CardDescription className="text-sm leading-relaxed text-muted-foreground">
                   {feature.description}
                 </CardDescription>
               </CardContent>
@@ -294,13 +284,13 @@ const FeaturesShowcase = () => {
           ].map((item, index, arr) => (
             <div key={item.step} className="flex items-center gap-4">
               <div className="flex flex-col items-center">
-                <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-2">
-                  <item.icon className="h-6 w-6 text-primary" />
+                <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center mb-2 shadow-lg">
+                  <item.icon className="h-6 w-6 text-primary-foreground" />
                 </div>
-                <span className="text-xs text-muted-foreground text-center">{item.label}</span>
+                <span className="text-xs text-muted-foreground text-center font-medium">{item.label}</span>
               </div>
               {index < arr.length - 1 && (
-                <div className="hidden md:block w-8 h-0.5 bg-border" />
+                <div className="hidden md:block w-8 h-0.5 bg-primary/30" />
               )}
             </div>
           ))}
