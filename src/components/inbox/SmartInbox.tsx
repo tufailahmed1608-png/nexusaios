@@ -150,7 +150,7 @@ const SmartInbox = () => {
         <p className="text-muted-foreground">AI-powered email analysis and task extraction</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-220px)]">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-220px)]">
         {/* Email List */}
         <div className="nexus-card overflow-hidden flex flex-col">
           <div className="p-4 border-b border-border">
@@ -202,7 +202,7 @@ const SmartInbox = () => {
           </div>
         </div>
 
-        {/* Email Content */}
+        {/* Email Content + AI Analysis */}
         <div className="nexus-card overflow-hidden flex flex-col">
           {selectedEmail ? (
             <>
@@ -227,10 +227,78 @@ const SmartInbox = () => {
                   </Button>
                 </div>
               </div>
-              <div className="flex-1 overflow-y-auto p-4 nexus-scrollbar">
-                <pre className="whitespace-pre-wrap font-sans text-sm text-foreground leading-relaxed">
-                  {selectedEmail.body}
-                </pre>
+              <div className="flex-1 overflow-y-auto nexus-scrollbar">
+                {/* Email Body */}
+                <div className="p-4">
+                  <pre className="whitespace-pre-wrap font-sans text-sm text-foreground leading-relaxed">
+                    {selectedEmail.body}
+                  </pre>
+                </div>
+
+                {/* Compact Sentiment & Tasks Row */}
+                <div className="px-4 pb-4 space-y-3">
+                  {/* Sentiment Badge */}
+                  <div className="flex items-center gap-4 p-3 rounded-lg bg-secondary/30">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-primary" />
+                      <span className="text-xs font-medium text-muted-foreground">Sentiment</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {(() => {
+                        const Icon = getSentimentIcon(selectedEmail.sentiment.label);
+                        return (
+                          <Icon
+                            className={cn(
+                              'w-4 h-4',
+                              selectedEmail.sentiment.label === 'positive' && 'text-success',
+                              selectedEmail.sentiment.label === 'negative' && 'text-destructive',
+                              selectedEmail.sentiment.label === 'neutral' && 'text-warning'
+                            )}
+                          />
+                        );
+                      })()}
+                      <span className="text-sm font-medium text-foreground capitalize">
+                        {selectedEmail.sentiment.label}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        ({Math.round(selectedEmail.sentiment.confidence * 100)}%)
+                      </span>
+                    </div>
+                    <div className="flex-1 h-1.5 rounded-full bg-secondary overflow-hidden">
+                      <div
+                        className={cn('h-full transition-all', getSentimentColor(selectedEmail.sentiment.label))}
+                        style={{ width: `${selectedEmail.sentiment.score * 100}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Compact Tasks */}
+                  {selectedEmail.extractedTasks.length > 0 && (
+                    <div className="p-3 rounded-lg bg-secondary/30">
+                      <div className="flex items-center gap-2 mb-2">
+                        <ListTodo className="w-4 h-4 text-primary" />
+                        <span className="text-xs font-medium text-muted-foreground">Extracted Tasks</span>
+                      </div>
+                      <div className="space-y-1.5">
+                        {selectedEmail.extractedTasks.map((task, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center justify-between py-1.5 px-2 rounded bg-background/50 hover:bg-background transition-colors group"
+                          >
+                            <span className="text-xs text-foreground">{task}</span>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <ArrowRight className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Reply Section */}
@@ -316,101 +384,6 @@ const SmartInbox = () => {
             <div className="flex-1 flex items-center justify-center text-muted-foreground">
               Select an email to view
             </div>
-          )}
-        </div>
-
-        {/* AI Analysis Panel */}
-        <div className="space-y-4 overflow-y-auto nexus-scrollbar">
-          {selectedEmail && (
-            <>
-              {/* Sentiment Gauge */}
-              <div className="nexus-card nexus-slide-up">
-                <div className="flex items-center gap-2 mb-4">
-                  <Sparkles className="w-5 h-5 text-primary" />
-                  <h3 className="font-semibold text-foreground">Sentiment Analysis</h3>
-                </div>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      {(() => {
-                        const Icon = getSentimentIcon(selectedEmail.sentiment.label);
-                        return (
-                          <Icon
-                            className={cn(
-                              'w-5 h-5',
-                              selectedEmail.sentiment.label === 'positive' && 'text-success',
-                              selectedEmail.sentiment.label === 'negative' && 'text-destructive',
-                              selectedEmail.sentiment.label === 'neutral' && 'text-warning'
-                            )}
-                          />
-                        );
-                      })()}
-                      <span className="font-medium text-foreground capitalize">
-                        {selectedEmail.sentiment.label}
-                      </span>
-                    </div>
-                    <span className="text-sm text-muted-foreground">
-                      {Math.round(selectedEmail.sentiment.confidence * 100)}% confidence
-                    </span>
-                  </div>
-                  <div className="nexus-sentiment-bar">
-                    <div
-                      className={cn('h-full transition-all', getSentimentColor(selectedEmail.sentiment.label))}
-                      style={{ width: `${selectedEmail.sentiment.score * 100}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Escalation Matrix */}
-              <div className="nexus-card nexus-slide-up" style={{ animationDelay: '100ms' }}>
-                <h3 className="font-semibold text-foreground mb-4">Escalation Matrix</h3>
-                <div className="grid grid-cols-4 gap-2">
-                  {(['L1', 'L2', 'L3', 'L4'] as const).map((level) => (
-                    <div
-                      key={level}
-                      className={cn(
-                        'p-3 rounded-lg text-center transition-all',
-                        selectedEmail.escalationLevel === level
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-secondary/50 text-muted-foreground'
-                      )}
-                    >
-                      <p className="font-semibold">{level}</p>
-                      <p className="text-xs mt-1">{getEscalationLabel(level)}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Extracted Tasks */}
-              <div className="nexus-card nexus-slide-up" style={{ animationDelay: '200ms' }}>
-                <div className="flex items-center gap-2 mb-4">
-                  <ListTodo className="w-5 h-5 text-primary" />
-                  <h3 className="font-semibold text-foreground">Extracted Tasks</h3>
-                </div>
-                <div className="space-y-2">
-                  {selectedEmail.extractedTasks.map((task, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors group"
-                    >
-                      <span className="text-sm text-foreground">{task}</span>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <ArrowRight className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-                <Button className="w-full mt-4" variant="outline">
-                  Add All to Task Board
-                </Button>
-              </div>
-            </>
           )}
         </div>
       </div>
