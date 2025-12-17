@@ -30,6 +30,7 @@ const translations: Record<Language, Record<string, string>> = {
     'activity': 'Activity',
     'collapse': 'Collapse',
     'expand': 'Expand',
+    'productDocs': 'Product Docs',
     
     // Dashboard
     'overview': 'Overview',
@@ -93,6 +94,7 @@ const translations: Record<Language, Record<string, string>> = {
     'activity': 'النشاط',
     'collapse': 'طي',
     'expand': 'توسيع',
+    'productDocs': 'وثائق المنتج',
     
     // Dashboard
     'overview': 'نظرة عامة',
