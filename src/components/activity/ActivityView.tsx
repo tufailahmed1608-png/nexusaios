@@ -21,6 +21,7 @@ import {
   ArrowDown,
   MessageSquare,
   Target,
+  Radio,
 } from 'lucide-react';
 import {
   AreaChart,
@@ -33,6 +34,8 @@ import {
   BarChart,
   Bar,
 } from 'recharts';
+import LiveActivityFeed from '@/components/collaboration/LiveActivityFeed';
+import { useRealtimeActivity } from '@/hooks/useRealtimeActivity';
 
 interface ActivityItem {
   id: string;
@@ -202,6 +205,7 @@ const AIProductivityCard = () => (
 
 const ActivityView = () => {
   const [period, setPeriod] = useState('today');
+  const { activities } = useRealtimeActivity();
 
   const dailyStats: ProductivityStat[] = [
     { label: 'Tasks Completed', value: 12, unit: '', change: 20, icon: CheckCircle2 },
@@ -389,11 +393,24 @@ const ActivityView = () => {
           </div>
 
           {/* AI Productivity Card - Right sidebar */}
-          <div>
+          <div className="space-y-6">
+            {/* Live Team Activity */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Radio className="h-4 w-4 text-success animate-pulse" />
+                  Live Team Activity
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <LiveActivityFeed activities={activities} />
+              </CardContent>
+            </Card>
+
             <AIProductivityCard />
 
             {/* AI Insights */}
-            <Card className="mt-6">
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
                   <Sparkles className="h-5 w-5 text-primary" />

@@ -17,6 +17,7 @@ import ReportsView from '@/components/reports/ReportsView';
 import AIChatButton from '@/components/chat/AIChatButton';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { usePresence } from '@/hooks/usePresence';
 
 const Index = () => {
   const [activeView, setActiveView] = useState('dashboard');
@@ -24,6 +25,7 @@ const Index = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { isRTL } = useLanguage();
   const isMobile = useIsMobile();
+  const { onlineUsers } = usePresence(activeView);
 
   useEffect(() => {
     if (isDark) {
@@ -90,6 +92,7 @@ const Index = () => {
           isDark={isDark} 
           onThemeToggle={() => setIsDark(!isDark)}
           onMenuClick={() => setSidebarOpen(true)}
+          onlineUsers={onlineUsers}
         />
         
         <main className="p-4 md:p-6 min-h-[calc(100vh-64px)]">
