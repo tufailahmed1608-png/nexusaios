@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
 import {
@@ -17,6 +18,7 @@ import {
   UserCircle,
   Activity,
   ClipboardList,
+  BookOpen,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -41,6 +43,7 @@ const menuItems = [
 const Sidebar = ({ activeView, onViewChange }: SidebarProps) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { t, isRTL } = useLanguage();
+  const navigate = useNavigate();
 
   return (
     <aside
@@ -98,8 +101,20 @@ const Sidebar = ({ activeView, onViewChange }: SidebarProps) => {
         })}
       </nav>
 
-      {/* Settings & Collapse */}
+      {/* Settings & Docs */}
       <div className="p-4 border-t border-border space-y-1">
+        <button
+          onClick={() => navigate('/docs')}
+          className="nexus-sidebar-item w-full"
+        >
+          <BookOpen className="w-5 h-5 flex-shrink-0" />
+          {!isCollapsed && (
+            <span className={cn('flex-1', isRTL ? 'text-right' : 'text-left')}>
+              {t('productDocs')}
+            </span>
+          )}
+        </button>
+
         <button
           onClick={() => onViewChange('settings')}
           className={cn(
