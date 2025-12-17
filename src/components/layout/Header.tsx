@@ -1,7 +1,15 @@
-import { Moon, Sun, Search, User } from 'lucide-react';
+import { Moon, Sun, Search, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import NotificationBell from '@/components/notifications/NotificationBell';
+import { useAuth } from '@/hooks/useAuth';
 
 interface HeaderProps {
   isDark: boolean;
@@ -9,6 +17,8 @@ interface HeaderProps {
 }
 
 const Header = ({ isDark, onThemeToggle }: HeaderProps) => {
+  const { user, signOut } = useAuth();
+
   return (
     <header className="h-16 bg-card border-b border-border flex items-center justify-between px-6">
       {/* Search */}
@@ -37,12 +47,29 @@ const Header = ({ isDark, onThemeToggle }: HeaderProps) => {
 
         <div className="w-px h-8 bg-border mx-2" />
 
-        <Button variant="ghost" className="gap-2 text-muted-foreground hover:text-foreground">
-          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-            <User className="w-4 h-4 text-primary-foreground" />
-          </div>
-          <span className="text-sm font-medium">Admin</span>
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="gap-2 text-muted-foreground hover:text-foreground">
+              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+                <User className="w-4 h-4 text-primary-foreground" />
+              </div>
+              <span className="text-sm font-medium max-w-[120px] truncate">
+                {user?.email?.split('@')[0] || 'User'}
+              </span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <div className="px-2 py-1.5">
+              <p className="text-sm font-medium">{user?.email?.split('@')[0]}</p>
+              <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+            </div>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={signOut} className="text-destructive focus:text-destructive cursor-pointer">
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign Out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );
