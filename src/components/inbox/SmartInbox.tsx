@@ -15,16 +15,20 @@ import {
   Reply,
   Paperclip,
   X,
+  Wand2,
+  Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const SmartInbox = () => {
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(emails[0]);
   const [isReplying, setIsReplying] = useState(false);
   const [replyText, setReplyText] = useState('');
   const [attachments, setAttachments] = useState<File[]>([]);
+  const [isGeneratingReply, setIsGeneratingReply] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -54,6 +58,41 @@ const SmartInbox = () => {
     setReplyText('');
     setAttachments([]);
     setIsReplying(false);
+  };
+
+  const handleGenerateAIReply = async () => {
+    if (!selectedEmail) return;
+    
+    setIsGeneratingReply(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-ai-reply', {
+        body: {
+          emailSubject: selectedEmail.subject,
+          emailFrom: selectedEmail.from,
+          emailBody: selectedEmail.body,
+          tone: 'professional',
+        },
+      });
+
+      if (error) throw error;
+      
+      if (data?.reply) {
+        setReplyText(data.reply);
+        toast({
+          title: 'AI Reply Generated',
+          description: 'Review and edit the suggested reply before sending.',
+        });
+      }
+    } catch (error: any) {
+      console.error('Error generating AI reply:', error);
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to generate AI reply. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsGeneratingReply(false);
+    }
   };
 
   const getSentimentColor = (sentiment: Email['sentiment']['label']) => {
@@ -229,17 +268,33 @@ const SmartInbox = () => {
                   )}
 
                   <div className="flex items-center justify-between">
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      onChange={handleFileChange}
-                      className="hidden"
-                      multiple
-                    />
-                    <Button variant="ghost" size="sm" onClick={handleAttachmentClick}>
-                      <Paperclip className="w-4 h-4 mr-2" />
-                      Attach
-                    </Button>
+                    <div className="flex gap-2">
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileChange}
+                        className="hidden"
+                        multiple
+                      />
+                      <Button variant="ghost" size="sm" onClick={handleAttachmentClick}>
+                        <Paperclip className="w-4 h-4 mr-2" />
+                        Attach
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={handleGenerateAIReply}
+                        disabled={isGeneratingReply}
+                        className="text-primary border-primary/30 hover:bg-primary/10"
+                      >
+                        {isGeneratingReply ? (
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        ) : (
+                          <Wand2 className="w-4 h-4 mr-2" />
+                        )}
+                        AI Reply
+                      </Button>
+                    </div>
                     <div className="flex gap-2">
                       <Button variant="ghost" size="sm" onClick={() => {
                         setIsReplying(false);
