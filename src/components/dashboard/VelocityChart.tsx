@@ -14,18 +14,20 @@ const VelocityChart = () => {
     <div className="nexus-card nexus-slide-up" style={{ animationDelay: '700ms' }}>
       <h3 className="font-semibold text-foreground mb-4">Team Velocity</h3>
       
-      <div className="h-64">
+      <div className="h-48 md:h-64">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={velocityData}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
             <XAxis
               dataKey="name"
-              tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+              tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
               axisLine={{ stroke: 'hsl(var(--border))' }}
+              interval="preserveStartEnd"
             />
             <YAxis
-              tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+              tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
               axisLine={{ stroke: 'hsl(var(--border))' }}
+              width={30}
             />
             <Tooltip
               contentStyle={{
@@ -46,7 +48,7 @@ const VelocityChart = () => {
       </div>
 
       <div className="mt-4 p-3 rounded-lg bg-secondary/30">
-        <div className="flex items-center justify-between text-sm">
+        <div className="flex items-center justify-between text-xs md:text-sm">
           <span className="text-muted-foreground">Average velocity</span>
           <span className="font-semibold text-foreground">54.7 pts/week</span>
         </div>

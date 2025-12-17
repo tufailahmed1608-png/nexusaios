@@ -14,7 +14,7 @@ const BudgetChart = () => {
     <div className="nexus-card nexus-slide-up" style={{ animationDelay: '500ms' }}>
       <h3 className="font-semibold text-foreground mb-4">Budget vs Actuals</h3>
       
-      <div className="h-64">
+      <div className="h-48 md:h-64">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={budgetData}>
             <defs>
@@ -30,13 +30,15 @@ const BudgetChart = () => {
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
             <XAxis
               dataKey="name"
-              tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+              tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
               axisLine={{ stroke: 'hsl(var(--border))' }}
+              interval="preserveStartEnd"
             />
             <YAxis
-              tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+              tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
               axisLine={{ stroke: 'hsl(var(--border))' }}
               tickFormatter={(value) => `$${value / 1000}k`}
+              width={45}
             />
             <Tooltip
               contentStyle={{
@@ -66,14 +68,14 @@ const BudgetChart = () => {
         </ResponsiveContainer>
       </div>
 
-      <div className="flex justify-center gap-6 mt-4">
+      <div className="flex justify-center gap-4 md:gap-6 mt-4">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-primary" />
-          <span className="text-sm text-muted-foreground">Budget</span>
+          <span className="text-xs md:text-sm text-muted-foreground">Budget</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-success" />
-          <span className="text-sm text-muted-foreground">Actual</span>
+          <span className="text-xs md:text-sm text-muted-foreground">Actual</span>
         </div>
       </div>
     </div>
