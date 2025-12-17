@@ -9,18 +9,21 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import NotificationBell from '@/components/notifications/NotificationBell';
+import OnlineUsers from '@/components/collaboration/OnlineUsers';
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { PresenceUser } from '@/hooks/usePresence';
 
 interface HeaderProps {
   isDark: boolean;
   onThemeToggle: () => void;
   onMenuClick?: () => void;
+  onlineUsers?: PresenceUser[];
 }
 
-const Header = ({ isDark, onThemeToggle, onMenuClick }: HeaderProps) => {
+const Header = ({ isDark, onThemeToggle, onMenuClick, onlineUsers = [] }: HeaderProps) => {
   const { user, signOut } = useAuth();
   const { language, setLanguage, t, isRTL } = useLanguage();
   const navigate = useNavigate();
@@ -57,6 +60,13 @@ const Header = ({ isDark, onThemeToggle, onMenuClick }: HeaderProps) => {
 
       {/* Actions */}
       <div className="flex items-center gap-1 md:gap-2">
+        {/* Online Users */}
+        {onlineUsers.length > 0 && (
+          <div className="hidden md:block">
+            <OnlineUsers users={onlineUsers} maxVisible={3} />
+          </div>
+        )}
+
         {/* Language Toggle */}
         <Button
           variant="ghost"
