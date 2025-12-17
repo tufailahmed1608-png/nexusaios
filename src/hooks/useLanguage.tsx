@@ -28,6 +28,8 @@ const translations: Record<Language, Record<string, string>> = {
     'stakeholders': 'Stakeholders',
     'strategy': 'Strategy',
     'activity': 'Activity',
+    'collapse': 'Collapse',
+    'expand': 'Expand',
     
     // Dashboard
     'overview': 'Overview',
@@ -89,6 +91,8 @@ const translations: Record<Language, Record<string, string>> = {
     'stakeholders': 'أصحاب المصلحة',
     'strategy': 'الاستراتيجية',
     'activity': 'النشاط',
+    'collapse': 'طي',
+    'expand': 'توسيع',
     
     // Dashboard
     'overview': 'نظرة عامة',

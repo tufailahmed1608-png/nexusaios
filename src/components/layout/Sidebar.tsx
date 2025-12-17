@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/hooks/useLanguage';
 import {
   LayoutDashboard,
   Inbox,
@@ -24,26 +25,28 @@ interface SidebarProps {
 }
 
 const menuItems = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { id: 'inbox', label: 'Smart Inbox', icon: Inbox, badge: 4 },
-  { id: 'tasks', label: 'Task Board', icon: CheckSquare },
-  { id: 'meetings', label: 'Meeting Hub', icon: Calendar },
-  { id: 'projects', label: 'Projects', icon: FolderKanban },
-  { id: 'documents', label: 'Documents', icon: FileText },
-  { id: 'stakeholders', label: 'Stakeholders', icon: UserCircle },
-  { id: 'reports', label: 'Reports', icon: ClipboardList },
-  { id: 'activity', label: 'Activity', icon: Activity },
-  { id: 'strategy', label: 'Strategy', icon: BarChart3 },
-  { id: 'team', label: 'Team', icon: Users },
+  { id: 'dashboard', labelKey: 'dashboard', icon: LayoutDashboard },
+  { id: 'inbox', labelKey: 'inbox', icon: Inbox, badge: 4 },
+  { id: 'tasks', labelKey: 'tasks', icon: CheckSquare },
+  { id: 'meetings', labelKey: 'meetings', icon: Calendar },
+  { id: 'projects', labelKey: 'projects', icon: FolderKanban },
+  { id: 'documents', labelKey: 'documents', icon: FileText },
+  { id: 'stakeholders', labelKey: 'stakeholders', icon: UserCircle },
+  { id: 'reports', labelKey: 'reports', icon: ClipboardList },
+  { id: 'activity', labelKey: 'activity', icon: Activity },
+  { id: 'strategy', labelKey: 'strategy', icon: BarChart3 },
+  { id: 'team', labelKey: 'team', icon: Users },
 ];
 
 const Sidebar = ({ activeView, onViewChange }: SidebarProps) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const { t, isRTL } = useLanguage();
 
   return (
     <aside
       className={cn(
-        'fixed left-0 top-0 h-screen bg-card border-r border-border flex flex-col transition-all duration-300 z-50',
+        'fixed top-0 h-screen bg-card border-border flex flex-col transition-all duration-300 z-50',
+        isRTL ? 'right-0 border-l' : 'left-0 border-r',
         isCollapsed ? 'w-20' : 'w-72'
       )}
     >
@@ -80,7 +83,9 @@ const Sidebar = ({ activeView, onViewChange }: SidebarProps) => {
               <Icon className="w-5 h-5 flex-shrink-0" />
               {!isCollapsed && (
                 <>
-                  <span className="flex-1 text-left">{item.label}</span>
+                  <span className={cn('flex-1', isRTL ? 'text-right' : 'text-left')}>
+                    {t(item.labelKey)}
+                  </span>
                   {item.badge && (
                     <span className="px-2 py-0.5 text-xs rounded-full bg-primary text-primary-foreground">
                       {item.badge}
@@ -103,7 +108,11 @@ const Sidebar = ({ activeView, onViewChange }: SidebarProps) => {
           )}
         >
           <Settings className="w-5 h-5 flex-shrink-0" />
-          {!isCollapsed && <span className="flex-1 text-left">Settings</span>}
+          {!isCollapsed && (
+            <span className={cn('flex-1', isRTL ? 'text-right' : 'text-left')}>
+              {t('settings')}
+            </span>
+          )}
         </button>
 
         <button
@@ -111,11 +120,13 @@ const Sidebar = ({ activeView, onViewChange }: SidebarProps) => {
           className="nexus-sidebar-item w-full justify-center"
         >
           {isCollapsed ? (
-            <ChevronRight className="w-5 h-5" />
+            isRTL ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />
           ) : (
             <>
-              <ChevronLeft className="w-5 h-5" />
-              <span className="flex-1 text-left">Collapse</span>
+              {isRTL ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
+              <span className={cn('flex-1', isRTL ? 'text-right' : 'text-left')}>
+                {t('collapse')}
+              </span>
             </>
           )}
         </button>
