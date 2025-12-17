@@ -9,6 +9,7 @@ import MeetingHub from '@/components/meetings/MeetingHub';
 import StrategyView from '@/components/strategy/StrategyView';
 import ProjectsView from '@/components/projects/ProjectsView';
 import TeamView from '@/components/team/TeamView';
+import DocumentsView from '@/components/documents/DocumentsView';
 
 const Index = () => {
   const [activeView, setActiveView] = useState('dashboard');
@@ -35,6 +36,8 @@ const Index = () => {
         return <MeetingHub />;
       case 'projects':
         return <ProjectsView />;
+      case 'documents':
+        return <DocumentsView />;
       case 'strategy':
         return <StrategyView />;
       case 'team':
