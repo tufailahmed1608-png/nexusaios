@@ -14,12 +14,14 @@ import StakeholderView from '@/components/stakeholders/StakeholderView';
 import ActivityView from '@/components/activity/ActivityView';
 import ReportsView from '@/components/reports/ReportsView';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Index = () => {
   const [activeView, setActiveView] = useState('dashboard');
   const [isDark, setIsDark] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const { isRTL } = useLanguage();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (isDark) {
@@ -69,12 +71,24 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Sidebar activeView={activeView} onViewChange={setActiveView} />
+      <Sidebar 
+        activeView={activeView} 
+        onViewChange={setActiveView}
+        isOpen={sidebarOpen}
+        onOpenChange={setSidebarOpen}
+      />
       
-      <div className={cn('transition-all duration-300', isRTL ? 'mr-72' : 'ml-72')}>
-        <Header isDark={isDark} onThemeToggle={() => setIsDark(!isDark)} />
+      <div className={cn(
+        'transition-all duration-300',
+        !isMobile && (isRTL ? 'mr-72' : 'ml-72')
+      )}>
+        <Header 
+          isDark={isDark} 
+          onThemeToggle={() => setIsDark(!isDark)}
+          onMenuClick={() => setSidebarOpen(true)}
+        />
         
-        <main className="p-6 min-h-[calc(100vh-64px)]">
+        <main className="p-4 md:p-6 min-h-[calc(100vh-64px)]">
           {renderContent()}
         </main>
       </div>
