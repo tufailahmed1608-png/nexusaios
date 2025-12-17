@@ -20,6 +20,7 @@ import {
   Activity,
   ClipboardList,
   Brain,
+  Calendar,
 } from 'lucide-react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 
@@ -40,6 +41,7 @@ const menuItems = [
   { id: 'documents', labelKey: 'documents', icon: FileText },
   { id: 'stakeholders', labelKey: 'stakeholders', icon: UserCircle },
   { id: 'reports', labelKey: 'reports', icon: ClipboardList },
+  { id: 'weeklyDigest', labelKey: 'weeklyDigest', icon: Calendar },
   { id: 'riskPrediction', labelKey: 'riskPrediction', icon: Brain },
   { id: 'activity', labelKey: 'activity', icon: Activity },
   { id: 'strategy', labelKey: 'strategy', icon: BarChart3 },
