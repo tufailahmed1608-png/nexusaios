@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { emails } from '@/data/mockData';
 import type { Email } from '@/data/mockData';
@@ -11,11 +11,50 @@ import {
   ArrowRight,
   Sparkles,
   ListTodo,
+  Send,
+  Reply,
+  Paperclip,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
 
 const SmartInbox = () => {
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(emails[0]);
+  const [isReplying, setIsReplying] = useState(false);
+  const [replyText, setReplyText] = useState('');
+  const [attachments, setAttachments] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
+
+  const handleAttachmentClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    setAttachments((prev) => [...prev, ...files]);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const removeAttachment = (index: number) => {
+    setAttachments((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSendReply = () => {
+    if (!replyText.trim()) {
+      toast({ title: 'Error', description: 'Please enter a message', variant: 'destructive' });
+      return;
+    }
+    toast({
+      title: 'Reply Sent',
+      description: `Reply sent to ${selectedEmail?.from}${attachments.length > 0 ? ` with ${attachments.length} attachment(s)` : ''}`,
+    });
+    setReplyText('');
+    setAttachments([]);
+    setIsReplying(false);
+  };
 
   const getSentimentColor = (sentiment: Email['sentiment']['label']) => {
     switch (sentiment) {
@@ -129,11 +168,24 @@ const SmartInbox = () => {
           {selectedEmail ? (
             <>
               <div className="p-4 border-b border-border">
-                <h3 className="font-semibold text-foreground mb-1">{selectedEmail.subject}</h3>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <span>{selectedEmail.from}</span>
-                  <span>•</span>
-                  <span>{selectedEmail.fromEmail}</span>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="font-semibold text-foreground mb-1">{selectedEmail.subject}</h3>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <span>{selectedEmail.from}</span>
+                      <span>•</span>
+                      <span>{selectedEmail.fromEmail}</span>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsReplying(!isReplying)}
+                    className="shrink-0"
+                  >
+                    <Reply className="w-4 h-4 mr-2" />
+                    Reply
+                  </Button>
                 </div>
               </div>
               <div className="flex-1 overflow-y-auto p-4 nexus-scrollbar">
@@ -141,6 +193,69 @@ const SmartInbox = () => {
                   {selectedEmail.body}
                 </pre>
               </div>
+
+              {/* Reply Section */}
+              {isReplying && (
+                <div className="p-4 border-t border-border space-y-3 bg-secondary/20">
+                  <div className="text-sm text-muted-foreground">
+                    Replying to <span className="font-medium text-foreground">{selectedEmail.from}</span>
+                  </div>
+                  <Textarea
+                    placeholder="Type your reply..."
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    className="min-h-[100px] resize-none"
+                  />
+
+                  {/* Attachments */}
+                  {attachments.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {attachments.map((file, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center gap-2 px-3 py-1.5 bg-secondary rounded-lg text-sm"
+                        >
+                          <Paperclip className="w-3 h-3 text-muted-foreground" />
+                          <span className="max-w-[120px] truncate text-foreground">{file.name}</span>
+                          <button
+                            onClick={() => removeAttachment(index)}
+                            className="text-muted-foreground hover:text-destructive"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between">
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                      className="hidden"
+                      multiple
+                    />
+                    <Button variant="ghost" size="sm" onClick={handleAttachmentClick}>
+                      <Paperclip className="w-4 h-4 mr-2" />
+                      Attach
+                    </Button>
+                    <div className="flex gap-2">
+                      <Button variant="ghost" size="sm" onClick={() => {
+                        setIsReplying(false);
+                        setReplyText('');
+                        setAttachments([]);
+                      }}>
+                        Cancel
+                      </Button>
+                      <Button size="sm" onClick={handleSendReply}>
+                        <Send className="w-4 h-4 mr-2" />
+                        Send
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </>
           ) : (
             <div className="flex-1 flex items-center justify-center text-muted-foreground">
