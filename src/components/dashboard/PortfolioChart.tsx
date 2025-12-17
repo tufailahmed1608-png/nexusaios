@@ -10,15 +10,15 @@ const PortfolioChart = () => {
     <div className="nexus-card nexus-slide-up" style={{ animationDelay: '400ms' }}>
       <h3 className="font-semibold text-foreground mb-4">Portfolio Health</h3>
       
-      <div className="h-64">
+      <div className="h-48 md:h-64">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
               data={portfolioHealthData}
               cx="50%"
               cy="50%"
-              innerRadius={60}
-              outerRadius={80}
+              innerRadius={40}
+              outerRadius={60}
               paddingAngle={5}
               dataKey="value"
             >
@@ -37,14 +37,14 @@ const PortfolioChart = () => {
         </ResponsiveContainer>
       </div>
 
-      <div className="flex justify-center gap-6 mt-2">
+      <div className="flex flex-wrap justify-center gap-3 md:gap-6 mt-2">
         {portfolioHealthData.map((item, index) => (
           <div key={item.name} className="flex items-center gap-2">
             <div
               className="w-3 h-3 rounded-full"
               style={{ backgroundColor: COLORS[index] }}
             />
-            <span className="text-sm text-muted-foreground">
+            <span className="text-xs md:text-sm text-muted-foreground">
               {item.name} ({item.value})
             </span>
           </div>

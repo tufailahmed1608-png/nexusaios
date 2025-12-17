@@ -41,8 +41,8 @@ const KPICard = ({ kpi, index }: KPICardProps) => {
       </div>
 
       <div>
-        <p className="text-sm text-muted-foreground mb-1">{kpi.title}</p>
-        <p className="text-3xl font-bold text-foreground">{kpi.value}</p>
+        <p className="text-xs md:text-sm text-muted-foreground mb-1">{kpi.title}</p>
+        <p className="text-2xl md:text-3xl font-bold text-foreground">{kpi.value}</p>
       </div>
     </div>
   );
