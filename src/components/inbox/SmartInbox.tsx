@@ -23,6 +23,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import SmartTaskSuggestions from '@/components/tasks/SmartTaskSuggestions';
 
 // Import email sender avatars
 import sarahChenAvatar from '@/assets/inbox/sarah-chen-email.png';
@@ -326,7 +327,21 @@ const SmartInbox = () => {
                         ))}
                       </div>
                     </div>
-                  )}
+                    )}
+
+                  {/* AI Task Suggestions */}
+                  <div className="p-3 rounded-lg bg-secondary/30">
+                    <SmartTaskSuggestions
+                      content={selectedEmail.body}
+                      contentType="email"
+                      sender={selectedEmail.from}
+                      subject={selectedEmail.subject}
+                      compact
+                      onTaskAdded={(task) => {
+                        console.log('Task added:', task);
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
 
