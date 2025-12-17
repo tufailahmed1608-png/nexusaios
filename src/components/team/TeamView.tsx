@@ -20,6 +20,14 @@ import {
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 
+// Import team member avatars
+import sarahChenAvatar from '@/assets/team/sarah-chen.png';
+import marcusJohnsonAvatar from '@/assets/team/marcus-johnson.png';
+import elenaRodriguezAvatar from '@/assets/team/elena-rodriguez.png';
+import davidKimAvatar from '@/assets/team/david-kim.png';
+import aishaPatelAvatar from '@/assets/team/aisha-patel.png';
+import jamesWilsonAvatar from '@/assets/team/james-wilson.png';
+
 interface TeamMemberFull {
   id: string;
   name: string;
@@ -43,7 +51,7 @@ const teamMembers: TeamMemberFull[] = [
   {
     id: '1',
     name: 'Sarah Chen',
-    avatar: '',
+    avatar: sarahChenAvatar,
     role: 'Engineering Lead',
     department: 'Engineering',
     email: 'sarah.chen@nexus.io',
@@ -67,7 +75,7 @@ const teamMembers: TeamMemberFull[] = [
   {
     id: '2',
     name: 'Marcus Johnson',
-    avatar: '',
+    avatar: marcusJohnsonAvatar,
     role: 'Senior Designer',
     department: 'Design',
     email: 'marcus.j@nexus.io',
@@ -91,7 +99,7 @@ const teamMembers: TeamMemberFull[] = [
   {
     id: '3',
     name: 'Elena Rodriguez',
-    avatar: '',
+    avatar: elenaRodriguezAvatar,
     role: 'Product Manager',
     department: 'Product',
     email: 'elena.r@nexus.io',
@@ -115,7 +123,7 @@ const teamMembers: TeamMemberFull[] = [
   {
     id: '4',
     name: 'David Kim',
-    avatar: '',
+    avatar: davidKimAvatar,
     role: 'Backend Developer',
     department: 'Engineering',
     email: 'david.k@nexus.io',
@@ -139,7 +147,7 @@ const teamMembers: TeamMemberFull[] = [
   {
     id: '5',
     name: 'Aisha Patel',
-    avatar: '',
+    avatar: aishaPatelAvatar,
     role: 'QA Engineer',
     department: 'Engineering',
     email: 'aisha.p@nexus.io',
@@ -163,7 +171,7 @@ const teamMembers: TeamMemberFull[] = [
   {
     id: '6',
     name: 'James Wilson',
-    avatar: '',
+    avatar: jamesWilsonAvatar,
     role: 'DevOps Engineer',
     department: 'Infrastructure',
     email: 'james.w@nexus.io',
