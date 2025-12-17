@@ -1,4 +1,4 @@
-import { Moon, Sun, Search, User, LogOut, Settings } from 'lucide-react';
+import { Moon, Sun, Search, User, LogOut, Settings, Languages } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import NotificationBell from '@/components/notifications/NotificationBell';
 import { useAuth } from '@/hooks/useAuth';
+import { useLanguage } from '@/hooks/useLanguage';
 import { useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
@@ -19,23 +20,39 @@ interface HeaderProps {
 
 const Header = ({ isDark, onThemeToggle }: HeaderProps) => {
   const { user, signOut } = useAuth();
+  const { language, setLanguage, t, isRTL } = useLanguage();
   const navigate = useNavigate();
+
+  const toggleLanguage = () => {
+    setLanguage(language === 'en' ? 'ar' : 'en');
+  };
 
   return (
     <header className="h-16 bg-card border-b border-border flex items-center justify-between px-6">
       {/* Search */}
       <div className="flex items-center gap-4 flex-1 max-w-xl">
         <div className="relative w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Search className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground ${isRTL ? 'right-3' : 'left-3'}`} />
           <Input
-            placeholder="Search projects, tasks, emails..."
-            className="pl-10 nexus-input"
+            placeholder={t('search.placeholder')}
+            className={`${isRTL ? 'pr-10' : 'pl-10'} nexus-input`}
           />
         </div>
       </div>
 
       {/* Actions */}
       <div className="flex items-center gap-2">
+        {/* Language Toggle */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={toggleLanguage}
+          className="text-muted-foreground hover:text-foreground gap-1.5 px-3"
+        >
+          <Languages className="w-4 h-4" />
+          <span className="text-xs font-medium">{language === 'en' ? 'عربي' : 'EN'}</span>
+        </Button>
+
         <Button
           variant="ghost"
           size="icon"
@@ -67,13 +84,13 @@ const Header = ({ isDark, onThemeToggle }: HeaderProps) => {
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => navigate('/settings')} className="cursor-pointer">
-              <Settings className="w-4 h-4 mr-2" />
-              Settings
+              <Settings className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+              {t('settings')}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={signOut} className="text-destructive focus:text-destructive cursor-pointer">
-              <LogOut className="w-4 h-4 mr-2" />
-              Sign Out
+              <LogOut className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+              {t('signOut')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
