@@ -8,6 +8,7 @@ import TaskBoard from '@/components/tasks/TaskBoard';
 import MeetingHub from '@/components/meetings/MeetingHub';
 import StrategyView from '@/components/strategy/StrategyView';
 import ProjectsView from '@/components/projects/ProjectsView';
+import TeamView from '@/components/team/TeamView';
 
 const Index = () => {
   const [activeView, setActiveView] = useState('dashboard');
@@ -37,14 +38,7 @@ const Index = () => {
       case 'strategy':
         return <StrategyView />;
       case 'team':
-        return (
-          <div className="flex items-center justify-center h-full text-muted-foreground">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-foreground mb-2">Team View</h2>
-              <p>Team management coming soon...</p>
-            </div>
-          </div>
-        );
+        return <TeamView />;
       case 'settings':
         return (
           <div className="flex items-center justify-center h-full text-muted-foreground">
