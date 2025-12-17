@@ -1,6 +1,7 @@
-import { Moon, Sun, Bell, Search, User } from 'lucide-react';
+import { Moon, Sun, Search, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import NotificationBell from '@/components/notifications/NotificationBell';
 
 interface HeaderProps {
   isDark: boolean;
@@ -32,14 +33,7 @@ const Header = ({ isDark, onThemeToggle }: HeaderProps) => {
           {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
         </Button>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-muted-foreground hover:text-foreground relative"
-        >
-          <Bell className="w-5 h-5" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full" />
-        </Button>
+        <NotificationBell />
 
         <div className="w-px h-8 bg-border mx-2" />
 
