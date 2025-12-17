@@ -10,6 +10,7 @@ import StrategyView from '@/components/strategy/StrategyView';
 import ProjectsView from '@/components/projects/ProjectsView';
 import TeamView from '@/components/team/TeamView';
 import DocumentsView from '@/components/documents/DocumentsView';
+import StakeholderView from '@/components/stakeholders/StakeholderView';
 
 const Index = () => {
   const [activeView, setActiveView] = useState('dashboard');
@@ -38,6 +39,8 @@ const Index = () => {
         return <ProjectsView />;
       case 'documents':
         return <DocumentsView />;
+      case 'stakeholders':
+        return <StakeholderView />;
       case 'strategy':
         return <StrategyView />;
       case 'team':
