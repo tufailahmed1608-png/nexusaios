@@ -49,14 +49,37 @@ export interface Meeting {
   status: 'scheduled' | 'completed' | 'cancelled';
 }
 
+export interface Milestone {
+  id: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+  progress: number;
+  status: 'completed' | 'in-progress' | 'upcoming' | 'delayed';
+}
+
+export interface TeamMember {
+  id: string;
+  name: string;
+  role: string;
+  avatar: string;
+  allocation: number; // percentage
+}
+
 export interface Project {
   id: string;
   name: string;
+  description: string;
   health: 'on-track' | 'at-risk' | 'critical';
   progress: number;
   budget: number;
   spent: number;
-  team: string[];
+  team: TeamMember[];
+  milestones: Milestone[];
+  startDate: string;
+  endDate: string;
+  priority: 'critical' | 'high' | 'medium' | 'low';
+  category: string;
 }
 
 export interface ChartData {
@@ -329,10 +352,128 @@ Sarah: Perfect. Let's document these decisions and share with the broader team.`
 ];
 
 export const projects: Project[] = [
-  { id: '1', name: 'Platform v2.0', health: 'on-track', progress: 72, budget: 500000, spent: 340000, team: ['Alex Kim', 'Michael Torres'] },
-  { id: '2', name: 'Brand Refresh', health: 'at-risk', progress: 45, budget: 150000, spent: 98000, team: ['Sarah Chen', 'Emily Watson'] },
-  { id: '3', name: 'Mobile App', health: 'on-track', progress: 89, budget: 300000, spent: 267000, team: ['Alex Kim', 'Sarah Chen'] },
-  { id: '4', name: 'Analytics Dashboard', health: 'critical', progress: 23, budget: 200000, spent: 180000, team: ['Michael Torres'] },
+  {
+    id: '1',
+    name: 'Platform v2.0',
+    description: 'Complete rebuild of the core platform with modern architecture and improved performance.',
+    health: 'on-track',
+    progress: 72,
+    budget: 500000,
+    spent: 340000,
+    startDate: '2024-01-01',
+    endDate: '2024-06-30',
+    priority: 'critical',
+    category: 'Engineering',
+    team: [
+      { id: 't1', name: 'Alex Kim', role: 'Tech Lead', avatar: 'AK', allocation: 80 },
+      { id: 't2', name: 'Michael Torres', role: 'Backend Dev', avatar: 'MT', allocation: 100 },
+      { id: 't3', name: 'Jordan Lee', role: 'Frontend Dev', avatar: 'JL', allocation: 60 },
+    ],
+    milestones: [
+      { id: 'm1', name: 'Architecture Design', startDate: '2024-01-01', endDate: '2024-01-31', progress: 100, status: 'completed' },
+      { id: 'm2', name: 'Core API Development', startDate: '2024-02-01', endDate: '2024-03-15', progress: 100, status: 'completed' },
+      { id: 'm3', name: 'Frontend Implementation', startDate: '2024-03-01', endDate: '2024-04-30', progress: 85, status: 'in-progress' },
+      { id: 'm4', name: 'Integration Testing', startDate: '2024-05-01', endDate: '2024-05-31', progress: 20, status: 'in-progress' },
+      { id: 'm5', name: 'UAT & Launch', startDate: '2024-06-01', endDate: '2024-06-30', progress: 0, status: 'upcoming' },
+    ],
+  },
+  {
+    id: '2',
+    name: 'Brand Refresh',
+    description: 'Comprehensive brand identity update including logo, colors, and design system.',
+    health: 'at-risk',
+    progress: 45,
+    budget: 150000,
+    spent: 98000,
+    startDate: '2024-02-01',
+    endDate: '2024-05-15',
+    priority: 'high',
+    category: 'Design',
+    team: [
+      { id: 't4', name: 'Sarah Chen', role: 'Design Lead', avatar: 'SC', allocation: 70 },
+      { id: 't5', name: 'Emily Watson', role: 'UX Designer', avatar: 'EW', allocation: 90 },
+    ],
+    milestones: [
+      { id: 'm6', name: 'Brand Discovery', startDate: '2024-02-01', endDate: '2024-02-28', progress: 100, status: 'completed' },
+      { id: 'm7', name: 'Logo Design', startDate: '2024-03-01', endDate: '2024-03-31', progress: 100, status: 'completed' },
+      { id: 'm8', name: 'Design System', startDate: '2024-04-01', endDate: '2024-04-30', progress: 40, status: 'delayed' },
+      { id: 'm9', name: 'Asset Rollout', startDate: '2024-05-01', endDate: '2024-05-15', progress: 0, status: 'upcoming' },
+    ],
+  },
+  {
+    id: '3',
+    name: 'Mobile App',
+    description: 'Native iOS and Android mobile application with offline support.',
+    health: 'on-track',
+    progress: 89,
+    budget: 300000,
+    spent: 267000,
+    startDate: '2023-10-01',
+    endDate: '2024-03-31',
+    priority: 'high',
+    category: 'Mobile',
+    team: [
+      { id: 't1', name: 'Alex Kim', role: 'Tech Lead', avatar: 'AK', allocation: 20 },
+      { id: 't4', name: 'Sarah Chen', role: 'UI Designer', avatar: 'SC', allocation: 30 },
+      { id: 't6', name: 'Chris Park', role: 'iOS Dev', avatar: 'CP', allocation: 100 },
+      { id: 't7', name: 'Dana Smith', role: 'Android Dev', avatar: 'DS', allocation: 100 },
+    ],
+    milestones: [
+      { id: 'm10', name: 'App Architecture', startDate: '2023-10-01', endDate: '2023-10-31', progress: 100, status: 'completed' },
+      { id: 'm11', name: 'Core Features', startDate: '2023-11-01', endDate: '2024-01-15', progress: 100, status: 'completed' },
+      { id: 'm12', name: 'Offline Mode', startDate: '2024-01-16', endDate: '2024-02-28', progress: 100, status: 'completed' },
+      { id: 'm13', name: 'Beta Testing', startDate: '2024-03-01', endDate: '2024-03-20', progress: 90, status: 'in-progress' },
+      { id: 'm14', name: 'App Store Launch', startDate: '2024-03-21', endDate: '2024-03-31', progress: 0, status: 'upcoming' },
+    ],
+  },
+  {
+    id: '4',
+    name: 'Analytics Dashboard',
+    description: 'Real-time analytics and reporting dashboard for business intelligence.',
+    health: 'critical',
+    progress: 23,
+    budget: 200000,
+    spent: 180000,
+    startDate: '2024-01-15',
+    endDate: '2024-04-30',
+    priority: 'medium',
+    category: 'Data',
+    team: [
+      { id: 't2', name: 'Michael Torres', role: 'Backend Dev', avatar: 'MT', allocation: 40 },
+      { id: 't8', name: 'Lisa Wang', role: 'Data Engineer', avatar: 'LW', allocation: 100 },
+    ],
+    milestones: [
+      { id: 'm15', name: 'Data Pipeline', startDate: '2024-01-15', endDate: '2024-02-15', progress: 100, status: 'completed' },
+      { id: 'm16', name: 'Dashboard UI', startDate: '2024-02-16', endDate: '2024-03-31', progress: 30, status: 'delayed' },
+      { id: 'm17', name: 'Report Generation', startDate: '2024-04-01', endDate: '2024-04-20', progress: 0, status: 'upcoming' },
+      { id: 'm18', name: 'User Training', startDate: '2024-04-21', endDate: '2024-04-30', progress: 0, status: 'upcoming' },
+    ],
+  },
+  {
+    id: '5',
+    name: 'Cloud Migration',
+    description: 'Migrate on-premise infrastructure to AWS with zero downtime.',
+    health: 'on-track',
+    progress: 55,
+    budget: 400000,
+    spent: 220000,
+    startDate: '2024-02-01',
+    endDate: '2024-07-31',
+    priority: 'critical',
+    category: 'Infrastructure',
+    team: [
+      { id: 't9', name: 'Robert Chen', role: 'DevOps Lead', avatar: 'RC', allocation: 100 },
+      { id: 't10', name: 'Anna Martinez', role: 'Cloud Architect', avatar: 'AM', allocation: 80 },
+      { id: 't2', name: 'Michael Torres', role: 'Backend Dev', avatar: 'MT', allocation: 30 },
+    ],
+    milestones: [
+      { id: 'm19', name: 'Assessment & Planning', startDate: '2024-02-01', endDate: '2024-02-29', progress: 100, status: 'completed' },
+      { id: 'm20', name: 'Dev Environment', startDate: '2024-03-01', endDate: '2024-03-31', progress: 100, status: 'completed' },
+      { id: 'm21', name: 'Staging Migration', startDate: '2024-04-01', endDate: '2024-05-15', progress: 60, status: 'in-progress' },
+      { id: 'm22', name: 'Production Migration', startDate: '2024-05-16', endDate: '2024-06-30', progress: 0, status: 'upcoming' },
+      { id: 'm23', name: 'Decommissioning', startDate: '2024-07-01', endDate: '2024-07-31', progress: 0, status: 'upcoming' },
+    ],
+  },
 ];
 
 export const portfolioHealthData: ChartData[] = [
