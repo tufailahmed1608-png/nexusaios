@@ -13,11 +13,13 @@ import DocumentsView from '@/components/documents/DocumentsView';
 import StakeholderView from '@/components/stakeholders/StakeholderView';
 import ActivityView from '@/components/activity/ActivityView';
 import ReportsView from '@/components/reports/ReportsView';
+import { useLanguage } from '@/hooks/useLanguage';
 
 const Index = () => {
   const [activeView, setActiveView] = useState('dashboard');
   const [isDark, setIsDark] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const { isRTL } = useLanguage();
 
   useEffect(() => {
     if (isDark) {
@@ -69,7 +71,7 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Sidebar activeView={activeView} onViewChange={setActiveView} />
       
-      <div className={cn('transition-all duration-300', 'ml-72')}>
+      <div className={cn('transition-all duration-300', isRTL ? 'mr-72' : 'ml-72')}>
         <Header isDark={isDark} onThemeToggle={() => setIsDark(!isDark)} />
         
         <main className="p-6 min-h-[calc(100vh-64px)]">
