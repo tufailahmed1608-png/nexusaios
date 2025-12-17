@@ -14,6 +14,7 @@ import DocumentsView from '@/components/documents/DocumentsView';
 import StakeholderView from '@/components/stakeholders/StakeholderView';
 import ActivityView from '@/components/activity/ActivityView';
 import ReportsView from '@/components/reports/ReportsView';
+import RiskPredictionView from '@/components/risk/RiskPredictionView';
 import AIChatButton from '@/components/chat/AIChatButton';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -55,6 +56,8 @@ const Index = () => {
         return <StakeholderView />;
       case 'reports':
         return <ReportsView />;
+      case 'riskPrediction':
+        return <RiskPredictionView />;
       case 'activity':
         return <ActivityView />;
       case 'strategy':
