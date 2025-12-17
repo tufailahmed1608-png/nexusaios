@@ -1,4 +1,4 @@
-import { Moon, Sun, Search, User, LogOut, Settings, Languages, Menu } from 'lucide-react';
+import { Moon, Sun, Search, User, LogOut, Settings, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -64,8 +64,8 @@ const Header = ({ isDark, onThemeToggle, onMenuClick }: HeaderProps) => {
           onClick={toggleLanguage}
           className="text-muted-foreground hover:text-foreground gap-1.5 px-2 md:px-3"
         >
-          <Languages className="w-4 h-4" />
-          <span className="text-xs font-medium hidden sm:inline">{language === 'en' ? 'عربي' : 'EN'}</span>
+          <span className="text-base">{language === 'en' ? '🇸🇦' : '🇺🇸'}</span>
+          <span className="text-xs font-medium hidden sm:inline">{language === 'en' ? 'عربي' : 'English'}</span>
         </Button>
 
         <Button
