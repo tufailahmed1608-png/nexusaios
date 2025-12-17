@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
 import { 
   AlertTriangle, 
   TrendingUp, 
@@ -18,7 +19,13 @@ import {
   ArrowDownRight,
   Minus,
   Info,
-  Sparkles
+  Sparkles,
+  Shield,
+  Loader2,
+  CheckCircle2,
+  Zap,
+  Eye,
+  Lightbulb
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
@@ -47,6 +54,25 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
+interface MitigationRecommendation {
+  id: number;
+  title: string;
+  description: string;
+  priority: 'critical' | 'high' | 'medium' | 'low';
+  impact: string;
+  timeToImplement: string;
+  resources: string;
+}
+
+interface MitigationData {
+  summary: string;
+  recommendations: MitigationRecommendation[];
+  warningSignsToMonitor: string[];
+  estimatedDelayReduction: string;
+}
 
 // Risk prediction data
 const projectRisks = [
@@ -269,6 +295,8 @@ const TrendIndicator = ({ trend }: { trend: string }) => {
 const RiskPredictionView = () => {
   const { isRTL } = useLanguage();
   const [selectedProject, setSelectedProject] = useState(projectRisks[0]);
+  const [mitigationData, setMitigationData] = useState<MitigationData | null>(null);
+  const [isGeneratingMitigation, setIsGeneratingMitigation] = useState(false);
 
   const radarData = selectedProject.factors.map(f => ({
     factor: f.name.split(' ')[0],
@@ -289,6 +317,56 @@ const RiskPredictionView = () => {
   );
   const highRiskCount = projectRisks.filter(p => p.riskScore >= 70).length;
   const atRiskCount = projectRisks.filter(p => p.riskScore >= 50 && p.riskScore < 70).length;
+
+  const generateMitigation = async () => {
+    setIsGeneratingMitigation(true);
+    setMitigationData(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-risk-mitigation', {
+        body: {
+          projectName: selectedProject.name,
+          riskScore: selectedProject.riskScore,
+          delayProbability: selectedProject.delayProbability,
+          predictedDelay: selectedProject.predictedDelay,
+          riskFactors: selectedProject.factors,
+          trend: selectedProject.trend,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      setMitigationData(data);
+      toast.success('Mitigation recommendations generated');
+    } catch (error) {
+      console.error('Error generating mitigation:', error);
+      toast.error('Failed to generate recommendations. Please try again.');
+    } finally {
+      setIsGeneratingMitigation(false);
+    }
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'critical': return 'bg-destructive text-destructive-foreground';
+      case 'high': return 'bg-amber-500 text-white';
+      case 'medium': return 'bg-amber-400/80 text-amber-900';
+      default: return 'bg-muted text-muted-foreground';
+    }
+  };
+
+  const getPriorityIcon = (priority: string) => {
+    switch (priority) {
+      case 'critical': return <AlertTriangle className="h-4 w-4" />;
+      case 'high': return <Zap className="h-4 w-4" />;
+      case 'medium': return <Target className="h-4 w-4" />;
+      default: return <CheckCircle2 className="h-4 w-4" />;
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -446,10 +524,14 @@ const RiskPredictionView = () => {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="factors">Risk Factors</TabsTrigger>
-                <TabsTrigger value="trend">Trend Analysis</TabsTrigger>
+                <TabsTrigger value="trend">Trend</TabsTrigger>
+                <TabsTrigger value="mitigation" className="gap-1">
+                  <Shield className="h-3 w-3" />
+                  Mitigation
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="overview" className="mt-4 space-y-4">
@@ -624,6 +706,125 @@ const RiskPredictionView = () => {
                     }
                   </p>
                 </div>
+              </TabsContent>
+
+              <TabsContent value="mitigation" className="mt-4 space-y-4">
+                {!mitigationData && !isGeneratingMitigation && (
+                  <div className="flex flex-col items-center justify-center py-8 text-center">
+                    <div className="p-4 rounded-full bg-primary/10 mb-4">
+                      <Shield className="h-8 w-8 text-primary" />
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2">AI Risk Mitigation</h3>
+                    <p className="text-sm text-muted-foreground max-w-md mb-4">
+                      Generate AI-powered recommendations to reduce project delays and mitigate identified risks.
+                    </p>
+                    <Button onClick={generateMitigation} className="gap-2">
+                      <Sparkles className="h-4 w-4" />
+                      Generate Recommendations
+                    </Button>
+                  </div>
+                )}
+
+                {isGeneratingMitigation && (
+                  <div className="flex flex-col items-center justify-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+                    <p className="text-sm text-muted-foreground">Analyzing risks and generating recommendations...</p>
+                  </div>
+                )}
+
+                {mitigationData && (
+                  <div className="space-y-4">
+                    {/* Summary */}
+                    <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Brain className="h-4 w-4 text-primary" />
+                        <span className="text-sm font-semibold">AI Analysis Summary</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{mitigationData.summary}</p>
+                    </div>
+
+                    {/* Estimated Impact */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                        <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 mb-1">
+                          <TrendingDown className="h-4 w-4" />
+                          <span className="text-xs uppercase tracking-wide font-medium">Estimated Delay Reduction</span>
+                        </div>
+                        <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
+                          {mitigationData.estimatedDelayReduction}
+                        </p>
+                      </div>
+                      <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                        <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 mb-1">
+                          <Eye className="h-4 w-4" />
+                          <span className="text-xs uppercase tracking-wide font-medium">Warning Signs to Monitor</span>
+                        </div>
+                        <p className="text-sm text-amber-600 dark:text-amber-400">
+                          {mitigationData.warningSignsToMonitor.length} key indicators
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Recommendations */}
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="text-sm font-semibold">Action Recommendations</h4>
+                        <Button variant="outline" size="sm" onClick={generateMitigation} className="gap-1">
+                          <Sparkles className="h-3 w-3" />
+                          Regenerate
+                        </Button>
+                      </div>
+                      <div className="space-y-3">
+                        {mitigationData.recommendations.map((rec) => (
+                          <div key={rec.id} className="p-4 rounded-lg border bg-card">
+                            <div className="flex items-start justify-between gap-3 mb-2">
+                              <div className="flex items-center gap-2">
+                                <Badge className={cn("text-xs gap-1", getPriorityColor(rec.priority))}>
+                                  {getPriorityIcon(rec.priority)}
+                                  {rec.priority}
+                                </Badge>
+                                <span className="font-medium text-sm">{rec.title}</span>
+                              </div>
+                            </div>
+                            <p className="text-sm text-muted-foreground mb-3">{rec.description}</p>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs">
+                              <div className="flex items-center gap-1.5 text-muted-foreground">
+                                <Target className="h-3 w-3" />
+                                <span className="font-medium">Impact:</span> {rec.impact}
+                              </div>
+                              <div className="flex items-center gap-1.5 text-muted-foreground">
+                                <Clock className="h-3 w-3" />
+                                <span className="font-medium">Time:</span> {rec.timeToImplement}
+                              </div>
+                              <div className="flex items-center gap-1.5 text-muted-foreground">
+                                <Users className="h-3 w-3" />
+                                <span className="font-medium">Resources:</span> {rec.resources}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Warning Signs */}
+                    {mitigationData.warningSignsToMonitor.length > 0 && (
+                      <div className="p-4 rounded-lg border">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Lightbulb className="h-4 w-4 text-amber-500" />
+                          <span className="text-sm font-semibold">Warning Signs to Monitor</span>
+                        </div>
+                        <ul className="space-y-2">
+                          {mitigationData.warningSignsToMonitor.map((sign, idx) => (
+                            <li key={idx} className="flex items-start gap-2 text-sm text-muted-foreground">
+                              <AlertTriangle className="h-3.5 w-3.5 text-amber-500 mt-0.5 flex-shrink-0" />
+                              {sign}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
               </TabsContent>
             </Tabs>
           </CardContent>
