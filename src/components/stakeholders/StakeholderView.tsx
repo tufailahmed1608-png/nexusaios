@@ -16,6 +16,13 @@ import {
   UserCheck,
   Eye,
   MoreVertical,
+  MessageSquare,
+  Video,
+  FileText,
+  Bell,
+  Calendar,
+  Clock,
+  Edit2,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -23,6 +30,21 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 interface Stakeholder {
   id: string;
@@ -37,6 +59,15 @@ interface Stakeholder {
   power: 'high' | 'medium' | 'low';
   projects: string[];
   lastContact: string;
+}
+
+interface CommunicationPlan {
+  influence: 'key-player' | 'keep-satisfied' | 'keep-informed' | 'monitor';
+  frequency: string;
+  channels: string[];
+  messageTypes: string[];
+  owner: string;
+  nextScheduled: string;
 }
 
 const mockStakeholders: Stakeholder[] = [
@@ -146,6 +177,41 @@ const mockStakeholders: Stakeholder[] = [
   },
 ];
 
+const mockCommunicationPlans: CommunicationPlan[] = [
+  {
+    influence: 'key-player',
+    frequency: 'Weekly',
+    channels: ['Email', 'Video Call', 'In-Person'],
+    messageTypes: ['Status Report', 'Risk Alerts', 'Decision Requests'],
+    owner: 'Project Manager',
+    nextScheduled: 'Tomorrow, 10:00 AM',
+  },
+  {
+    influence: 'keep-satisfied',
+    frequency: 'Bi-Weekly',
+    channels: ['Email', 'Video Call'],
+    messageTypes: ['Executive Summary', 'Milestone Updates'],
+    owner: 'Project Manager',
+    nextScheduled: 'Dec 20, 2:00 PM',
+  },
+  {
+    influence: 'keep-informed',
+    frequency: 'Weekly',
+    channels: ['Email', 'Slack'],
+    messageTypes: ['Newsletter', 'Progress Updates', 'Meeting Notes'],
+    owner: 'Team Lead',
+    nextScheduled: 'Friday, 4:00 PM',
+  },
+  {
+    influence: 'monitor',
+    frequency: 'Monthly',
+    channels: ['Email'],
+    messageTypes: ['Monthly Summary', 'Major Announcements'],
+    owner: 'Communications Lead',
+    nextScheduled: 'Jan 1, 9:00 AM',
+  },
+];
+
 const influenceConfig = {
   'key-player': {
     label: 'Key Players',
@@ -177,6 +243,13 @@ const influenceConfig = {
   },
 };
 
+const channelIcons: Record<string, React.ElementType> = {
+  'Email': Mail,
+  'Video Call': Video,
+  'In-Person': Users,
+  'Slack': MessageSquare,
+};
+
 const StakeholderCard = ({ stakeholder }: { stakeholder: Stakeholder }) => {
   const config = influenceConfig[stakeholder.influence];
 
@@ -200,7 +273,7 @@ const StakeholderCard = ({ stakeholder }: { stakeholder: Stakeholder }) => {
                     <MoreVertical className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" className="bg-popover">
                   <DropdownMenuItem>View Profile</DropdownMenuItem>
                   <DropdownMenuItem>Send Email</DropdownMenuItem>
                   <DropdownMenuItem>Schedule Meeting</DropdownMenuItem>
@@ -260,6 +333,89 @@ const StakeholderCard = ({ stakeholder }: { stakeholder: Stakeholder }) => {
   );
 };
 
+const CommunicationPlanCard = ({ plan }: { plan: CommunicationPlan }) => {
+  const config = influenceConfig[plan.influence];
+  const Icon = config.icon;
+  const stakeholderCount = mockStakeholders.filter(s => s.influence === plan.influence).length;
+
+  return (
+    <Card className={`border-2 ${config.color}`}>
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Icon className="h-5 w-5" />
+            {config.label}
+          </CardTitle>
+          <Button variant="ghost" size="icon" className="h-8 w-8">
+            <Edit2 className="h-4 w-4" />
+          </Button>
+        </div>
+        <p className="text-sm text-muted-foreground">{stakeholderCount} stakeholder(s)</p>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Frequency */}
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-background flex items-center justify-center">
+            <Clock className="h-4 w-4 text-muted-foreground" />
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">Frequency</p>
+            <p className="font-medium text-foreground">{plan.frequency}</p>
+          </div>
+        </div>
+
+        {/* Channels */}
+        <div>
+          <p className="text-xs text-muted-foreground mb-2">Channels</p>
+          <div className="flex flex-wrap gap-2">
+            {plan.channels.map((channel) => {
+              const ChannelIcon = channelIcons[channel] || Bell;
+              return (
+                <Badge key={channel} variant="secondary" className="gap-1">
+                  <ChannelIcon className="h-3 w-3" />
+                  {channel}
+                </Badge>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Message Types */}
+        <div>
+          <p className="text-xs text-muted-foreground mb-2">Message Types</p>
+          <div className="flex flex-wrap gap-1">
+            {plan.messageTypes.map((type) => (
+              <Badge key={type} variant="outline" className="text-xs">
+                {type}
+              </Badge>
+            ))}
+          </div>
+        </div>
+
+        {/* Owner & Next Scheduled */}
+        <div className="pt-3 border-t border-border space-y-2">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Owner:</span>
+            <span className="font-medium text-foreground">{plan.owner}</span>
+          </div>
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground flex items-center gap-1">
+              <Calendar className="h-3 w-3" />
+              Next:
+            </span>
+            <span className="font-medium text-primary">{plan.nextScheduled}</span>
+          </div>
+        </div>
+
+        <Button variant="outline" className="w-full gap-2">
+          <Mail className="h-4 w-4" />
+          Send Communication
+        </Button>
+      </CardContent>
+    </Card>
+  );
+};
+
 const StakeholderView = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
@@ -309,6 +465,7 @@ const StakeholderView = () => {
         <TabsList>
           <TabsTrigger value="all">All ({filterStakeholders().length})</TabsTrigger>
           <TabsTrigger value="matrix">Influence Matrix</TabsTrigger>
+          <TabsTrigger value="communication">Communication Plan</TabsTrigger>
         </TabsList>
 
         <TabsContent value="all" className="mt-6">
@@ -373,6 +530,64 @@ const StakeholderView = () => {
               );
             })}
           </div>
+        </TabsContent>
+
+        <TabsContent value="communication" className="mt-6 space-y-6">
+          {/* Communication Plan Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+            {mockCommunicationPlans.map((plan) => (
+              <CommunicationPlanCard key={plan.influence} plan={plan} />
+            ))}
+          </div>
+
+          {/* Communication Schedule Table */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                Communication Schedule
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Stakeholder Group</TableHead>
+                    <TableHead>Frequency</TableHead>
+                    <TableHead>Primary Channel</TableHead>
+                    <TableHead>Message Type</TableHead>
+                    <TableHead>Owner</TableHead>
+                    <TableHead>Next Scheduled</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {mockCommunicationPlans.map((plan) => {
+                    const config = influenceConfig[plan.influence];
+                    return (
+                      <TableRow key={plan.influence}>
+                        <TableCell>
+                          <Badge className={config.badgeColor}>{config.label}</Badge>
+                        </TableCell>
+                        <TableCell>{plan.frequency}</TableCell>
+                        <TableCell>{plan.channels[0]}</TableCell>
+                        <TableCell>{plan.messageTypes[0]}</TableCell>
+                        <TableCell>{plan.owner}</TableCell>
+                        <TableCell className="text-primary font-medium">
+                          {plan.nextScheduled}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button variant="ghost" size="sm">
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
