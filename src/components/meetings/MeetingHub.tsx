@@ -14,6 +14,21 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+
+// Import attendee avatars
+import sarahChenAvatar from '@/assets/inbox/sarah-chen-email.png';
+import michaelTorresAvatar from '@/assets/inbox/michael-torres.png';
+import alexKimAvatar from '@/assets/inbox/alex-kim.png';
+import emilyWatsonAvatar from '@/assets/inbox/emily-watson.png';
+
+// Avatar mapping for attendees
+const attendeeAvatars: Record<string, string> = {
+  'Sarah Chen': sarahChenAvatar,
+  'Michael Torres': michaelTorresAvatar,
+  'Alex Kim': alexKimAvatar,
+  'Emily Watson': emilyWatsonAvatar,
+};
 
 const MeetingHub = () => {
   const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(
@@ -109,6 +124,21 @@ const MeetingHub = () => {
                     <span>{meeting.attendees.length}</span>
                   </div>
                 </div>
+                <div className="flex -space-x-1.5 mt-2">
+                  {meeting.attendees.slice(0, 4).map((attendee, idx) => (
+                    <Avatar key={idx} className="w-6 h-6 border border-card">
+                      <AvatarImage src={attendeeAvatars[attendee]} alt={attendee} />
+                      <AvatarFallback className="bg-primary text-[8px] font-medium text-primary-foreground">
+                        {attendee.split(' ').map(n => n[0]).join('')}
+                      </AvatarFallback>
+                    </Avatar>
+                  ))}
+                  {meeting.attendees.length > 4 && (
+                    <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center text-[8px] font-medium text-foreground border border-card">
+                      +{meeting.attendees.length - 4}
+                    </div>
+                  )}
+                </div>
               </button>
             ))}
           </div>
@@ -119,9 +149,19 @@ const MeetingHub = () => {
           {selectedMeeting ? (
             <>
               <div className="p-4 border-b border-border">
-                <h3 className="font-semibold text-foreground mb-1">{selectedMeeting.title}</h3>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <span>
+                <h3 className="font-semibold text-foreground mb-2">{selectedMeeting.title}</h3>
+                <div className="flex items-center gap-3">
+                  <div className="flex -space-x-1.5">
+                    {selectedMeeting.attendees.slice(0, 5).map((attendee, idx) => (
+                      <Avatar key={idx} className="w-7 h-7 border-2 border-card" title={attendee}>
+                        <AvatarImage src={attendeeAvatars[attendee]} alt={attendee} />
+                        <AvatarFallback className="bg-primary text-[10px] font-medium text-primary-foreground">
+                          {attendee.split(' ').map(n => n[0]).join('')}
+                        </AvatarFallback>
+                      </Avatar>
+                    ))}
+                  </div>
+                  <span className="text-sm text-muted-foreground">
                     {selectedMeeting.attendees.length} attendees • {selectedMeeting.duration}
                   </span>
                 </div>
