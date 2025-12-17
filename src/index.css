@@ -296,6 +296,91 @@
     animation: nexusPulseGlow 2s ease-in-out infinite;
   }
 
+  /* Hero animated gradient background */
+  .hero-gradient {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--background)) 0%,
+      hsl(var(--primary) / 0.05) 25%,
+      hsl(var(--background)) 50%,
+      hsl(239 84% 67% / 0.08) 75%,
+      hsl(var(--background)) 100%
+    );
+    background-size: 400% 400%;
+    animation: heroGradientShift 15s ease infinite;
+  }
+
+  .hero-glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.4;
+    animation: heroGlowPulse 8s ease-in-out infinite;
+  }
+
+  .hero-glow-1 {
+    width: 600px;
+    height: 600px;
+    background: hsl(var(--primary) / 0.3);
+    top: -200px;
+    right: -100px;
+    animation-delay: 0s;
+  }
+
+  .hero-glow-2 {
+    width: 500px;
+    height: 500px;
+    background: hsl(239 84% 67% / 0.25);
+    bottom: -150px;
+    left: -100px;
+    animation-delay: 4s;
+  }
+
+  .hero-glow-3 {
+    width: 400px;
+    height: 400px;
+    background: hsl(280 70% 50% / 0.2);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation-delay: 2s;
+  }
+
+  /* Floating particles */
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    animation: particleFloat linear infinite;
+  }
+
+  .particle-sm {
+    width: 4px;
+    height: 4px;
+    background: hsl(var(--primary) / 0.4);
+  }
+
+  .particle-md {
+    width: 6px;
+    height: 6px;
+    background: hsl(239 84% 67% / 0.3);
+  }
+
+  .particle-lg {
+    width: 8px;
+    height: 8px;
+    background: hsl(var(--primary) / 0.2);
+  }
+
+  /* Grid pattern overlay */
+  .hero-grid {
+    background-image: 
+      linear-gradient(hsl(var(--border) / 0.3) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border) / 0.3) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse at center, black 20%, transparent 70%);
+  }
+
   @keyframes nexusFadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -309,5 +394,39 @@
   @keyframes nexusPulseGlow {
     0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.4); }
     50% { box-shadow: 0 0 20px 4px hsl(var(--primary) / 0.2); }
+  }
+
+  @keyframes heroGradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  @keyframes heroGlowPulse {
+    0%, 100% { 
+      opacity: 0.3;
+      transform: scale(1);
+    }
+    50% { 
+      opacity: 0.5;
+      transform: scale(1.1);
+    }
+  }
+
+  @keyframes particleFloat {
+    0% {
+      transform: translateY(100vh) rotate(0deg);
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    90% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(-100vh) rotate(720deg);
+      opacity: 0;
+    }
   }
 }
