@@ -31,6 +31,7 @@ const translations: Record<Language, Record<string, string>> = {
     'collapse': 'Collapse',
     'expand': 'Expand',
     'productDocs': 'Product Docs',
+    'pitchDeck': 'Pitch Deck',
     
     // Dashboard
     'overview': 'Overview',
@@ -95,6 +96,7 @@ const translations: Record<Language, Record<string, string>> = {
     'collapse': 'طي',
     'expand': 'توسيع',
     'productDocs': 'وثائق المنتج',
+    'pitchDeck': 'عرض تقديمي',
     
     // Dashboard
     'overview': 'نظرة عامة',
