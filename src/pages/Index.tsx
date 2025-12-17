@@ -11,6 +11,7 @@ import ProjectsView from '@/components/projects/ProjectsView';
 import TeamView from '@/components/team/TeamView';
 import DocumentsView from '@/components/documents/DocumentsView';
 import StakeholderView from '@/components/stakeholders/StakeholderView';
+import ActivityView from '@/components/activity/ActivityView';
 
 const Index = () => {
   const [activeView, setActiveView] = useState('dashboard');
@@ -41,6 +42,8 @@ const Index = () => {
         return <DocumentsView />;
       case 'stakeholders':
         return <StakeholderView />;
+      case 'activity':
+        return <ActivityView />;
       case 'strategy':
         return <StrategyView />;
       case 'team':

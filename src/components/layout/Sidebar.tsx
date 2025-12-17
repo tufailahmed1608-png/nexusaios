@@ -14,6 +14,7 @@ import {
   FolderKanban,
   FileText,
   UserCircle,
+  Activity,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -29,6 +30,7 @@ const menuItems = [
   { id: 'projects', label: 'Projects', icon: FolderKanban },
   { id: 'documents', label: 'Documents', icon: FileText },
   { id: 'stakeholders', label: 'Stakeholders', icon: UserCircle },
+  { id: 'activity', label: 'Activity', icon: Activity },
   { id: 'strategy', label: 'Strategy', icon: BarChart3 },
   { id: 'team', label: 'Team', icon: Users },
 ];
