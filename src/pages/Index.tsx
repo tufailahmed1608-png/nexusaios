@@ -16,7 +16,7 @@ import ReportsView from '@/components/reports/ReportsView';
 
 const Index = () => {
   const [activeView, setActiveView] = useState('dashboard');
-  const [isDark, setIsDark] = useState(true);
+  const [isDark, setIsDark] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
