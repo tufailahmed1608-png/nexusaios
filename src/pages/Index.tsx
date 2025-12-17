@@ -6,6 +6,7 @@ import Dashboard from '@/components/dashboard/Dashboard';
 import SmartInbox from '@/components/inbox/SmartInbox';
 import TaskBoard from '@/components/tasks/TaskBoard';
 import MeetingHub from '@/components/meetings/MeetingHub';
+import CalendarView from '@/components/calendar/CalendarView';
 import StrategyView from '@/components/strategy/StrategyView';
 import ProjectsView from '@/components/projects/ProjectsView';
 import TeamView from '@/components/team/TeamView';
@@ -40,6 +41,8 @@ const Index = () => {
         return <SmartInbox />;
       case 'tasks':
         return <TaskBoard />;
+      case 'calendar':
+        return <CalendarView />;
       case 'meetings':
         return <MeetingHub />;
       case 'projects':
