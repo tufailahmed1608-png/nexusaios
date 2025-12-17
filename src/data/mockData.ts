@@ -358,3 +358,114 @@ export const velocityData: ChartData[] = [
   { name: 'Week 5', value: 55 },
   { name: 'Week 6', value: 67 },
 ];
+
+// Strategy View Data
+export interface StrategicPillar {
+  id: string;
+  name: string;
+  description: string;
+  progress: number;
+  target: number;
+  status: 'on-track' | 'at-risk' | 'critical';
+  initiatives: number;
+  completedInitiatives: number;
+}
+
+export interface ROIData {
+  name: string;
+  investment: number;
+  returns: number;
+  roi: number;
+}
+
+export interface BudgetForecast {
+  month: string;
+  planned: number;
+  actual: number;
+  forecast: number;
+}
+
+export const strategicPillars: StrategicPillar[] = [
+  {
+    id: '1',
+    name: 'Digital Transformation',
+    description: 'Modernize legacy systems and adopt cloud-native solutions',
+    progress: 68,
+    target: 75,
+    status: 'on-track',
+    initiatives: 12,
+    completedInitiatives: 8,
+  },
+  {
+    id: '2',
+    name: 'Customer Experience',
+    description: 'Enhance customer touchpoints and satisfaction scores',
+    progress: 45,
+    target: 80,
+    status: 'at-risk',
+    initiatives: 8,
+    completedInitiatives: 3,
+  },
+  {
+    id: '3',
+    name: 'Operational Excellence',
+    description: 'Streamline processes and reduce operational costs',
+    progress: 82,
+    target: 85,
+    status: 'on-track',
+    initiatives: 15,
+    completedInitiatives: 12,
+  },
+  {
+    id: '4',
+    name: 'Innovation & Growth',
+    description: 'Launch new products and expand market presence',
+    progress: 28,
+    target: 60,
+    status: 'critical',
+    initiatives: 6,
+    completedInitiatives: 1,
+  },
+  {
+    id: '5',
+    name: 'Talent Development',
+    description: 'Build workforce capabilities and engagement',
+    progress: 71,
+    target: 70,
+    status: 'on-track',
+    initiatives: 10,
+    completedInitiatives: 7,
+  },
+];
+
+export const roiData: ROIData[] = [
+  { name: 'Platform v2.0', investment: 500000, returns: 850000, roi: 70 },
+  { name: 'Mobile App', investment: 300000, returns: 520000, roi: 73 },
+  { name: 'Analytics Dashboard', investment: 200000, returns: 180000, roi: -10 },
+  { name: 'Brand Refresh', investment: 150000, returns: 280000, roi: 87 },
+  { name: 'Automation Suite', investment: 400000, returns: 720000, roi: 80 },
+  { name: 'Cloud Migration', investment: 600000, returns: 950000, roi: 58 },
+];
+
+export const budgetForecastData: BudgetForecast[] = [
+  { month: 'Jan', planned: 450000, actual: 420000, forecast: 420000 },
+  { month: 'Feb', planned: 480000, actual: 495000, forecast: 495000 },
+  { month: 'Mar', planned: 520000, actual: 510000, forecast: 510000 },
+  { month: 'Apr', planned: 550000, actual: 580000, forecast: 580000 },
+  { month: 'May', planned: 600000, actual: 575000, forecast: 575000 },
+  { month: 'Jun', planned: 580000, actual: 590000, forecast: 590000 },
+  { month: 'Jul', planned: 620000, actual: null, forecast: 605000 },
+  { month: 'Aug', planned: 650000, actual: null, forecast: 640000 },
+  { month: 'Sep', planned: 700000, actual: null, forecast: 685000 },
+  { month: 'Oct', planned: 680000, actual: null, forecast: 670000 },
+  { month: 'Nov', planned: 720000, actual: null, forecast: 710000 },
+  { month: 'Dec', planned: 750000, actual: null, forecast: 745000 },
+];
+
+export const quarterlyPerformance = [
+  { quarter: 'Q1 2023', revenue: 2400000, cost: 1800000, profit: 600000 },
+  { quarter: 'Q2 2023', revenue: 2800000, cost: 2000000, profit: 800000 },
+  { quarter: 'Q3 2023', revenue: 3100000, cost: 2200000, profit: 900000 },
+  { quarter: 'Q4 2023', revenue: 3500000, cost: 2400000, profit: 1100000 },
+  { quarter: 'Q1 2024', revenue: 3200000, cost: 2300000, profit: 900000 },
+];
