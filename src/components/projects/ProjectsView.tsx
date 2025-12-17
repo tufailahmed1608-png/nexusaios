@@ -15,6 +15,29 @@ import {
   MoreHorizontal,
 } from 'lucide-react';
 import { projects, Project, Milestone } from '@/data/mockData';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+
+// Import project team member avatars
+import alexKimAvatar from '@/assets/inbox/alex-kim.png';
+import michaelTorresAvatar from '@/assets/inbox/michael-torres.png';
+import jordanLeeAvatar from '@/assets/projects/jordan-lee.png';
+import sarahChenAvatar from '@/assets/inbox/sarah-chen-email.png';
+import emilyWatsonAvatar from '@/assets/inbox/emily-watson.png';
+import chrisParkAvatar from '@/assets/projects/chris-park.png';
+import danaSmithAvatar from '@/assets/projects/dana-smith.png';
+import lisaWangAvatar from '@/assets/projects/lisa-wang.png';
+
+// Avatar mapping for team members
+const teamAvatars: Record<string, string> = {
+  'Alex Kim': alexKimAvatar,
+  'Michael Torres': michaelTorresAvatar,
+  'Jordan Lee': jordanLeeAvatar,
+  'Sarah Chen': sarahChenAvatar,
+  'Emily Watson': emilyWatsonAvatar,
+  'Chris Park': chrisParkAvatar,
+  'Dana Smith': danaSmithAvatar,
+  'Lisa Wang': lisaWangAvatar,
+};
 
 type ViewMode = 'cards' | 'gantt';
 
@@ -213,13 +236,16 @@ const ProjectCard = ({ project, onSelect }: ProjectCardProps) => {
       <div className="flex items-center justify-between">
         <div className="flex -space-x-2">
           {project.team.slice(0, 4).map(member => (
-            <div
+            <Avatar
               key={member.id}
-              className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-xs font-medium text-primary-foreground border-2 border-card"
+              className="w-8 h-8 border-2 border-card"
               title={`${member.name} (${member.allocation}%)`}
             >
-              {member.avatar}
-            </div>
+              <AvatarImage src={teamAvatars[member.name]} alt={member.name} />
+              <AvatarFallback className="bg-primary text-xs font-medium text-primary-foreground">
+                {member.name.split(' ').map(n => n[0]).join('')}
+              </AvatarFallback>
+            </Avatar>
           ))}
           {project.team.length > 4 && (
             <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-xs font-medium text-foreground border-2 border-card">
@@ -543,9 +569,12 @@ const ProjectDetailModal = ({ project, onClose }: ProjectDetailModalProps) => {
             <div className="grid grid-cols-2 gap-3">
               {project.team.map(member => (
                 <div key={member.id} className="flex items-center gap-3 p-3 rounded-lg bg-secondary/30">
-                  <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-sm font-medium text-primary-foreground">
-                    {member.avatar}
-                  </div>
+                  <Avatar className="w-10 h-10">
+                    <AvatarImage src={teamAvatars[member.name]} alt={member.name} />
+                    <AvatarFallback className="bg-primary text-sm font-medium text-primary-foreground">
+                      {member.name.split(' ').map(n => n[0]).join('')}
+                    </AvatarFallback>
+                  </Avatar>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-foreground truncate">{member.name}</p>
                     <p className="text-xs text-muted-foreground">{member.role}</p>
