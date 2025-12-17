@@ -15,6 +15,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import SmartTaskSuggestions from '@/components/tasks/SmartTaskSuggestions';
 
 // Import attendee avatars
 import sarahChenAvatar from '@/assets/inbox/sarah-chen-email.png';
@@ -263,6 +264,20 @@ const MeetingHub = () => {
                   Add All to Task Board
                 </Button>
               </div>
+
+              {/* Smart Task Suggestions */}
+              {selectedMeeting?.transcript && (
+                <div className="nexus-slide-up" style={{ animationDelay: '300ms' }}>
+                  <SmartTaskSuggestions
+                    content={selectedMeeting.transcript}
+                    contentType="meeting"
+                    subject={selectedMeeting.title}
+                    onTaskAdded={(task) => {
+                      console.log('Task added from meeting:', task);
+                    }}
+                  />
+                </div>
+              )}
             </>
           ) : (
             <div className="nexus-card h-full flex items-center justify-center">
