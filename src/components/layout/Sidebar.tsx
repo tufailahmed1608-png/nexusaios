@@ -12,7 +12,6 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  Sparkles,
   Users,
   FolderKanban,
   FileText,
@@ -23,6 +22,7 @@ import {
   Calendar,
 } from 'lucide-react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
+import nexusLogo from '@/assets/nexus-logo.png';
 
 interface SidebarProps {
   activeView: string;
@@ -79,9 +79,7 @@ const SidebarContent = ({
       {/* Logo */}
       <div className="h-16 flex items-center px-6 border-b border-border">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
-            <Sparkles className="w-5 h-5 text-primary-foreground" />
-          </div>
+          <img src={nexusLogo} alt="Nexus Logo" className="w-10 h-10 rounded-xl object-cover" />
           {!isCollapsed && (
             <div className="nexus-fade-in">
               <h1 className="font-semibold text-foreground">Nexus</h1>
