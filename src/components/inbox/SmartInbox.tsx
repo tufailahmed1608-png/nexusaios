@@ -22,6 +22,21 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+
+// Import email sender avatars
+import sarahChenAvatar from '@/assets/inbox/sarah-chen-email.png';
+import michaelTorresAvatar from '@/assets/inbox/michael-torres.png';
+import alexKimAvatar from '@/assets/inbox/alex-kim.png';
+import emilyWatsonAvatar from '@/assets/inbox/emily-watson.png';
+
+// Avatar mapping for email senders
+const emailAvatars: Record<string, string> = {
+  'Sarah Chen': sarahChenAvatar,
+  'Michael Torres': michaelTorresAvatar,
+  'Alex Kim': alexKimAvatar,
+  'Emily Watson': emilyWatsonAvatar,
+};
 
 const SmartInbox = () => {
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(emails[0]);
@@ -169,6 +184,12 @@ const SmartInbox = () => {
                 )}
               >
                 <div className="flex items-start gap-3">
+                  <Avatar className="h-10 w-10 shrink-0">
+                    <AvatarImage src={emailAvatars[email.from]} alt={email.from} />
+                    <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                      {email.from.split(' ').map(n => n[0]).join('')}
+                    </AvatarFallback>
+                  </Avatar>
                   <button className="mt-1 text-muted-foreground hover:text-warning">
                     {email.isStarred ? (
                       <Star className="w-4 h-4 fill-warning text-warning" />
@@ -208,12 +229,20 @@ const SmartInbox = () => {
             <>
               <div className="p-4 border-b border-border">
                 <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="font-semibold text-foreground mb-1">{selectedEmail.subject}</h3>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <span>{selectedEmail.from}</span>
-                      <span>•</span>
-                      <span>{selectedEmail.fromEmail}</span>
+                  <div className="flex items-start gap-3">
+                    <Avatar className="h-12 w-12 shrink-0">
+                      <AvatarImage src={emailAvatars[selectedEmail.from]} alt={selectedEmail.from} />
+                      <AvatarFallback className="bg-primary/10 text-primary">
+                        {selectedEmail.from.split(' ').map(n => n[0]).join('')}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <h3 className="font-semibold text-foreground mb-1">{selectedEmail.subject}</h3>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <span className="font-medium text-foreground">{selectedEmail.from}</span>
+                        <span>•</span>
+                        <span>{selectedEmail.fromEmail}</span>
+                      </div>
                     </div>
                   </div>
                   <Button

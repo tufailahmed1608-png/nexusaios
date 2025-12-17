@@ -11,6 +11,7 @@ export interface Email {
   id: string;
   from: string;
   fromEmail: string;
+  avatar?: string;
   subject: string;
   preview: string;
   body: string;
