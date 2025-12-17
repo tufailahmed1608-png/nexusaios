@@ -1,4 +1,4 @@
-import { Moon, Sun, Search, User, LogOut } from 'lucide-react';
+import { Moon, Sun, Search, User, LogOut, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import NotificationBell from '@/components/notifications/NotificationBell';
 import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
   isDark: boolean;
@@ -18,6 +19,7 @@ interface HeaderProps {
 
 const Header = ({ isDark, onThemeToggle }: HeaderProps) => {
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <header className="h-16 bg-card border-b border-border flex items-center justify-between px-6">
@@ -63,6 +65,11 @@ const Header = ({ isDark, onThemeToggle }: HeaderProps) => {
               <p className="text-sm font-medium">{user?.email?.split('@')[0]}</p>
               <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
             </div>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => navigate('/settings')} className="cursor-pointer">
+              <Settings className="w-4 h-4 mr-2" />
+              Settings
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={signOut} className="text-destructive focus:text-destructive cursor-pointer">
               <LogOut className="w-4 h-4 mr-2" />
