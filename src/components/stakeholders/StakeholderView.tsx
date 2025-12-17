@@ -46,6 +46,16 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
+// Import stakeholder avatars
+import sarahMitchellAvatar from '@/assets/stakeholders/sarah-mitchell.png';
+import jamesWilsonCfoAvatar from '@/assets/stakeholders/james-wilson-cfo.png';
+import emilyChenAvatar from '@/assets/stakeholders/emily-chen.png';
+import michaelBrownAvatar from '@/assets/stakeholders/michael-brown.png';
+import lisaThompsonAvatar from '@/assets/stakeholders/lisa-thompson.png';
+import davidParkAvatar from '@/assets/stakeholders/david-park.png';
+import amandaFosterAvatar from '@/assets/stakeholders/amanda-foster.png';
+import robertKimAvatar from '@/assets/stakeholders/robert-kim.png';
+
 interface Stakeholder {
   id: string;
   name: string;
@@ -78,6 +88,7 @@ const mockStakeholders: Stakeholder[] = [
     organization: 'Acme Corp',
     email: 'sarah.m@acme.com',
     phone: '+1 555-0101',
+    avatar: sarahMitchellAvatar,
     influence: 'key-player',
     interest: 'high',
     power: 'high',
@@ -91,6 +102,7 @@ const mockStakeholders: Stakeholder[] = [
     organization: 'Acme Corp',
     email: 'james.w@acme.com',
     phone: '+1 555-0102',
+    avatar: jamesWilsonCfoAvatar,
     influence: 'keep-satisfied',
     interest: 'medium',
     power: 'high',
@@ -104,6 +116,7 @@ const mockStakeholders: Stakeholder[] = [
     organization: 'TechStart Inc',
     email: 'emily.c@techstart.com',
     phone: '+1 555-0103',
+    avatar: emilyChenAvatar,
     influence: 'key-player',
     interest: 'high',
     power: 'medium',
@@ -117,6 +130,7 @@ const mockStakeholders: Stakeholder[] = [
     organization: 'Acme Corp',
     email: 'michael.b@acme.com',
     phone: '+1 555-0104',
+    avatar: michaelBrownAvatar,
     influence: 'keep-informed',
     interest: 'high',
     power: 'low',
@@ -130,6 +144,7 @@ const mockStakeholders: Stakeholder[] = [
     organization: 'Global Media',
     email: 'lisa.t@globalmedia.com',
     phone: '+1 555-0105',
+    avatar: lisaThompsonAvatar,
     influence: 'keep-satisfied',
     interest: 'low',
     power: 'high',
@@ -143,6 +158,7 @@ const mockStakeholders: Stakeholder[] = [
     organization: 'TechStart Inc',
     email: 'david.p@techstart.com',
     phone: '+1 555-0106',
+    avatar: davidParkAvatar,
     influence: 'keep-informed',
     interest: 'high',
     power: 'medium',
@@ -156,6 +172,7 @@ const mockStakeholders: Stakeholder[] = [
     organization: 'Acme Corp',
     email: 'amanda.f@acme.com',
     phone: '+1 555-0107',
+    avatar: amandaFosterAvatar,
     influence: 'monitor',
     interest: 'low',
     power: 'medium',
@@ -169,6 +186,7 @@ const mockStakeholders: Stakeholder[] = [
     organization: 'Strategy Partners',
     email: 'robert.k@strategyp.com',
     phone: '+1 555-0108',
+    avatar: robertKimAvatar,
     influence: 'monitor',
     interest: 'medium',
     power: 'low',
