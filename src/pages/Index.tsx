@@ -13,6 +13,7 @@ import DocumentsView from '@/components/documents/DocumentsView';
 import StakeholderView from '@/components/stakeholders/StakeholderView';
 import ActivityView from '@/components/activity/ActivityView';
 import ReportsView from '@/components/reports/ReportsView';
+import AIChatButton from '@/components/chat/AIChatButton';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -92,6 +93,8 @@ const Index = () => {
           {renderContent()}
         </main>
       </div>
+      
+      <AIChatButton />
     </div>
   );
 };

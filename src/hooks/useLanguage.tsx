@@ -179,6 +179,12 @@ const translations: Record<Language, Record<string, string>> = {
     'noData': 'No data available',
     'error': 'Error',
     'success': 'Success',
+    
+    // AI Chat
+    'aiAssistant': 'Nexus AI',
+    'aiAssistantDesc': 'Your project management assistant',
+    'aiWelcome': 'Hi! I\'m Nexus AI. How can I help you with your projects today?',
+    'typeMessage': 'Type a message...',
   },
   ar: {
     // Header
@@ -349,6 +355,12 @@ const translations: Record<Language, Record<string, string>> = {
     'noData': 'لا توجد بيانات',
     'error': 'خطأ',
     'success': 'نجاح',
+    
+    // AI Chat
+    'aiAssistant': 'نيكسس الذكي',
+    'aiAssistantDesc': 'مساعدك في إدارة المشاريع',
+    'aiWelcome': 'مرحباً! أنا نيكسس الذكي. كيف يمكنني مساعدتك في مشاريعك اليوم؟',
+    'typeMessage': 'اكتب رسالة...',
   },
 };
 
