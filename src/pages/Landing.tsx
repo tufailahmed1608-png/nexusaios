@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import nexusLogo from '@/assets/nexus-logo.png';
+
 import {
   Brain,
   Mail,
@@ -76,7 +76,9 @@ const Landing = () => {
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src={nexusLogo} alt="Nexus Logo" className="w-10 h-10 rounded-xl" />
+            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-primary-foreground" />
+            </div>
             <div>
               <span className="font-bold text-foreground text-lg">Nexus</span>
               <span className="text-muted-foreground text-sm ml-1">Project OS</span>
@@ -280,7 +282,9 @@ const Landing = () => {
       <footer className="py-12 px-6 border-t border-border">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
-            <img src={nexusLogo} alt="Nexus Logo" className="w-8 h-8 rounded-lg" />
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-primary-foreground" />
+            </div>
             <span className="font-semibold text-foreground">Nexus Project OS</span>
           </div>
           <p className="text-sm text-muted-foreground">
