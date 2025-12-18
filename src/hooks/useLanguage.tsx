@@ -182,6 +182,8 @@ const translations: Record<Language, Record<string, string>> = {
     'noData': 'No data available',
     'error': 'Error',
     'success': 'Success',
+    'more': 'More',
+    'less': 'Less',
     
     // AI Chat
     'aiAssistant': 'Nexus AI',
@@ -361,6 +363,8 @@ const translations: Record<Language, Record<string, string>> = {
     'noData': 'لا توجد بيانات',
     'error': 'خطأ',
     'success': 'نجاح',
+    'more': 'المزيد',
+    'less': 'أقل',
     
     // AI Chat
     'aiAssistant': 'نيكسس الذكي',
