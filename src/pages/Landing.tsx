@@ -138,8 +138,8 @@ const Landing = () => {
             <Button size="lg" onClick={() => navigate('/auth')} className="gap-2 text-lg px-8 py-6 nexus-pulse-glow">
               Start Free Trial <ArrowRight className="w-5 h-5" />
             </Button>
-            <Button size="lg" variant="outline" onClick={() => navigate('/features')} className="text-lg px-8 py-6 backdrop-blur-sm">
-              View Features
+            <Button size="lg" variant="outline" onClick={() => navigate('/demo')} className="text-lg px-8 py-6 backdrop-blur-sm">
+              See Demo
             </Button>
           </div>
 
