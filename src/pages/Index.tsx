@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
-import TopNav from '@/components/layout/TopNav';
+import { cn } from '@/lib/utils';
+import Sidebar from '@/components/layout/Sidebar';
+import Header from '@/components/layout/Header';
 import Dashboard from '@/components/dashboard/Dashboard';
 import SmartInbox from '@/components/inbox/SmartInbox';
 import TaskBoard from '@/components/tasks/TaskBoard';
@@ -15,11 +17,16 @@ import ReportsView from '@/components/reports/ReportsView';
 import RiskPredictionView from '@/components/risk/RiskPredictionView';
 import WeeklyDigestView from '@/components/digest/WeeklyDigestView';
 import AIChatButton from '@/components/chat/AIChatButton';
+import { useLanguage } from '@/hooks/useLanguage';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { usePresence } from '@/hooks/usePresence';
 
 const Index = () => {
   const [activeView, setActiveView] = useState('dashboard');
   const [isDark, setIsDark] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { isRTL } = useLanguage();
+  const isMobile = useIsMobile();
   const { onlineUsers } = usePresence(activeView);
 
   useEffect(() => {
@@ -76,17 +83,28 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <TopNav 
+      <Sidebar 
         activeView={activeView} 
         onViewChange={setActiveView}
-        isDark={isDark}
-        onThemeToggle={() => setIsDark(!isDark)}
-        onlineUsers={onlineUsers}
+        isOpen={sidebarOpen}
+        onOpenChange={setSidebarOpen}
       />
       
-      <main className="p-4 md:p-6 min-h-[calc(100vh-64px)]">
-        {renderContent()}
-      </main>
+      <div className={cn(
+        'transition-all duration-300',
+        !isMobile && (isRTL ? 'mr-72' : 'ml-72')
+      )}>
+        <Header 
+          isDark={isDark} 
+          onThemeToggle={() => setIsDark(!isDark)}
+          onMenuClick={() => setSidebarOpen(true)}
+          onlineUsers={onlineUsers}
+        />
+        
+        <main className="p-4 md:p-6 min-h-[calc(100vh-64px)]">
+          {renderContent()}
+        </main>
+      </div>
       
       <AIChatButton />
     </div>
