@@ -13,6 +13,7 @@ import ProductDocumentation from "./pages/ProductDocumentation";
 import PitchDeck from "./pages/PitchDeck";
 import FeaturesShowcase from "./pages/FeaturesShowcase";
 import ProductDemo from "./pages/ProductDemo";
+import AdminAnalytics from "./pages/AdminAnalytics";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 
@@ -67,6 +68,14 @@ const App = () => (
               <Route path="/pitch-deck" element={<PitchDeck />} />
               <Route path="/features" element={<FeaturesShowcase />} />
               <Route path="/demo" element={<ProductDemo />} />
+              <Route
+                path="/admin/analytics"
+                element={
+                  <ProtectedRoute>
+                    <AdminAnalytics />
+                  </ProtectedRoute>
+                }
+              />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
