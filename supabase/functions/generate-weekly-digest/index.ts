@@ -1,9 +1,36 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+// Input validation constants
+const MAX_WEEK_DATA_LENGTH = 50000;
+
+function validateInput(body: unknown): { valid: boolean; error?: string; data?: Record<string, unknown> } {
+  if (!body || typeof body !== 'object') {
+    return { valid: false, error: "Invalid request body" };
+  }
+
+  const { weekData } = body as Record<string, unknown>;
+
+  if (!weekData || typeof weekData !== 'object' || Array.isArray(weekData)) {
+    return { valid: false, error: "weekData must be an object" };
+  }
+
+  // Check serialized length to prevent extremely large payloads
+  const serialized = JSON.stringify(weekData);
+  if (serialized.length > MAX_WEEK_DATA_LENGTH) {
+    return { valid: false, error: `weekData exceeds maximum size of ${MAX_WEEK_DATA_LENGTH} characters` };
+  }
+
+  return {
+    valid: true,
+    data: weekData as Record<string, unknown>,
+  };
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -11,13 +38,59 @@ serve(async (req) => {
   }
 
   try {
-    const { weekData } = await req.json();
+    // Authentication check
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
-    console.log("Generating weekly digest...");
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: "Invalid token" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Parse and validate input
+    let body;
+    try {
+      body = await req.json();
+    } catch {
+      return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const validation = validateInput(body);
+    if (!validation.valid) {
+      return new Response(JSON.stringify({ error: validation.error }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const weekData = validation.data!;
+
+    console.log("Generating weekly digest for user:", user.id);
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+      console.error("LOVABLE_API_KEY is not configured");
+      return new Response(JSON.stringify({ error: "Service configuration error" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const systemPrompt = `You are a senior project management assistant creating executive weekly status summaries. 
@@ -88,6 +161,7 @@ Create an executive-friendly weekly status report summarizing progress, highligh
     });
 
     if (!response.ok) {
+      console.error("AI gateway error:", response.status);
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limits exceeded, please try again later." }), {
           status: 429,
@@ -100,14 +174,20 @@ Create an executive-friendly weekly status report summarizing progress, highligh
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      throw new Error(`AI gateway error: ${response.status}`);
+      return new Response(JSON.stringify({ error: "Failed to generate digest" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const data = await response.json();
     const aiContent = data.choices?.[0]?.message?.content;
 
     if (!aiContent) {
-      throw new Error("No content in AI response");
+      return new Response(JSON.stringify({ error: "No content in AI response" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     let digestData;
@@ -132,7 +212,7 @@ Create an executive-friendly weekly status report summarizing progress, highligh
       };
     }
 
-    console.log("Successfully generated weekly digest");
+    console.log("Successfully generated weekly digest for user:", user.id);
 
     return new Response(JSON.stringify(digestData), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -140,9 +220,9 @@ Create an executive-friendly weekly status report summarizing progress, highligh
 
   } catch (error) {
     console.error("Error:", error);
-    return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: "An unexpected error occurred" }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });

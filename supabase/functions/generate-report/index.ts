@@ -1,9 +1,49 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Input validation constants
+const MAX_PROJECT_DATA_LENGTH = 50000;
+const VALID_REPORT_TYPES = ['weekly-status', 'monthly-summary', 'stakeholder-update', 'risk-assessment', 'team-performance'];
+
+interface ValidatedInput {
+  reportType: string;
+  projectData: Record<string, unknown>;
+}
+
+function validateInput(body: unknown): { valid: boolean; error?: string; data?: ValidatedInput } {
+  if (!body || typeof body !== 'object') {
+    return { valid: false, error: "Invalid request body" };
+  }
+
+  const { reportType, projectData } = body as Record<string, unknown>;
+
+  if (typeof reportType !== 'string' || !VALID_REPORT_TYPES.includes(reportType)) {
+    return { valid: false, error: `reportType must be one of: ${VALID_REPORT_TYPES.join(', ')}` };
+  }
+
+  if (!projectData || typeof projectData !== 'object' || Array.isArray(projectData)) {
+    return { valid: false, error: "projectData must be an object" };
+  }
+
+  // Check serialized length to prevent extremely large payloads
+  const serialized = JSON.stringify(projectData);
+  if (serialized.length > MAX_PROJECT_DATA_LENGTH) {
+    return { valid: false, error: `projectData exceeds maximum size of ${MAX_PROJECT_DATA_LENGTH} characters` };
+  }
+
+  return {
+    valid: true,
+    data: {
+      reportType,
+      projectData: projectData as Record<string, unknown>,
+    },
+  };
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -11,14 +51,60 @@ serve(async (req) => {
   }
 
   try {
-    const { reportType, projectData } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+    // Authentication check
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
-    console.log(`Generating ${reportType} report...`);
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: 'Invalid token' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Parse and validate input
+    let body;
+    try {
+      body = await req.json();
+    } catch {
+      return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const validation = validateInput(body);
+    if (!validation.valid) {
+      return new Response(JSON.stringify({ error: validation.error }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const { reportType, projectData } = validation.data!;
+
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      console.error("LOVABLE_API_KEY is not configured");
+      return new Response(JSON.stringify({ error: "Service configuration error" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    console.log(`Generating ${reportType} report for user:`, user.id);
 
     const systemPrompts: Record<string, string> = {
       'weekly-status': `You are an expert project management assistant. Generate a professional weekly status report based on the provided project data. The report should include:
@@ -102,8 +188,7 @@ Format in professional markdown.`
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
+      console.error("AI gateway error:", response.status);
       
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again later." }), {
@@ -118,17 +203,23 @@ Format in professional markdown.`
         });
       }
       
-      throw new Error(`AI gateway error: ${response.status}`);
+      return new Response(JSON.stringify({ error: "Failed to generate report" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const data = await response.json();
     const reportContent = data.choices?.[0]?.message?.content;
 
     if (!reportContent) {
-      throw new Error("No report content generated");
+      return new Response(JSON.stringify({ error: "No report content generated" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    console.log("Report generated successfully");
+    console.log("Report generated successfully for user:", user.id);
 
     return new Response(JSON.stringify({ 
       success: true, 
@@ -141,9 +232,7 @@ Format in professional markdown.`
 
   } catch (error) {
     console.error("Error generating report:", error);
-    return new Response(JSON.stringify({ 
-      error: error instanceof Error ? error.message : "Failed to generate report" 
-    }), {
+    return new Response(JSON.stringify({ error: "An unexpected error occurred" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
