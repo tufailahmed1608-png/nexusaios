@@ -20,6 +20,7 @@ import AIChatButton from '@/components/chat/AIChatButton';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePresence } from '@/hooks/usePresence';
+import { useActivityTracking } from '@/hooks/useActivityTracking';
 
 const Index = () => {
   const [activeView, setActiveView] = useState('dashboard');
@@ -28,6 +29,7 @@ const Index = () => {
   const { isRTL } = useLanguage();
   const isMobile = useIsMobile();
   const { onlineUsers } = usePresence(activeView);
+  const { trackAction } = useActivityTracking();
 
   useEffect(() => {
     if (isDark) {
@@ -36,6 +38,11 @@ const Index = () => {
       document.documentElement.classList.remove('dark');
     }
   }, [isDark]);
+
+  const handleViewChange = (view: string) => {
+    setActiveView(view);
+    trackAction({ actionType: 'feature_usage', actionDetails: { view, feature: 'navigation' } });
+  };
 
   const renderContent = () => {
     switch (activeView) {
@@ -85,7 +92,7 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Sidebar 
         activeView={activeView} 
-        onViewChange={setActiveView}
+        onViewChange={handleViewChange}
         isOpen={sidebarOpen}
         onOpenChange={setSidebarOpen}
       />
