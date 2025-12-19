@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useAdminRole } from '@/hooks/useAdminRole';
 import {
   LayoutDashboard,
   Inbox,
@@ -20,6 +21,7 @@ import {
   ClipboardList,
   Brain,
   Calendar,
+  Shield,
 } from 'lucide-react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import nexusLogo from '@/assets/nexus-logo.png';
@@ -53,13 +55,15 @@ const SidebarContent = ({
   onViewChange, 
   isCollapsed, 
   setIsCollapsed,
-  onItemClick 
+  onItemClick,
+  isAdmin,
 }: { 
   activeView: string; 
   onViewChange: (view: string) => void;
   isCollapsed: boolean;
   setIsCollapsed: (collapsed: boolean) => void;
   onItemClick?: () => void;
+  isAdmin?: boolean;
 }) => {
   const { t, isRTL } = useLanguage();
   const navigate = useNavigate();
@@ -122,8 +126,22 @@ const SidebarContent = ({
         })}
       </nav>
 
-      {/* Settings */}
+      {/* Settings & Admin */}
       <div className="p-4 border-t border-border space-y-1">
+        {isAdmin && (
+          <button
+            onClick={() => handleNavigate('/admin/analytics')}
+            className="nexus-sidebar-item w-full text-primary"
+          >
+            <Shield className="w-5 h-5 flex-shrink-0" />
+            {!isCollapsed && (
+              <span className={cn('flex-1', isRTL ? 'text-right' : 'text-left')}>
+                Admin Dashboard
+              </span>
+            )}
+          </button>
+        )}
+        
         <button
           onClick={() => handleNavigate('/settings')}
           className={cn(
@@ -162,6 +180,7 @@ const SidebarContent = ({
 const Sidebar = ({ activeView, onViewChange, isOpen = false, onOpenChange }: SidebarProps) => {
   const { isRTL } = useLanguage();
   const isMobile = useIsMobile();
+  const { isAdmin } = useAdminRole();
 
   // Mobile: Sheet drawer
   if (isMobile) {
@@ -177,6 +196,7 @@ const Sidebar = ({ activeView, onViewChange, isOpen = false, onOpenChange }: Sid
             isCollapsed={false}
             setIsCollapsed={() => {}}
             onItemClick={() => onOpenChange?.(false)}
+            isAdmin={isAdmin}
           />
         </SheetContent>
       </Sheet>
@@ -196,6 +216,7 @@ const Sidebar = ({ activeView, onViewChange, isOpen = false, onOpenChange }: Sid
         onViewChange={onViewChange}
         isCollapsed={false}
         setIsCollapsed={() => {}}
+        isAdmin={isAdmin}
       />
     </aside>
   );
