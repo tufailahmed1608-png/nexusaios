@@ -7,7 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Legend } from 'recharts';
-import { ArrowLeft, Users, Activity, TrendingUp, Clock, Shield, BarChart3, UserCog } from 'lucide-react';
+import { ArrowLeft, Users, Activity, TrendingUp, Clock, Shield, BarChart3, UserCog, Radio } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { format, subDays, startOfDay, endOfDay } from 'date-fns';
 import UserManagement from '@/components/admin/UserManagement';
 
@@ -27,6 +28,7 @@ const AdminAnalytics = () => {
   const { isAdmin, loading: adminLoading } = useAdminRole();
   const [activities, setActivities] = useState<ActivityData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isLive, setIsLive] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -42,9 +44,9 @@ const AdminAnalytics = () => {
   }, [isAdmin, adminLoading, navigate]);
 
   useEffect(() => {
-    const fetchActivities = async () => {
-      if (!isAdmin) return;
+    if (!isAdmin) return;
 
+    const fetchActivities = async () => {
       try {
         const { data, error } = await supabase
           .from('user_activities' as any)
@@ -61,9 +63,31 @@ const AdminAnalytics = () => {
       }
     };
 
-    if (isAdmin) {
-      fetchActivities();
-    }
+    fetchActivities();
+
+    // Set up realtime subscription
+    const channel = supabase
+      .channel('admin-activity-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'user_activities',
+        },
+        (payload) => {
+          console.log('New activity received:', payload);
+          setActivities((prev) => [payload.new as unknown as ActivityData, ...prev]);
+          setIsLive(true);
+          // Reset live indicator after 2 seconds
+          setTimeout(() => setIsLive(false), 2000);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [isAdmin]);
 
   if (adminLoading || loading) {
@@ -139,14 +163,23 @@ const AdminAnalytics = () => {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 py-4 flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/app')}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div className="flex items-center gap-2">
-            <Shield className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-bold">Admin Analytics</h1>
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={() => navigate('/app')}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div className="flex items-center gap-2">
+              <Shield className="h-6 w-6 text-primary" />
+              <h1 className="text-xl font-bold">Admin Analytics</h1>
+            </div>
           </div>
+          <Badge 
+            variant="outline" 
+            className={`gap-1.5 transition-colors ${isLive ? 'border-green-500 text-green-500' : 'border-muted-foreground/30 text-muted-foreground'}`}
+          >
+            <Radio className={`h-3 w-3 ${isLive ? 'animate-pulse' : ''}`} />
+            {isLive ? 'Live Update' : 'Live'}
+          </Badge>
         </div>
       </header>
 
