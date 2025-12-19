@@ -288,7 +288,7 @@ const Landing = () => {
             <span className="font-semibold text-foreground">Nexus Project OS</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            © 2024 Nexus Project OS. All rights reserved.
+            © 2025 Nexus Project OS. All rights reserved.
           </p>
         </div>
       </footer>
