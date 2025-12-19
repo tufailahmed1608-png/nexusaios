@@ -9,7 +9,12 @@ import Landing from "./pages/Landing";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Settings from "./pages/Settings";
-import ProductDocumentation from "./pages/ProductDocumentation";
+import DocsCover from "./pages/docs/DocsCover";
+import DocsExecutiveSummary from "./pages/docs/DocsExecutiveSummary";
+import DocsCoreFeatures from "./pages/docs/DocsCoreFeatures";
+import DocsTechnicalSpecs from "./pages/docs/DocsTechnicalSpecs";
+import DocsAIIntegration from "./pages/docs/DocsAIIntegration";
+import DocsCompetitiveAnalysis from "./pages/docs/DocsCompetitiveAnalysis";
 import PitchDeck from "./pages/PitchDeck";
 import FeaturesShowcase from "./pages/FeaturesShowcase";
 import ProductDemo from "./pages/ProductDemo";
@@ -64,7 +69,12 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
-              <Route path="/docs" element={<ProductDocumentation />} />
+              <Route path="/docs" element={<DocsCover />} />
+              <Route path="/docs/executive-summary" element={<DocsExecutiveSummary />} />
+              <Route path="/docs/core-features" element={<DocsCoreFeatures />} />
+              <Route path="/docs/technical-specs" element={<DocsTechnicalSpecs />} />
+              <Route path="/docs/ai-integration" element={<DocsAIIntegration />} />
+              <Route path="/docs/competitive-analysis" element={<DocsCompetitiveAnalysis />} />
               <Route path="/pitch-deck" element={<PitchDeck />} />
               <Route path="/features" element={<FeaturesShowcase />} />
               <Route path="/demo" element={<ProductDemo />} />
