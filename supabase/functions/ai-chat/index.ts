@@ -1,9 +1,46 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+// Input validation
+const MAX_MESSAGE_LENGTH = 4000;
+const MAX_MESSAGES = 50;
+
+function validateMessages(messages: unknown): { valid: boolean; error?: string; data?: Array<{ role: string; content: string }> } {
+  if (!Array.isArray(messages)) {
+    return { valid: false, error: "messages must be an array" };
+  }
+  if (messages.length > MAX_MESSAGES) {
+    return { valid: false, error: `Maximum ${MAX_MESSAGES} messages allowed` };
+  }
+  if (messages.length === 0) {
+    return { valid: false, error: "At least one message is required" };
+  }
+
+  const validatedMessages: Array<{ role: string; content: string }> = [];
+  for (let i = 0; i < messages.length; i++) {
+    const msg = messages[i];
+    if (!msg || typeof msg !== "object") {
+      return { valid: false, error: `Invalid message at index ${i}` };
+    }
+    if (typeof msg.role !== "string" || !["user", "assistant", "system"].includes(msg.role)) {
+      return { valid: false, error: `Invalid role at index ${i}` };
+    }
+    if (typeof msg.content !== "string") {
+      return { valid: false, error: `Invalid content at index ${i}` };
+    }
+    if (msg.content.length > MAX_MESSAGE_LENGTH) {
+      return { valid: false, error: `Message at index ${i} exceeds ${MAX_MESSAGE_LENGTH} characters` };
+    }
+    validatedMessages.push({ role: msg.role, content: msg.content });
+  }
+
+  return { valid: true, data: validatedMessages };
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -11,14 +48,58 @@ serve(async (req) => {
   }
 
   try {
-    const { messages } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+    // Authentication check
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    console.log("Starting AI chat with messages:", messages.length);
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: "Invalid token" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Parse and validate input
+    let body;
+    try {
+      body = await req.json();
+    } catch {
+      return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const validation = validateMessages(body.messages);
+    if (!validation.valid) {
+      return new Response(JSON.stringify({ error: validation.error }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      console.error("LOVABLE_API_KEY is not configured");
+      return new Response(JSON.stringify({ error: "Service configuration error" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    console.log("Starting AI chat for user:", user.id, "messages:", validation.data!.length);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -41,15 +122,14 @@ serve(async (req) => {
 
 Be concise, professional, and helpful. Use bullet points for lists. Keep responses focused and actionable.`
           },
-          ...messages,
+          ...validation.data!,
         ],
         stream: true,
       }),
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
+      console.error("AI gateway error:", response.status);
       
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again later." }), {
@@ -77,7 +157,7 @@ Be concise, professional, and helpful. Use bullet points for lists. Keep respons
     });
   } catch (error) {
     console.error("AI chat error:", error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), {
+    return new Response(JSON.stringify({ error: "An unexpected error occurred" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
