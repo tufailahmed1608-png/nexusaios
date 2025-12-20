@@ -14,6 +14,84 @@ export type Database = {
   }
   public: {
     Tables: {
+      company_branding: {
+        Row: {
+          accent_color: string
+          company_name: string
+          created_at: string
+          font_body: string
+          font_heading: string
+          id: string
+          logo_url: string | null
+          primary_color: string
+          secondary_color: string
+          tagline: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accent_color?: string
+          company_name?: string
+          created_at?: string
+          font_body?: string
+          font_heading?: string
+          id?: string
+          logo_url?: string | null
+          primary_color?: string
+          secondary_color?: string
+          tagline?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accent_color?: string
+          company_name?: string
+          created_at?: string
+          font_body?: string
+          font_heading?: string
+          id?: string
+          logo_url?: string | null
+          primary_color?: string
+          secondary_color?: string
+          tagline?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      document_templates: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_default: boolean
+          name: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          name: string
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          name?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       documents: {
         Row: {
           content: string
@@ -45,6 +123,42 @@ export type Database = {
           id?: string
           search_vector?: unknown
           title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      email_templates: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          is_default: boolean
+          name: string
+          subject: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          name: string
+          subject: string
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          name?: string
+          subject?: string
+          type?: string
           updated_at?: string
           user_id?: string
         }
