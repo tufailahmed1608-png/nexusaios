@@ -22,6 +22,7 @@ import {
   Brain,
   Calendar,
   Shield,
+  BookOpen,
 } from 'lucide-react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import nexusLogo from '@/assets/nexus-logo.png';
@@ -41,6 +42,7 @@ const menuItems = [
   { id: 'meetings', labelKey: 'meetings', icon: Video },
   { id: 'projects', labelKey: 'projects', icon: FolderKanban },
   { id: 'documents', labelKey: 'documents', icon: FileText },
+  { id: 'knowledge', labelKey: 'knowledge', icon: BookOpen },
   { id: 'stakeholders', labelKey: 'stakeholders', icon: UserCircle },
   { id: 'reports', labelKey: 'reports', icon: ClipboardList },
   { id: 'weeklyDigest', labelKey: 'weeklyDigest', icon: Calendar },
