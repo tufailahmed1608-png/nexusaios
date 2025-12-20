@@ -16,6 +16,7 @@ import ActivityView from '@/components/activity/ActivityView';
 import ReportsView from '@/components/reports/ReportsView';
 import RiskPredictionView from '@/components/risk/RiskPredictionView';
 import WeeklyDigestView from '@/components/digest/WeeklyDigestView';
+import { KnowledgeBase } from '@/components/knowledge/KnowledgeBase';
 import AIChatButton from '@/components/chat/AIChatButton';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -74,6 +75,8 @@ const Index = () => {
         return <StrategyView />;
       case 'team':
         return <TeamView />;
+      case 'knowledge':
+        return <KnowledgeBase />;
       case 'settings':
         return (
           <div className="flex items-center justify-center h-full text-muted-foreground">
