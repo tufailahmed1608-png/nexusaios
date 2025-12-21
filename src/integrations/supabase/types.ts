@@ -191,6 +191,39 @@ export type Database = {
         }
         Relationships: []
       }
+      role_definitions: {
+        Row: {
+          created_at: string
+          description: string
+          display_name: string
+          hierarchy_level: number
+          id: string
+          permissions: Json
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          display_name: string
+          hierarchy_level?: number
+          id?: string
+          permissions?: Json
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          display_name?: string
+          hierarchy_level?: number
+          id?: string
+          permissions?: Json
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_activities: {
         Row: {
           action_details: Json | null
@@ -253,7 +286,13 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "user"
+      app_role:
+        | "admin"
+        | "user"
+        | "project_manager"
+        | "senior_project_manager"
+        | "program_manager"
+        | "pmo"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -381,7 +420,14 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user"],
+      app_role: [
+        "admin",
+        "user",
+        "project_manager",
+        "senior_project_manager",
+        "program_manager",
+        "pmo",
+      ],
     },
   },
 } as const
