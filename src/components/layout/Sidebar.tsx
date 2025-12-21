@@ -2,7 +2,9 @@ import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useAdminRole } from '@/hooks/useAdminRole';
+import { useUserRole } from '@/hooks/useUserRole';
+import { hasFeatureAccess } from '@/lib/permissions';
+import { getRoleDisplayName } from '@/lib/permissions';
 import {
   LayoutDashboard,
   Inbox,
@@ -24,9 +26,12 @@ import {
   Shield,
   BookOpen,
   Palette,
+  User,
 } from 'lucide-react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { Badge } from '@/components/ui/badge';
 import nexusLogo from '@/assets/nexus-logo.png';
+import type { AppRole } from '@/lib/permissions';
 
 interface SidebarProps {
   activeView: string;
@@ -60,6 +65,7 @@ const SidebarContent = ({
   isCollapsed, 
   setIsCollapsed,
   onItemClick,
+  userRole,
   isAdmin,
 }: { 
   activeView: string; 
@@ -67,6 +73,7 @@ const SidebarContent = ({
   isCollapsed: boolean;
   setIsCollapsed: (collapsed: boolean) => void;
   onItemClick?: () => void;
+  userRole: AppRole | null;
   isAdmin?: boolean;
 }) => {
   const { t, isRTL } = useLanguage();
@@ -81,6 +88,11 @@ const SidebarContent = ({
     navigate(path);
     onItemClick?.();
   };
+
+  // Filter menu items based on user role permissions
+  const filteredMenuItems = menuItems.filter((item) => 
+    hasFeatureAccess(userRole, item.id)
+  );
 
   return (
     <>
@@ -97,39 +109,50 @@ const SidebarContent = ({
         </div>
       </div>
 
+      {/* User Role Badge */}
+      {!isCollapsed && userRole && (
+        <div className="px-4 py-2 border-b border-border">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <User className="w-3 h-3" />
+            <span>Role:</span>
+            <Badge variant="secondary" className="text-xs font-normal">
+              {getRoleDisplayName(userRole)}
+            </Badge>
+          </div>
+        </div>
+      )}
+
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-1 overflow-y-auto nexus-scrollbar">
-        {menuItems
-          .filter((item) => item.id !== 'branding' || isAdmin)
-          .map((item) => {
-            const Icon = item.icon;
-            const isActive = activeView === item.id;
-            
-            return (
-              <button
-                key={item.id}
-                onClick={() => handleViewChange(item.id)}
-                className={cn(
-                  'nexus-sidebar-item w-full',
-                  isActive && 'nexus-sidebar-item-active'
-                )}
-              >
-                <Icon className="w-5 h-5 flex-shrink-0" />
-                {!isCollapsed && (
-                  <>
-                    <span className={cn('flex-1', isRTL ? 'text-right' : 'text-left')}>
-                      {t(item.labelKey)}
+        {filteredMenuItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = activeView === item.id;
+          
+          return (
+            <button
+              key={item.id}
+              onClick={() => handleViewChange(item.id)}
+              className={cn(
+                'nexus-sidebar-item w-full',
+                isActive && 'nexus-sidebar-item-active'
+              )}
+            >
+              <Icon className="w-5 h-5 flex-shrink-0" />
+              {!isCollapsed && (
+                <>
+                  <span className={cn('flex-1', isRTL ? 'text-right' : 'text-left')}>
+                    {t(item.labelKey)}
+                  </span>
+                  {item.badge && (
+                    <span className="px-2 py-0.5 text-xs rounded-full bg-primary text-primary-foreground">
+                      {item.badge}
                     </span>
-                    {item.badge && (
-                      <span className="px-2 py-0.5 text-xs rounded-full bg-primary text-primary-foreground">
-                        {item.badge}
-                      </span>
-                    )}
-                  </>
-                )}
-              </button>
-            );
-          })}
+                  )}
+                </>
+              )}
+            </button>
+          );
+        })}
       </nav>
 
       {/* Settings & Admin */}
@@ -186,7 +209,7 @@ const SidebarContent = ({
 const Sidebar = ({ activeView, onViewChange, isOpen = false, onOpenChange }: SidebarProps) => {
   const { isRTL } = useLanguage();
   const isMobile = useIsMobile();
-  const { isAdmin } = useAdminRole();
+  const { role, isAdmin } = useUserRole();
 
   // Mobile: Sheet drawer
   if (isMobile) {
@@ -202,6 +225,7 @@ const Sidebar = ({ activeView, onViewChange, isOpen = false, onOpenChange }: Sid
             isCollapsed={false}
             setIsCollapsed={() => {}}
             onItemClick={() => onOpenChange?.(false)}
+            userRole={role}
             isAdmin={isAdmin}
           />
         </SheetContent>
@@ -222,6 +246,7 @@ const Sidebar = ({ activeView, onViewChange, isOpen = false, onOpenChange }: Sid
         onViewChange={onViewChange}
         isCollapsed={false}
         setIsCollapsed={() => {}}
+        userRole={role}
         isAdmin={isAdmin}
       />
     </aside>
