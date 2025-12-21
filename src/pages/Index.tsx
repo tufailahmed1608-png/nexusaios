@@ -18,6 +18,7 @@ import RiskPredictionView from '@/components/risk/RiskPredictionView';
 import WeeklyDigestView from '@/components/digest/WeeklyDigestView';
 import { KnowledgeBase } from '@/components/knowledge/KnowledgeBase';
 import { BrandingView } from '@/components/branding/BrandingView';
+import { ProtectedFeature } from '@/components/auth/ProtectedFeature';
 import AIChatButton from '@/components/chat/AIChatButton';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -57,29 +58,73 @@ const Index = () => {
       case 'calendar':
         return <CalendarView />;
       case 'meetings':
-        return <MeetingHub />;
+        return (
+          <ProtectedFeature feature="meetings">
+            <MeetingHub />
+          </ProtectedFeature>
+        );
       case 'projects':
-        return <ProjectsView />;
+        return (
+          <ProtectedFeature feature="projects">
+            <ProjectsView />
+          </ProtectedFeature>
+        );
       case 'documents':
         return <DocumentsView />;
       case 'stakeholders':
-        return <StakeholderView />;
+        return (
+          <ProtectedFeature feature="stakeholders">
+            <StakeholderView />
+          </ProtectedFeature>
+        );
       case 'reports':
-        return <ReportsView />;
+        return (
+          <ProtectedFeature feature="reports">
+            <ReportsView />
+          </ProtectedFeature>
+        );
       case 'weeklyDigest':
-        return <WeeklyDigestView />;
+        return (
+          <ProtectedFeature feature="weeklyDigest">
+            <WeeklyDigestView />
+          </ProtectedFeature>
+        );
       case 'riskPrediction':
-        return <RiskPredictionView />;
+        return (
+          <ProtectedFeature feature="riskPrediction">
+            <RiskPredictionView />
+          </ProtectedFeature>
+        );
       case 'activity':
-        return <ActivityView />;
+        return (
+          <ProtectedFeature feature="activity">
+            <ActivityView />
+          </ProtectedFeature>
+        );
       case 'strategy':
-        return <StrategyView />;
+        return (
+          <ProtectedFeature feature="strategy">
+            <StrategyView />
+          </ProtectedFeature>
+        );
       case 'team':
-        return <TeamView />;
+        return (
+          <ProtectedFeature feature="team">
+            <TeamView />
+          </ProtectedFeature>
+        );
       case 'knowledge':
-        return <KnowledgeBase />;
+        return (
+          <ProtectedFeature feature="knowledge">
+            <KnowledgeBase />
+          </ProtectedFeature>
+        );
       case 'branding':
-        return <BrandingView />;
+        return (
+          <ProtectedFeature feature="branding">
+            <BrandingView />
+          </ProtectedFeature>
+        );
       case 'settings':
         return (
           <div className="flex items-center justify-center h-full text-muted-foreground">
