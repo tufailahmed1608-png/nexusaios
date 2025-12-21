@@ -1,11 +1,38 @@
-import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Palette, FileText, Mail } from "lucide-react";
+import { Palette, FileText, Mail, ShieldAlert } from "lucide-react";
 import { BrandingSettings } from "./BrandingSettings";
 import { DocumentTemplates } from "./DocumentTemplates";
 import { EmailTemplates } from "./EmailTemplates";
+import { useAdminRole } from "@/hooks/useAdminRole";
+import { Card, CardContent } from "@/components/ui/card";
 
 export function BrandingView() {
+  const { isAdmin, loading } = useAdminRole();
+
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[400px]">
+        <Card className="max-w-md">
+          <CardContent className="pt-6 text-center space-y-4">
+            <ShieldAlert className="h-12 w-12 text-destructive mx-auto" />
+            <h2 className="text-xl font-semibold">Access Denied</h2>
+            <p className="text-muted-foreground">
+              You need administrator privileges to access branding and template settings.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center gap-3">

@@ -99,35 +99,37 @@ const SidebarContent = ({
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-1 overflow-y-auto nexus-scrollbar">
-        {menuItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = activeView === item.id;
-          
-          return (
-            <button
-              key={item.id}
-              onClick={() => handleViewChange(item.id)}
-              className={cn(
-                'nexus-sidebar-item w-full',
-                isActive && 'nexus-sidebar-item-active'
-              )}
-            >
-              <Icon className="w-5 h-5 flex-shrink-0" />
-              {!isCollapsed && (
-                <>
-                  <span className={cn('flex-1', isRTL ? 'text-right' : 'text-left')}>
-                    {t(item.labelKey)}
-                  </span>
-                  {item.badge && (
-                    <span className="px-2 py-0.5 text-xs rounded-full bg-primary text-primary-foreground">
-                      {item.badge}
+        {menuItems
+          .filter((item) => item.id !== 'branding' || isAdmin)
+          .map((item) => {
+            const Icon = item.icon;
+            const isActive = activeView === item.id;
+            
+            return (
+              <button
+                key={item.id}
+                onClick={() => handleViewChange(item.id)}
+                className={cn(
+                  'nexus-sidebar-item w-full',
+                  isActive && 'nexus-sidebar-item-active'
+                )}
+              >
+                <Icon className="w-5 h-5 flex-shrink-0" />
+                {!isCollapsed && (
+                  <>
+                    <span className={cn('flex-1', isRTL ? 'text-right' : 'text-left')}>
+                      {t(item.labelKey)}
                     </span>
-                  )}
-                </>
-              )}
-            </button>
-          );
-        })}
+                    {item.badge && (
+                      <span className="px-2 py-0.5 text-xs rounded-full bg-primary text-primary-foreground">
+                        {item.badge}
+                      </span>
+                    )}
+                  </>
+                )}
+              </button>
+            );
+          })}
       </nav>
 
       {/* Settings & Admin */}
