@@ -26,7 +26,7 @@ const DocsCover = () => {
       const contentWidth = pageWidth - margin * 2;
       let yPos = margin;
 
-      const addHeader = (title: string, pageNum: number) => {
+      const addHeader = (title: string, pageNum: number, totalPages: number = 8) => {
         pdf.setFillColor(79, 70, 229);
         pdf.rect(0, 0, pageWidth, 25, 'F');
         pdf.setTextColor(255, 255, 255);
@@ -35,7 +35,7 @@ const DocsCover = () => {
         pdf.text('Nexus Project OS', margin, 16);
         pdf.setFontSize(10);
         pdf.setFont('helvetica', 'normal');
-        pdf.text(`Page ${pageNum} of 7`, pageWidth - margin - 20, 16);
+        pdf.text(`Page ${pageNum} of ${totalPages}`, pageWidth - margin - 20, 16);
         pdf.setTextColor(0, 0, 0);
         yPos = 35;
       };
@@ -108,9 +108,91 @@ const DocsCover = () => {
       pdf.setFontSize(10);
       pdf.text('Document Version: 1.0 | December 2025', pageWidth / 2, pageHeight - 30, { align: 'center' });
 
+      // Table of Contents Page
+      pdf.addPage();
+      pdf.setFillColor(79, 70, 229);
+      pdf.rect(0, 0, pageWidth, 25, 'F');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(14);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Nexus Project OS', margin, 16);
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text('Table of Contents', pageWidth - margin - 30, 16);
+      
+      yPos = 45;
+      pdf.setTextColor(30, 41, 59);
+      pdf.setFontSize(28);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Table of Contents', margin, yPos);
+      
+      yPos += 20;
+      
+      // TOC entries with clickable links
+      const tocEntries = [
+        { title: 'Executive Summary', page: 3, desc: 'Overview of Nexus Project OS and key value propositions' },
+        { title: 'Core Features', page: 4, desc: 'Smart Inbox, Meeting Hub, Dashboard, Task Board & more' },
+        { title: 'Technical Specifications', page: 5, desc: 'Technology stack, security, and integrations' },
+        { title: 'AI Integration', page: 6, desc: 'Google Gemini capabilities and intelligent automation' },
+        { title: 'Competitive Analysis', page: 7, desc: 'Market comparison and key differentiators' },
+        { title: 'Roles & User Journeys', page: 8, desc: 'Role hierarchy, permissions, and user workflows' },
+        { title: 'Market Position', page: 9, desc: 'Market overview, target segments, and go-to-market strategy' },
+      ];
+
+      tocEntries.forEach((entry, idx) => {
+        const entryY = yPos;
+        
+        // Chapter number circle
+        pdf.setFillColor(79, 70, 229);
+        pdf.circle(margin + 5, entryY - 2, 5, 'F');
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(`${idx + 1}`, margin + 3, entryY);
+        
+        // Title (clickable)
+        pdf.setTextColor(79, 70, 229);
+        pdf.setFontSize(14);
+        pdf.setFont('helvetica', 'bold');
+        const titleX = margin + 15;
+        pdf.textWithLink(entry.title, titleX, entryY, { pageNumber: entry.page });
+        
+        // Page number
+        pdf.setTextColor(100, 116, 139);
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'normal');
+        const pageText = `Page ${entry.page - 1}`;
+        const pageTextWidth = pdf.getTextWidth(pageText);
+        pdf.textWithLink(pageText, pageWidth - margin - pageTextWidth, entryY, { pageNumber: entry.page });
+        
+        // Dotted line
+        pdf.setDrawColor(200, 200, 200);
+        pdf.setLineDashPattern([1, 2], 0);
+        const titleWidth = pdf.getTextWidth(entry.title);
+        pdf.line(titleX + titleWidth + 5, entryY - 1, pageWidth - margin - pageTextWidth - 5, entryY - 1);
+        pdf.setLineDashPattern([], 0);
+        
+        // Description
+        pdf.setTextColor(100, 116, 139);
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text(entry.desc, titleX, entryY + 6);
+        
+        yPos += 22;
+      });
+
+      // Add click instruction
+      yPos += 15;
+      pdf.setFillColor(241, 245, 249);
+      pdf.roundedRect(margin, yPos - 5, contentWidth, 20, 3, 3, 'F');
+      pdf.setTextColor(71, 85, 105);
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'italic');
+      pdf.text('Click on any chapter title or page number to navigate directly to that section.', margin + 10, yPos + 5);
+
       // Page 1: Executive Summary
       pdf.addPage();
-      addHeader('Executive Summary', 1);
+      addHeader('Executive Summary', 2);
       addTitle('Executive Summary');
       
       addParagraph('Nexus Project OS is an AI-first Project Management Operating System designed to consolidate communication, strategy, and execution into a single interface. Unlike traditional tools (Jira, Asana, Monday.com), Nexus uses AI to actively analyze incoming data—emails, meeting transcripts, and documents—to automatically generate tasks, assess sentiment, and predict risks.');
@@ -131,7 +213,7 @@ const DocsCover = () => {
 
       // Page 2: Core Features
       pdf.addPage();
-      addHeader('Core Features', 2);
+      addHeader('Core Features', 3);
       addTitle('Core Features');
 
       const features = [
@@ -147,7 +229,7 @@ const DocsCover = () => {
       ];
 
       features.forEach((feature, idx) => {
-        if (checkPageBreak(20)) addHeader('Core Features', 2);
+        if (checkPageBreak(20)) addHeader('Core Features', 3);
         addSubtitle(`${idx + 1}. ${feature.name}`);
         addParagraph(feature.desc);
         yPos += 2;
@@ -155,7 +237,7 @@ const DocsCover = () => {
 
       // Page 3: Technical Specifications
       pdf.addPage();
-      addHeader('Technical Specifications', 3);
+      addHeader('Technical Specifications', 4);
       addTitle('Technical Specifications');
 
       addSubtitle('Technology Stack');
@@ -185,7 +267,7 @@ const DocsCover = () => {
 
       // Page 4: AI Integration
       pdf.addPage();
-      addHeader('AI Integration', 4);
+      addHeader('AI Integration', 5);
       addTitle('AI Integration');
 
       addSubtitle('Powered by Google Gemini');
@@ -214,7 +296,7 @@ const DocsCover = () => {
 
       // Page 5: Competitive Analysis
       pdf.addPage();
-      addHeader('Competitive Analysis', 5);
+      addHeader('Competitive Analysis', 6);
       addTitle('Competitive Analysis');
 
       addSubtitle('Key Differentiators');
@@ -234,7 +316,7 @@ const DocsCover = () => {
 
       // Page 6: Roles & User Journeys
       pdf.addPage();
-      addHeader('Roles & User Journeys', 6);
+      addHeader('Roles & User Journeys', 7);
       addTitle('Roles & User Journeys');
 
       addSubtitle('Role Hierarchy');
@@ -256,7 +338,7 @@ const DocsCover = () => {
 
       // Page 7: Market Position
       pdf.addPage();
-      addHeader('Market Position', 7);
+      addHeader('Market Position', 8);
       addTitle('Market Position & Strategy');
 
       addSubtitle('Market Overview');
@@ -287,7 +369,7 @@ const DocsCover = () => {
       
       toast({
         title: 'PDF Downloaded',
-        description: 'Complete 7-page documentation has been exported successfully.',
+        description: 'Complete 9-page documentation with Table of Contents has been exported.',
       });
     } catch (error) {
       console.error('Error generating PDF:', error);
