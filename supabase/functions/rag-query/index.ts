@@ -61,7 +61,7 @@ serve(async (req) => {
 
       if (error) {
         console.error('Insert error:', error);
-        return new Response(JSON.stringify({ error: error.message }), {
+        return new Response(JSON.stringify({ error: 'Failed to upload document' }), {
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
@@ -88,7 +88,7 @@ serve(async (req) => {
 
       if (error) {
         console.error('Delete error:', error);
-        return new Response(JSON.stringify({ error: error.message }), {
+        return new Response(JSON.stringify({ error: 'Failed to delete document' }), {
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
@@ -101,24 +101,64 @@ serve(async (req) => {
 
     if (action === 'query') {
       // Search documents and generate response with AI
-      if (!query) {
+      // Validate query exists and is a string
+      if (!query || typeof query !== 'string') {
         return new Response(JSON.stringify({ error: 'Query is required' }), {
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
 
-      // Full-text search for relevant documents
-      const { data: documents, error: searchError } = await supabase
-        .from('documents')
-        .select('id, title, content')
-        .eq('user_id', user.id)
-        .textSearch('search_vector', query.split(' ').join(' | '))
-        .limit(5);
+      // Validate query length to prevent DoS
+      if (query.length > 500) {
+        return new Response(JSON.stringify({ error: 'Query too long (max 500 characters)' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      // Sanitize query: remove special tsquery operators to prevent injection
+      const sanitizedQuery = query
+        .replace(/[&|!()<>:*@\\]/g, '') // Remove tsquery special characters
+        .trim()
+        .split(/\s+/)
+        .filter(word => word.length > 0 && word.length <= 100) // Filter valid words
+        .slice(0, 20) // Limit number of search terms
+        .join(' | ');
+
+      // If sanitization results in empty query, return error
+      if (sanitizedQuery.length === 0) {
+        return new Response(JSON.stringify({ error: 'Invalid query - please use alphanumeric characters' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      // Full-text search for relevant documents with sanitized query
+      let documents = null;
+      let searchError = null;
+
+      try {
+        const result = await supabase
+          .from('documents')
+          .select('id, title, content')
+          .eq('user_id', user.id)
+          .textSearch('search_vector', sanitizedQuery)
+          .limit(5);
+        
+        documents = result.data;
+        searchError = result.error;
+      } catch (err) {
+        console.error('Search execution error:', err);
+        return new Response(JSON.stringify({ error: 'Search failed' }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
 
       if (searchError) {
         console.error('Search error:', searchError);
-        return new Response(JSON.stringify({ error: searchError.message }), {
+        return new Response(JSON.stringify({ error: 'Search failed' }), {
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
@@ -207,7 +247,7 @@ Always cite which document(s) you used to answer the question when applicable.`
 
   } catch (error) {
     console.error('Error in rag-query:', error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }), {
+    return new Response(JSON.stringify({ error: 'An unexpected error occurred' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
