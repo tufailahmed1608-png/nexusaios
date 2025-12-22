@@ -28,6 +28,7 @@ import {
   Palette,
   User,
   Gavel,
+  Sparkles,
 } from 'lucide-react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
@@ -59,6 +60,7 @@ const menuItems = [
   { id: 'activity', labelKey: 'activity', icon: Activity },
   { id: 'strategy', labelKey: 'strategy', icon: BarChart3 },
   { id: 'team', labelKey: 'team', icon: Users },
+  { id: 'aiControls', labelKey: 'aiControls', icon: Sparkles },
 ];
 
 const SidebarContent = ({ 
