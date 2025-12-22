@@ -96,6 +96,9 @@ export const FEATURE_PERMISSIONS: Record<string, AppRole[]> = {
   
   // Feedback Widget - Primary for: User
   feedback: ['user', 'project_manager', 'senior_project_manager', 'program_manager', 'executive', 'pmo', 'admin'],
+
+  // AI Controls - PMO and Admin for governance, Executive for transparency
+  aiControls: ['executive', 'pmo', 'admin'],
   
   // Admin Dashboard - Admin only | Hidden for: User, PM, Program Manager, Executive
   adminDashboard: ['admin'],
