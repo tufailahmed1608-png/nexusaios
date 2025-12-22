@@ -21,8 +21,10 @@ import {
   Loader2,
   History,
   ClipboardList,
+  Brain,
 } from 'lucide-react';
 import AuditLogPanel from './AuditLogPanel';
+import { AIExplainability, type AIExplanation } from '@/components/ai/AIExplainability';
 
 interface ReportType {
   id: string;
@@ -42,6 +44,7 @@ interface GeneratedReport {
   content: string;
   generatedAt: string;
   status: AIOutputState;
+  explanation?: AIExplanation;
 }
 
 const reportTypes: ReportType[] = [
@@ -141,6 +144,45 @@ const ReportsView = () => {
   const [isGenerating, setIsGenerating] = useState<string | null>(null);
   const [generatedReports, setGeneratedReports] = useState<GeneratedReport[]>([]);
   const [selectedReport, setSelectedReport] = useState<GeneratedReport | null>(null);
+  const [isLoadingExplanation, setIsLoadingExplanation] = useState(false);
+
+  const generateExplanation = async (report: GeneratedReport) => {
+    setIsLoadingExplanation(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-ai-explanation', {
+        body: {
+          type: 'report',
+          context: {
+            reportType: report.type,
+            projectData: mockProjectData,
+          },
+          outputContent: report.content,
+        },
+      });
+
+      if (error) throw error;
+
+      const updatedReport = { ...report, explanation: data };
+      setSelectedReport(updatedReport);
+      setGeneratedReports(prev =>
+        prev.map(r => (r.id === report.id ? updatedReport : r))
+      );
+
+      toast({
+        title: "Explanation Generated",
+        description: "AI explainability details are now available.",
+      });
+    } catch (error) {
+      console.error('Error generating explanation:', error);
+      toast({
+        title: "Explanation Failed",
+        description: "Could not generate AI explanation.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingExplanation(false);
+    }
+  };
 
   const handleGenerateReport = async (reportType: ReportType) => {
     setIsGenerating(reportType.id);
@@ -176,6 +218,9 @@ const ReportsView = () => {
         title: "Report Generated",
         description: `${reportType.name} has been generated successfully.`,
       });
+
+      // Auto-generate explanation
+      setTimeout(() => generateExplanation(newReport), 500);
     } catch (error) {
       console.error('Error generating report:', error);
       toast({
@@ -386,8 +431,47 @@ const ReportsView = () => {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-[500px] pr-4">
+              <CardContent className="space-y-4">
+                {/* AI Explainability Panel */}
+                {selectedReport.explanation ? (
+                  <AIExplainability explanation={selectedReport.explanation} />
+                ) : (
+                  <Card className="border-dashed border-primary/30 bg-primary/5">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Brain className="h-5 w-5 text-primary" />
+                          <div>
+                            <p className="text-sm font-medium">AI Explainability</p>
+                            <p className="text-xs text-muted-foreground">
+                              Understand how this report was generated
+                            </p>
+                          </div>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => generateExplanation(selectedReport)}
+                          disabled={isLoadingExplanation}
+                        >
+                          {isLoadingExplanation ? (
+                            <>
+                              <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                              Loading...
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles className="h-3 w-3 mr-1" />
+                              Generate
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                <ScrollArea className="h-[400px] pr-4">
                   <div className="prose prose-sm dark:prose-invert max-w-none">
                     <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed bg-muted/50 p-4 rounded-lg">
                       {selectedReport.content}
