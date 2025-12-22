@@ -1,6 +1,8 @@
 import { cn } from '@/lib/utils';
 import { TrendingUp, TrendingDown, Minus, Folder, CheckCircle, Zap, DollarSign } from 'lucide-react';
 import type { KPI } from '@/data/mockData';
+import { WhyAmISeeingThis, createRoleBasedReason, createPersonalizationReason } from '@/components/ai/WhyAmISeeingThis';
+import { useUserRole } from '@/hooks/useUserRole';
 
 interface KPICardProps {
   kpi: KPI;
@@ -14,15 +16,49 @@ const iconMap: Record<string, React.ElementType> = {
   'dollar-sign': DollarSign,
 };
 
+const getKpiReasons = (kpiTitle: string, role: string) => {
+  const reasons = [];
+  
+  // Add role-based reason
+  if (role) {
+    reasons.push(createRoleBasedReason(role as any, 'dashboard KPIs'));
+  }
+  
+  // Add personalization reasons based on KPI type
+  if (kpiTitle.toLowerCase().includes('project')) {
+    reasons.push(createPersonalizationReason('projects you manage or participate in'));
+  } else if (kpiTitle.toLowerCase().includes('task')) {
+    reasons.push(createPersonalizationReason('tasks assigned to you and your team'));
+  } else if (kpiTitle.toLowerCase().includes('budget') || kpiTitle.toLowerCase().includes('spent')) {
+    reasons.push(createPersonalizationReason('your portfolio budget allocation'));
+  } else if (kpiTitle.toLowerCase().includes('velocity') || kpiTitle.toLowerCase().includes('efficiency')) {
+    reasons.push(createPersonalizationReason('your team\'s recent performance data'));
+  } else {
+    reasons.push(createPersonalizationReason('your activity and project involvement'));
+  }
+  
+  return reasons;
+};
+
 const KPICard = ({ kpi, index }: KPICardProps) => {
+  const { role } = useUserRole();
   const Icon = iconMap[kpi.icon] || Folder;
   const TrendIcon = kpi.trend === 'up' ? TrendingUp : kpi.trend === 'down' ? TrendingDown : Minus;
 
   return (
     <div
-      className="nexus-kpi-card nexus-card-hover nexus-slide-up"
+      className="nexus-kpi-card nexus-card-hover nexus-slide-up relative group"
       style={{ animationDelay: `${index * 100}ms` }}
     >
+      {/* Why am I seeing this? tooltip */}
+      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <WhyAmISeeingThis 
+          reasons={getKpiReasons(kpi.title, role || 'user')} 
+          itemType="metric"
+          size="sm"
+        />
+      </div>
+
       <div className="flex items-start justify-between mb-4">
         <div className="p-2.5 rounded-xl bg-primary/10">
           <Icon className="w-5 h-5 text-primary" />
