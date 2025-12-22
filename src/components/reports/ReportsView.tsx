@@ -30,12 +30,15 @@ interface ReportType {
   color: string;
 }
 
+import { AIOutputStatusBadge, AIOutputStatusWorkflow, type AIOutputState } from './AIOutputStatus';
+
 interface GeneratedReport {
   id: string;
   type: string;
   name: string;
   content: string;
   generatedAt: string;
+  status: AIOutputState;
 }
 
 const reportTypes: ReportType[] = [
@@ -158,6 +161,7 @@ const ReportsView = () => {
         name: reportType.name,
         content: data.report,
         generatedAt: data.generatedAt,
+        status: 'draft',
       };
 
       setGeneratedReports(prev => [newReport, ...prev]);
@@ -322,26 +326,45 @@ const ReportsView = () => {
           {selectedReport && (
             <Card>
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="flex items-center gap-2">
-                      <FileText className="h-5 w-5" />
-                      {selectedReport.name}
-                    </CardTitle>
-                    <CardDescription className="flex items-center gap-2 mt-1">
-                      <Clock className="h-3 w-3" />
-                      Generated {new Date(selectedReport.generatedAt).toLocaleString()}
-                    </CardDescription>
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        {selectedReport.name}
+                      </CardTitle>
+                      <CardDescription className="flex items-center gap-2 mt-1">
+                        <Clock className="h-3 w-3" />
+                        Generated {new Date(selectedReport.generatedAt).toLocaleString()}
+                      </CardDescription>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" onClick={handleCopyReport}>
+                        <Copy className="h-4 w-4 mr-1" />
+                        Copy
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={handleDownloadReport}>
+                        <Download className="h-4 w-4 mr-1" />
+                        Download
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={handleCopyReport}>
-                      <Copy className="h-4 w-4 mr-1" />
-                      Copy
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={handleDownloadReport}>
-                      <Download className="h-4 w-4 mr-1" />
-                      Download
-                    </Button>
+                  {/* AI Output Status Workflow */}
+                  <div className="border-t border-border pt-4">
+                    <AIOutputStatusWorkflow 
+                      status={selectedReport.status} 
+                      onStatusChange={(newStatus) => {
+                        const updatedReport = { ...selectedReport, status: newStatus };
+                        setSelectedReport(updatedReport);
+                        setGeneratedReports(prev => 
+                          prev.map(r => r.id === selectedReport.id ? updatedReport : r)
+                        );
+                        toast({
+                          title: "Status Updated",
+                          description: `Report status changed to ${newStatus}.`,
+                        });
+                      }}
+                    />
                   </div>
                 </div>
               </CardHeader>
@@ -396,9 +419,12 @@ const ReportsView = () => {
                           </p>
                         </div>
                       </div>
-                      <Button variant="ghost" size="sm">
-                        View
-                      </Button>
+                      <div className="flex items-center gap-3">
+                        <AIOutputStatusBadge status={report.status} size="sm" />
+                        <Button variant="ghost" size="sm">
+                          View
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
