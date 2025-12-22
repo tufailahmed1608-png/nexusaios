@@ -6,6 +6,7 @@ export const ROLE_HIERARCHY = {
   program_manager: 4,
   executive: 5,
   pmo: 6,
+  tenant_admin: 8,
   admin: 10,
 } as const;
 
@@ -95,13 +96,16 @@ export const FEATURE_PERMISSIONS: Record<string, AppRole[]> = {
   branding: ['pmo', 'admin'],
   
   // Feedback Widget - Primary for: User
-  feedback: ['user', 'project_manager', 'senior_project_manager', 'program_manager', 'executive', 'pmo', 'admin'],
+  feedback: ['user', 'project_manager', 'senior_project_manager', 'program_manager', 'executive', 'pmo', 'tenant_admin', 'admin'],
 
   // AI Controls - PMO and Admin for governance, Executive for transparency
-  aiControls: ['executive', 'pmo', 'admin'],
+  aiControls: ['executive', 'pmo', 'tenant_admin', 'admin'],
+
+  // Tenant Settings - Tenant Admin and Admin only
+  tenantSettings: ['tenant_admin', 'admin'],
   
   // Admin Dashboard - Admin only | Hidden for: User, PM, Program Manager, Executive
-  adminDashboard: ['admin'],
+  adminDashboard: ['tenant_admin', 'admin'],
 };
 
 // Check if a role has access to a feature
@@ -127,6 +131,7 @@ export function getRoleDisplayName(role: AppRole): string {
     program_manager: 'Program Manager',
     executive: 'Executive',
     pmo: 'PMO',
+    tenant_admin: 'Tenant Administrator',
     admin: 'Administrator',
   };
   return displayNames[role] || role;

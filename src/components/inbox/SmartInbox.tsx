@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { emails } from '@/data/mockData';
 import type { Email } from '@/data/mockData';
@@ -17,6 +17,11 @@ import {
   X,
   Wand2,
   Loader2,
+  Shield,
+  TrendingUp,
+  TrendingDown,
+  Activity,
+  Info,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -24,6 +29,14 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import SmartTaskSuggestions from '@/components/tasks/SmartTaskSuggestions';
+import { useTenantSettings } from '@/hooks/useTenantSettings';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 // Import email sender avatars
 import sarahChenAvatar from '@/assets/inbox/sarah-chen-email.png';
@@ -47,6 +60,29 @@ const SmartInbox = () => {
   const [isGeneratingReply, setIsGeneratingReply] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const { settings } = useTenantSettings();
+
+  // Calculate aggregate signals (no individual sentiment)
+  const aggregateSignals = useMemo(() => {
+    const total = emails.length;
+    const positive = emails.filter(e => e.sentiment.label === 'positive').length;
+    const negative = emails.filter(e => e.sentiment.label === 'negative').length;
+    const neutral = emails.filter(e => e.sentiment.label === 'neutral').length;
+    const critical = emails.filter(e => e.priority === 'critical').length;
+    const high = emails.filter(e => e.priority === 'high').length;
+
+    return {
+      total,
+      sentimentDistribution: {
+        positive: Math.round((positive / total) * 100),
+        negative: Math.round((negative / total) * 100),
+        neutral: Math.round((neutral / total) * 100),
+      },
+      priorityAlerts: critical + high,
+      criticalCount: critical,
+      trend: positive > negative ? 'positive' : negative > positive ? 'negative' : 'stable',
+    };
+  }, []);
 
   const handleAttachmentClick = () => {
     fileInputRef.current?.click();
@@ -111,28 +147,6 @@ const SmartInbox = () => {
     }
   };
 
-  const getSentimentColor = (sentiment: Email['sentiment']['label']) => {
-    switch (sentiment) {
-      case 'positive':
-        return 'bg-success';
-      case 'negative':
-        return 'bg-destructive';
-      default:
-        return 'bg-warning';
-    }
-  };
-
-  const getSentimentIcon = (sentiment: Email['sentiment']['label']) => {
-    switch (sentiment) {
-      case 'positive':
-        return CheckCircle2;
-      case 'negative':
-        return AlertTriangle;
-      default:
-        return Minus;
-    }
-  };
-
   const getPriorityColor = (priority: Email['priority']) => {
     switch (priority) {
       case 'critical':
@@ -159,18 +173,115 @@ const SmartInbox = () => {
     }
   };
 
+  if (!settings.smartInboxEnabled) {
+    return (
+      <div className="space-y-6">
+        <div className="nexus-fade-in">
+          <h2 className="text-2xl font-bold text-foreground">Communication Signals</h2>
+          <p className="text-muted-foreground">Feature disabled by Tenant Administrator</p>
+        </div>
+        <Alert>
+          <Shield className="h-4 w-4" />
+          <AlertDescription>
+            The Smart Inbox feature has been disabled by your organization's administrator. 
+            Contact your Tenant Admin for more information.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="nexus-fade-in">
-        <h2 className="text-2xl font-bold text-foreground">Smart Inbox</h2>
-        <p className="text-muted-foreground">AI-powered email analysis and task extraction</p>
+        <h2 className="text-2xl font-bold text-foreground">Communication Signals</h2>
+        <p className="text-muted-foreground">Aggregate communication intelligence from connected systems</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-220px)]">
+      {/* Governance Notice */}
+      <Alert className="border-primary/30 bg-primary/5">
+        <Shield className="h-4 w-4 text-primary" />
+        <AlertDescription className="text-sm">
+          <span className="font-medium">Governed Feature:</span> This view shows aggregate communication signals only. 
+          Individual sentiment scoring is disabled. Data is not used for HR or performance evaluation.
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-3 w-3 ml-1 inline-block cursor-help text-muted-foreground" />
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs">
+                <p className="text-xs">
+                  Per governance policy, this feature aggregates signals to support PMO decision-making 
+                  without individual performance tracking.
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </AlertDescription>
+      </Alert>
+
+      {/* Aggregate Signal Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="nexus-card p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Activity className="w-4 h-4 text-primary" />
+            <span className="text-xs font-medium text-muted-foreground">Total Signals</span>
+          </div>
+          <div className="text-2xl font-bold text-foreground">{aggregateSignals.total}</div>
+          <p className="text-xs text-muted-foreground">Communications analyzed</p>
+        </div>
+        <div className="nexus-card p-4">
+          <div className="flex items-center gap-2 mb-2">
+            {aggregateSignals.trend === 'positive' ? (
+              <TrendingUp className="w-4 h-4 text-success" />
+            ) : aggregateSignals.trend === 'negative' ? (
+              <TrendingDown className="w-4 h-4 text-destructive" />
+            ) : (
+              <Minus className="w-4 h-4 text-warning" />
+            )}
+            <span className="text-xs font-medium text-muted-foreground">Overall Tone</span>
+          </div>
+          <div className="text-2xl font-bold text-foreground capitalize">{aggregateSignals.trend}</div>
+          <p className="text-xs text-muted-foreground">Aggregate sentiment trend</p>
+        </div>
+        <div className="nexus-card p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <AlertTriangle className="w-4 h-4 text-warning" />
+            <span className="text-xs font-medium text-muted-foreground">Priority Alerts</span>
+          </div>
+          <div className="text-2xl font-bold text-foreground">{aggregateSignals.priorityAlerts}</div>
+          <p className="text-xs text-muted-foreground">High/Critical items</p>
+        </div>
+        <div className="nexus-card p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles className="w-4 h-4 text-primary" />
+            <span className="text-xs font-medium text-muted-foreground">Sentiment Mix</span>
+          </div>
+          <div className="flex gap-1 h-2 rounded-full overflow-hidden bg-secondary">
+            <div 
+              className="bg-success transition-all" 
+              style={{ width: `${aggregateSignals.sentimentDistribution.positive}%` }} 
+            />
+            <div 
+              className="bg-warning transition-all" 
+              style={{ width: `${aggregateSignals.sentimentDistribution.neutral}%` }} 
+            />
+            <div 
+              className="bg-destructive transition-all" 
+              style={{ width: `${aggregateSignals.sentimentDistribution.negative}%` }} 
+            />
+          </div>
+          <p className="text-xs text-muted-foreground mt-2">
+            {aggregateSignals.sentimentDistribution.positive}% positive • {aggregateSignals.sentimentDistribution.neutral}% neutral • {aggregateSignals.sentimentDistribution.negative}% negative
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-420px)]">
         {/* Email List */}
         <div className="nexus-card overflow-hidden flex flex-col">
           <div className="p-4 border-b border-border">
-            <h3 className="font-semibold text-foreground">Inbox</h3>
+            <h3 className="font-semibold text-foreground">Signal Queue</h3>
           </div>
           <div className="flex-1 overflow-y-auto nexus-scrollbar">
             {emails.map((email) => (
@@ -212,10 +323,7 @@ const SmartInbox = () => {
                     </p>
                     <p className="text-xs text-muted-foreground truncate mt-1">{email.preview}</p>
                     <div className="flex items-center gap-2 mt-2">
-                      <div
-                        className={cn('w-2 h-2 rounded-full', getSentimentColor(email.sentiment.label))}
-                      />
-                      <span className="text-xs text-muted-foreground">{email.escalationLevel}</span>
+                      <span className="text-xs text-muted-foreground">{getEscalationLabel(email.escalationLevel)}</span>
                     </div>
                   </div>
                 </div>
@@ -265,41 +373,20 @@ const SmartInbox = () => {
                   </pre>
                 </div>
 
-                {/* Compact Sentiment & Tasks Row */}
+                {/* Extracted Intelligence (no individual sentiment) */}
                 <div className="px-4 pb-4 space-y-3">
-                  {/* Sentiment Badge */}
+                  {/* Escalation Level & Priority */}
                   <div className="flex items-center gap-4 p-3 rounded-lg bg-secondary/30">
                     <div className="flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-primary" />
-                      <span className="text-xs font-medium text-muted-foreground">Sentiment</span>
+                      <AlertTriangle className="w-4 h-4 text-warning" />
+                      <span className="text-xs font-medium text-muted-foreground">Classification</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      {(() => {
-                        const Icon = getSentimentIcon(selectedEmail.sentiment.label);
-                        return (
-                          <Icon
-                            className={cn(
-                              'w-4 h-4',
-                              selectedEmail.sentiment.label === 'positive' && 'text-success',
-                              selectedEmail.sentiment.label === 'negative' && 'text-destructive',
-                              selectedEmail.sentiment.label === 'neutral' && 'text-warning'
-                            )}
-                          />
-                        );
-                      })()}
-                      <span className="text-sm font-medium text-foreground capitalize">
-                        {selectedEmail.sentiment.label}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        ({Math.round(selectedEmail.sentiment.confidence * 100)}%)
-                      </span>
-                    </div>
-                    <div className="flex-1 h-1.5 rounded-full bg-secondary overflow-hidden">
-                      <div
-                        className={cn('h-full transition-all', getSentimentColor(selectedEmail.sentiment.label))}
-                        style={{ width: `${selectedEmail.sentiment.score * 100}%` }}
-                      />
-                    </div>
+                    <span className={cn('nexus-badge text-xs', getPriorityColor(selectedEmail.priority))}>
+                      {selectedEmail.priority} priority
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {getEscalationLabel(selectedEmail.escalationLevel)} level
+                    </span>
                   </div>
 
                   {/* Compact Tasks */}
@@ -307,7 +394,7 @@ const SmartInbox = () => {
                     <div className="p-3 rounded-lg bg-secondary/30">
                       <div className="flex items-center gap-2 mb-2">
                         <ListTodo className="w-4 h-4 text-primary" />
-                        <span className="text-xs font-medium text-muted-foreground">Extracted Tasks</span>
+                        <span className="text-xs font-medium text-muted-foreground">Extracted Actions</span>
                       </div>
                       <div className="space-y-1.5">
                         {selectedEmail.extractedTasks.map((task, index) => (
@@ -327,7 +414,7 @@ const SmartInbox = () => {
                         ))}
                       </div>
                     </div>
-                    )}
+                  )}
 
                   {/* AI Task Suggestions */}
                   <div className="p-3 rounded-lg bg-secondary/30">
@@ -426,7 +513,7 @@ const SmartInbox = () => {
             </>
           ) : (
             <div className="flex-1 flex items-center justify-center text-muted-foreground">
-              Select an email to view
+              Select a signal to view
             </div>
           )}
         </div>

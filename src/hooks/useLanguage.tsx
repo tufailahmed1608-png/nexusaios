@@ -35,6 +35,7 @@ const translations: Record<Language, Record<string, string>> = {
     'branding': 'Branding',
     'decisions': 'Decision Log',
     'aiControls': 'AI Controls',
+    'tenantSettings': 'Tenant Settings',
     'collapse': 'Collapse',
     'expand': 'Expand',
     'productDocs': 'Product Docs',

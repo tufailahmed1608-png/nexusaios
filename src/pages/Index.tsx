@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { cn } from '@/lib/utils';
 import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
@@ -143,6 +143,15 @@ const Index = () => {
         return (
           <ProtectedFeature feature="aiControls">
             <AIControlsView />
+          </ProtectedFeature>
+        );
+      case 'tenantSettings':
+        const TenantSettings = lazy(() => import('@/components/admin/TenantSettings'));
+        return (
+          <ProtectedFeature feature="tenantSettings">
+            <Suspense fallback={<div className="flex items-center justify-center h-full"><div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" /></div>}>
+              <TenantSettings />
+            </Suspense>
           </ProtectedFeature>
         );
       case 'settings':

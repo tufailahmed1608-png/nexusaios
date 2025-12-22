@@ -61,6 +61,7 @@ const menuItems = [
   { id: 'strategy', labelKey: 'strategy', icon: BarChart3 },
   { id: 'team', labelKey: 'team', icon: Users },
   { id: 'aiControls', labelKey: 'aiControls', icon: Sparkles },
+  { id: 'tenantSettings', labelKey: 'tenantSettings', icon: Shield },
 ];
 
 const SidebarContent = ({ 
