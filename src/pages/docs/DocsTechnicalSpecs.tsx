@@ -4,7 +4,7 @@ const DocsTechnicalSpecs = () => {
   return (
     <DocsLayout 
       currentPage={3} 
-      totalPages={5} 
+      totalPages={7} 
       title="Technical Specifications"
       prevPath="/docs/core-features"
       nextPath="/docs/ai-integration"

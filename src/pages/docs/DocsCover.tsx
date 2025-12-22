@@ -39,7 +39,7 @@ const DocsCover = () => {
           </Button>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
           <button 
             onClick={() => navigate('/docs/executive-summary')}
             className="text-slate-400 hover:text-indigo-400 transition-colors"
@@ -64,11 +64,25 @@ const DocsCover = () => {
           >
             4. AI Integration
           </button>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
           <button 
             onClick={() => navigate('/docs/competitive-analysis')}
             className="text-slate-400 hover:text-indigo-400 transition-colors"
           >
             5. Competitive Analysis
+          </button>
+          <button 
+            onClick={() => navigate('/docs/roles-user-journeys')}
+            className="text-slate-400 hover:text-indigo-400 transition-colors"
+          >
+            6. Roles & User Journeys
+          </button>
+          <button 
+            onClick={() => navigate('/docs/market-position')}
+            className="text-slate-400 hover:text-indigo-400 transition-colors"
+          >
+            7. Market Position
           </button>
         </div>
 

@@ -15,6 +15,8 @@ import DocsCoreFeatures from "./pages/docs/DocsCoreFeatures";
 import DocsTechnicalSpecs from "./pages/docs/DocsTechnicalSpecs";
 import DocsAIIntegration from "./pages/docs/DocsAIIntegration";
 import DocsCompetitiveAnalysis from "./pages/docs/DocsCompetitiveAnalysis";
+import DocsRolesUserJourneys from "./pages/docs/DocsRolesUserJourneys";
+import DocsMarketPosition from "./pages/docs/DocsMarketPosition";
 import PitchDeck from "./pages/PitchDeck";
 import FeaturesShowcase from "./pages/FeaturesShowcase";
 import ProductDemo from "./pages/ProductDemo";
@@ -75,6 +77,8 @@ const App = () => (
               <Route path="/docs/technical-specs" element={<DocsTechnicalSpecs />} />
               <Route path="/docs/ai-integration" element={<DocsAIIntegration />} />
               <Route path="/docs/competitive-analysis" element={<DocsCompetitiveAnalysis />} />
+              <Route path="/docs/roles-user-journeys" element={<DocsRolesUserJourneys />} />
+              <Route path="/docs/market-position" element={<DocsMarketPosition />} />
               <Route path="/pitch-deck" element={<PitchDeck />} />
               <Route path="/features" element={<FeaturesShowcase />} />
               <Route path="/demo" element={<ProductDemo />} />
