@@ -219,7 +219,43 @@ Comprehensive team member management and resource allocation.
 
 ---
 
-### 11. Activity Feed
+### 11. Role-Based Access Control
+**Granular Permission Management**
+
+Nexus implements a comprehensive role-based access control system that ensures users only see features relevant to their responsibilities.
+
+**Available Roles:**
+| Role | Description | Access Level |
+|------|-------------|--------------|
+| User | Basic access | Dashboard, Smart Inbox |
+| Project Manager | Full project access | All project features |
+| Senior Project Manager | Extended access | All features + advanced analytics |
+| Program Manager | Multi-project oversight | Cross-project visibility |
+| PMO | Portfolio management | Full platform access |
+| Admin | System administration | User management, role assignment |
+
+**Role Request Workflow:**
+1. **New User Onboarding:** New users start with basic access (Dashboard & Smart Inbox only)
+2. **Role Request:** Users can request elevated roles through Settings
+3. **Admin Review:** Administrators review pending role requests
+4. **Approval/Rejection:** Admins approve or reject with optional notes
+5. **Instant Access:** Approved users immediately gain new permissions
+
+**Admin Capabilities:**
+- View all users and their current roles
+- Assign roles directly to any user
+- Review and process role upgrade requests
+- Add notes when approving/rejecting requests
+
+**Benefits:**
+- Secure access control based on organizational hierarchy
+- Self-service role request reduces admin overhead
+- Clear audit trail for role changes
+- Flexible permission system adapts to team structure
+
+---
+
+### 12. Activity Feed
 **Project Activity Timeline**
 
 Real-time activity tracking across all project activities.
@@ -229,6 +265,7 @@ Real-time activity tracking across all project activities.
 - Document changes
 - Communication logs
 - Decision records
+- Role changes and requests
 
 ---
 
@@ -294,6 +331,13 @@ Nexus leverages Google's Gemini AI model for:
 - Session management
 - Protected route enforcement
 - Automatic redirect for unauthenticated users
+- Role-based feature access control
+
+### Role-Based Access Control
+- **Hierarchical Roles:** Admin, PMO, Program Manager, Senior PM, PM, User
+- **Permission-Based Views:** Features shown based on user role
+- **Role Request System:** Users can request role upgrades
+- **Admin Management:** Centralized role assignment dashboard
 
 ### Data Security
 - Row Level Security (RLS) on all data tables
@@ -350,5 +394,5 @@ For more information about Nexus Project OS, contact the product team.
 
 ---
 
-*Document Version: 1.0*
+*Document Version: 1.1*
 *Last Updated: December 2024*
