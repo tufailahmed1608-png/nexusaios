@@ -4,7 +4,7 @@ const DocsExecutiveSummary = () => {
   return (
     <DocsLayout 
       currentPage={1} 
-      totalPages={5} 
+      totalPages={7} 
       title="Executive Summary"
       prevPath="/docs"
       nextPath="/docs/core-features"

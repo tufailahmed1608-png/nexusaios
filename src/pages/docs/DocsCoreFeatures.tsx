@@ -4,7 +4,7 @@ const DocsCoreFeatures = () => {
   return (
     <DocsLayout 
       currentPage={2} 
-      totalPages={5} 
+      totalPages={7} 
       title="Core Features"
       prevPath="/docs/executive-summary"
       nextPath="/docs/technical-specs"

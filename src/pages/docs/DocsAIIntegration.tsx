@@ -4,7 +4,7 @@ const DocsAIIntegration = () => {
   return (
     <DocsLayout 
       currentPage={4} 
-      totalPages={5} 
+      totalPages={7} 
       title="AI Integration"
       prevPath="/docs/technical-specs"
       nextPath="/docs/competitive-analysis"

@@ -4,10 +4,10 @@ const DocsCompetitiveAnalysis = () => {
   return (
     <DocsLayout 
       currentPage={5} 
-      totalPages={5} 
+      totalPages={7} 
       title="Competitive Analysis"
       prevPath="/docs/ai-integration"
-      nextPath={null}
+      nextPath="/docs/roles-user-journeys"
     >
       <section className="mb-10">
         <h2 className="text-2xl font-bold text-slate-800 border-b border-slate-200 pb-2 mb-4">Competitive Advantages</h2>
