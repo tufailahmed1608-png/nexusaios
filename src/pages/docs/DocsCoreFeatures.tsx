@@ -1,131 +1,122 @@
 import DocsLayout from '@/components/docs/DocsLayout';
+import { Video, FileText, BarChart3, Gavel, TrendingUp, Shield } from 'lucide-react';
 
 const DocsCoreFeatures = () => {
   return (
     <DocsLayout 
       currentPage={2} 
       totalPages={7} 
-      title="Core Features"
+      title="Core Intelligence Features"
       prevPath="/docs/executive-summary"
       nextPath="/docs/technical-specs"
     >
       <section className="mb-10">
-        <h2 className="text-2xl font-bold text-slate-800 border-b border-slate-200 pb-2 mb-6">Core Features</h2>
+        <h2 className="text-2xl font-bold text-slate-800 border-b border-slate-200 pb-2 mb-6">Core Intelligence Features</h2>
+        <p className="text-slate-600 mb-6">
+          These features define Nexus. Meeting intelligence, executive reporting, decision tracking, and governance enforcement—the primary value proposition for PMO and executives.
+        </p>
         
-        {/* Smart Inbox */}
+        {/* Meeting Intelligence Hub */}
         <div className="mb-8">
-          <h3 className="text-xl font-semibold text-indigo-700 mb-3">1. Smart Inbox</h3>
-          <p className="text-slate-600 italic mb-3">AI-Powered Email Intelligence</p>
-          <p className="text-slate-700 mb-3">The Smart Inbox is a master view combining email reading with AI analytics, unifying communication analysis in a single interface.</p>
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center">
+              <Video className="w-5 h-5 text-indigo-600" />
+            </div>
+            <h3 className="text-xl font-semibold text-indigo-700">Meeting Intelligence Hub</h3>
+          </div>
+          <p className="text-slate-600 italic mb-3">Automated MoM Generation & Intelligence Extraction</p>
+          <p className="text-slate-700 mb-3">Transform meetings into structured intelligence with automated extraction of actions, decisions, and risks.</p>
           <ul className="list-disc list-inside text-slate-700 space-y-1 ml-4">
-            <li><strong>Sentiment Analysis:</strong> Real-time visualization of email emotion with confidence scores</li>
-            <li><strong>Escalation Matrix:</strong> AI determines email priority from L1 (Operational) to L4 (Executive)</li>
-            <li><strong>Task Extraction:</strong> One-click conversion of email content to Kanban tasks</li>
-            <li><strong>AI Smart Reply:</strong> Generate contextually appropriate email responses using AI</li>
+            <li><strong>Auto-Generated Minutes:</strong> AI creates Summaries, Decisions, and Action Items from transcripts</li>
+            <li><strong>Decision Extraction:</strong> Automatically identify and log decisions with context</li>
+            <li><strong>Risk Identification:</strong> Flag potential risks and blockers from meeting content</li>
+            <li><strong>Action Item Tracking:</strong> Extract and assign actionable items to team members</li>
           </ul>
         </div>
 
-        {/* Meeting Hub */}
+        {/* Executive & PMO Reporting */}
         <div className="mb-8">
-          <h3 className="text-xl font-semibold text-indigo-700 mb-3">2. Meeting Hub</h3>
-          <p className="text-slate-600 italic mb-3">Intelligent Meeting Management</p>
-          <p className="text-slate-700 mb-3">Meeting Hub enables users to process transcripts and generate structured meeting documentation on the fly.</p>
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center">
+              <FileText className="w-5 h-5 text-indigo-600" />
+            </div>
+            <h3 className="text-xl font-semibold text-indigo-700">Executive & PMO Reporting</h3>
+          </div>
+          <p className="text-slate-600 italic mb-3">Auto-Generated Intelligence Reports</p>
+          <p className="text-slate-700 mb-3">Generate weekly, monthly, and executive reports with portfolio summaries—no manual compilation required.</p>
           <ul className="list-disc list-inside text-slate-700 space-y-1 ml-4">
-            <li><strong>Transcript Analyzer:</strong> Converts raw meeting text into structured outputs</li>
-            <li><strong>Auto-Generated Minutes:</strong> AI creates Summaries, Decisions, and Action Items</li>
-            <li><strong>Task Extraction:</strong> Automatically identify and extract actionable items</li>
+            <li><strong>Weekly Status Reports:</strong> Automated project status with AI-generated summaries</li>
+            <li><strong>Executive Summaries:</strong> High-level portfolio health for leadership review</li>
+            <li><strong>Portfolio Analytics:</strong> Cross-project insights and trend analysis</li>
+            <li><strong>Approval Workflow:</strong> Draft → Reviewed → Approved lifecycle for all reports</li>
           </ul>
         </div>
 
         {/* Executive Dashboard */}
         <div className="mb-8">
-          <h3 className="text-xl font-semibold text-indigo-700 mb-3">3. Executive Dashboard</h3>
-          <p className="text-slate-600 italic mb-3">Real-Time Portfolio Intelligence</p>
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center">
+              <BarChart3 className="w-5 h-5 text-indigo-600" />
+            </div>
+            <h3 className="text-xl font-semibold text-indigo-700">Executive Dashboard</h3>
+          </div>
+          <p className="text-slate-600 italic mb-3">Portfolio Health & KPI Visualization</p>
           <ul className="list-disc list-inside text-slate-700 space-y-1 ml-4">
-            <li><strong>KPI Cards:</strong> Real-time metrics display with trend indicators</li>
-            <li><strong>Portfolio Health Charts:</strong> Visual representation of project status</li>
-            <li><strong>Budget vs. Actuals:</strong> Financial tracking and variance analysis</li>
-            <li><strong>Velocity Tracking:</strong> Team performance and delivery metrics</li>
+            <li><strong>Portfolio Health:</strong> Visual representation of project status across the organization</li>
+            <li><strong>KPI Heatmaps:</strong> At-a-glance performance indicators for quick assessment</li>
+            <li><strong>Risk Concentration:</strong> Identify risk clusters and hotspots across projects</li>
+            <li><strong>Trend Analysis:</strong> Track portfolio performance over time</li>
           </ul>
         </div>
 
-        {/* Task Board */}
+        {/* Decision Log */}
         <div className="mb-8">
-          <h3 className="text-xl font-semibold text-indigo-700 mb-3">4. Task Board</h3>
-          <p className="text-slate-600 italic mb-3">AI-Enhanced Task Management</p>
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center">
+              <Gavel className="w-5 h-5 text-indigo-600" />
+            </div>
+            <h3 className="text-xl font-semibold text-indigo-700">Decision Log</h3>
+          </div>
+          <p className="text-slate-600 italic mb-3">Structured Decision Tracking with Audit Trail</p>
           <ul className="list-disc list-inside text-slate-700 space-y-1 ml-4">
-            <li><strong>Kanban View:</strong> Visual task organization by status</li>
-            <li><strong>Auto-Generated Tasks:</strong> Tasks created from emails and meeting transcripts</li>
-            <li><strong>Priority Management:</strong> Critical, High, Medium, Low priority levels</li>
+            <li><strong>Capture from Meetings:</strong> Decisions extracted automatically from meeting transcripts</li>
+            <li><strong>Approval Workflow:</strong> Route decisions to appropriate stakeholders for approval</li>
+            <li><strong>Source Traceability:</strong> Link decisions back to original context and discussions</li>
+            <li><strong>Audit Trail:</strong> Complete history of decision changes and approvals</li>
           </ul>
         </div>
 
         {/* Strategy View */}
         <div className="mb-8">
-          <h3 className="text-xl font-semibold text-indigo-700 mb-3">5. Strategy View</h3>
-          <p className="text-slate-600 italic mb-3">Strategic Alignment & ROI Tracking</p>
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center">
+              <TrendingUp className="w-5 h-5 text-indigo-600" />
+            </div>
+            <h3 className="text-xl font-semibold text-indigo-700">Strategy View</h3>
+          </div>
+          <p className="text-slate-600 italic mb-3">Strategic Pillar Alignment & Initiative Tracking</p>
           <ul className="list-disc list-inside text-slate-700 space-y-1 ml-4">
-            <li><strong>ROI Tracking:</strong> Return on investment analysis by project/initiative</li>
-            <li><strong>Budget vs. Actuals:</strong> Detailed financial comparison views</li>
-            <li><strong>Strategic Pillar Alignment:</strong> Map projects to organizational objectives</li>
+            <li><strong>Strategic Alignment:</strong> Map projects and initiatives to organizational pillars</li>
+            <li><strong>Initiative Contribution:</strong> Track how projects contribute to strategic goals</li>
+            <li><strong>ROI Indicators:</strong> High-level return on investment visibility</li>
+            <li><strong>Portfolio Balance:</strong> Ensure resource allocation matches strategic priorities</li>
           </ul>
         </div>
 
-        {/* Stakeholder Management */}
+        {/* Governance & Accountability */}
         <div className="mb-8">
-          <h3 className="text-xl font-semibold text-indigo-700 mb-3">6. Stakeholder Management</h3>
-          <p className="text-slate-600 italic mb-3">Intelligent Stakeholder Engagement</p>
-          <table className="w-full text-sm border-collapse mb-4">
-            <thead>
-              <tr className="bg-slate-100">
-                <th className="border border-slate-300 p-2 text-left">Category</th>
-                <th className="border border-slate-300 p-2 text-left">Influence</th>
-                <th className="border border-slate-300 p-2 text-left">Interest</th>
-                <th className="border border-slate-300 p-2 text-left">Strategy</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td className="border border-slate-300 p-2">Key Players</td><td className="border border-slate-300 p-2">High</td><td className="border border-slate-300 p-2">High</td><td className="border border-slate-300 p-2">Engage closely</td></tr>
-              <tr><td className="border border-slate-300 p-2">Keep Satisfied</td><td className="border border-slate-300 p-2">High</td><td className="border border-slate-300 p-2">Low</td><td className="border border-slate-300 p-2">Keep informed of major decisions</td></tr>
-              <tr><td className="border border-slate-300 p-2">Keep Informed</td><td className="border border-slate-300 p-2">Low</td><td className="border border-slate-300 p-2">High</td><td className="border border-slate-300 p-2">Regular updates</td></tr>
-              <tr><td className="border border-slate-300 p-2">Monitor</td><td className="border border-slate-300 p-2">Low</td><td className="border border-slate-300 p-2">Low</td><td className="border border-slate-300 p-2">Minimal effort</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        {/* Auto-Generated Reports */}
-        <div className="mb-8">
-          <h3 className="text-xl font-semibold text-indigo-700 mb-3">7. Auto-Generated Reports</h3>
-          <p className="text-slate-600 italic mb-3">AI-Powered Status Reporting</p>
-          <p className="text-slate-700 mb-2">Report Types:</p>
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center">
+              <Shield className="w-5 h-5 text-indigo-600" />
+            </div>
+            <h3 className="text-xl font-semibold text-indigo-700">Governance & Accountability</h3>
+          </div>
+          <p className="text-slate-600 italic mb-3">Human-in-the-Loop Enforcement</p>
           <ul className="list-disc list-inside text-slate-700 space-y-1 ml-4">
-            <li>Weekly Status Report</li>
-            <li>Monthly Summary</li>
-            <li>Stakeholder Update</li>
-            <li>Risk Assessment</li>
-            <li>Team Performance</li>
-          </ul>
-        </div>
-
-        {/* Documents & Templates */}
-        <div className="mb-8">
-          <h3 className="text-xl font-semibold text-indigo-700 mb-3">8. Documents & Templates</h3>
-          <p className="text-slate-600 italic mb-3">Centralized Document Management</p>
-          <ul className="list-disc list-inside text-slate-700 space-y-1 ml-4">
-            <li>Cloud Sync with Google Drive and OneDrive</li>
-            <li>Pre-built templates: Project Kickoff, MOM, RACI Matrix, Risk Register, Project Charter</li>
-            <li>Searchable template library with category filtering</li>
-          </ul>
-        </div>
-
-        {/* Smart Notifications */}
-        <div className="mb-8">
-          <h3 className="text-xl font-semibold text-indigo-700 mb-3">9. Smart Notifications</h3>
-          <p className="text-slate-600 italic mb-3">AI-Prioritized Alerts</p>
-          <ul className="list-disc list-inside text-slate-700 space-y-1 ml-4">
-            <li>Deadline alerts, risk notifications, project updates</li>
-            <li>Priority levels: Critical, High, Medium, Low</li>
-            <li>Unread count badges and notification history</li>
+            <li><strong>AI Output Lifecycle:</strong> Draft → Reviewed → Approved → Published workflow</li>
+            <li><strong>Explainability:</strong> Every AI insight shows source, rationale, and confidence</li>
+            <li><strong>Approval Requirements:</strong> Critical outputs require human sign-off</li>
+            <li><strong>Audit Logging:</strong> Complete trail of all AI-generated content and approvals</li>
           </ul>
         </div>
       </section>

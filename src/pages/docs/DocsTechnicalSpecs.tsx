@@ -53,7 +53,7 @@ const DocsTechnicalSpecs = () => {
               <div className="text-xs text-slate-500">Styling</div>
             </div>
             <div className="text-center p-3 bg-white rounded-lg shadow-sm">
-              <div className="text-indigo-600 font-semibold">Supabase</div>
+              <div className="text-indigo-600 font-semibold">Cloud Backend</div>
               <div className="text-xs text-slate-500">Backend</div>
             </div>
           </div>
@@ -77,6 +77,58 @@ const DocsTechnicalSpecs = () => {
               <li>• Lazy loading</li>
               <li>• Edge function deployment</li>
             </ul>
+          </div>
+        </div>
+      </section>
+
+      <section className="mb-10">
+        <h2 className="text-2xl font-bold text-slate-800 border-b border-slate-200 pb-2 mb-4">Integration Layer</h2>
+        <p className="text-slate-600 mb-6">
+          Nexus observes your existing delivery systems without replacing them. Connect once and get unified intelligence.
+        </p>
+        
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="bg-blue-50 p-4 rounded-lg text-center border border-blue-100">
+            <div className="w-10 h-10 rounded-full bg-blue-500 mx-auto mb-2 flex items-center justify-center">
+              <span className="text-white text-xs font-bold">J</span>
+            </div>
+            <div className="font-medium text-slate-700">Jira</div>
+            <div className="text-xs text-slate-500">Project tracking</div>
+          </div>
+          <div className="bg-orange-50 p-4 rounded-lg text-center border border-orange-100">
+            <div className="w-10 h-10 rounded-full bg-orange-500 mx-auto mb-2 flex items-center justify-center">
+              <span className="text-white text-xs font-bold">M</span>
+            </div>
+            <div className="font-medium text-slate-700">M365</div>
+            <div className="text-xs text-slate-500">Office suite</div>
+          </div>
+          <div className="bg-purple-50 p-4 rounded-lg text-center border border-purple-100">
+            <div className="w-10 h-10 rounded-full bg-purple-500 mx-auto mb-2 flex items-center justify-center">
+              <span className="text-white text-xs font-bold">T</span>
+            </div>
+            <div className="font-medium text-slate-700">Teams</div>
+            <div className="text-xs text-slate-500">Meetings</div>
+          </div>
+          <div className="bg-cyan-50 p-4 rounded-lg text-center border border-cyan-100">
+            <div className="w-10 h-10 rounded-full bg-cyan-500 mx-auto mb-2 flex items-center justify-center">
+              <span className="text-white text-xs font-bold">O</span>
+            </div>
+            <div className="font-medium text-slate-700">Outlook</div>
+            <div className="text-xs text-slate-500">Email</div>
+          </div>
+          <div className="bg-blue-50 p-4 rounded-lg text-center border border-blue-100">
+            <div className="w-10 h-10 rounded-full bg-blue-600 mx-auto mb-2 flex items-center justify-center">
+              <span className="text-white text-xs font-bold">C</span>
+            </div>
+            <div className="font-medium text-slate-700">Confluence</div>
+            <div className="text-xs text-slate-500">Documentation</div>
+          </div>
+          <div className="bg-pink-50 p-4 rounded-lg text-center border border-pink-100">
+            <div className="w-10 h-10 rounded-full bg-pink-500 mx-auto mb-2 flex items-center justify-center">
+              <span className="text-white text-xs font-bold">S</span>
+            </div>
+            <div className="font-medium text-slate-700">Slack</div>
+            <div className="text-xs text-slate-500">Communication</div>
           </div>
         </div>
       </section>
@@ -111,29 +163,6 @@ const DocsTechnicalSpecs = () => {
           
           <h4 className="font-semibold text-slate-800 mb-2">Typography</h4>
           <p className="text-slate-700 text-sm">Primary font family with consistent sizing scale across all components.</p>
-        </div>
-      </section>
-
-      <section className="mb-10">
-        <h2 className="text-2xl font-bold text-slate-800 border-b border-slate-200 pb-2 mb-4">Integrations</h2>
-        
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-slate-50 p-4 rounded-lg text-center">
-            <div className="text-2xl mb-2">📁</div>
-            <div className="font-medium text-slate-700">Google Drive</div>
-          </div>
-          <div className="bg-slate-50 p-4 rounded-lg text-center">
-            <div className="text-2xl mb-2">☁️</div>
-            <div className="font-medium text-slate-700">OneDrive</div>
-          </div>
-          <div className="bg-slate-50 p-4 rounded-lg text-center">
-            <div className="text-2xl mb-2">📋</div>
-            <div className="font-medium text-slate-700">Jira</div>
-          </div>
-          <div className="bg-slate-50 p-4 rounded-lg text-center">
-            <div className="text-2xl mb-2">💬</div>
-            <div className="font-medium text-slate-700">Slack</div>
-          </div>
         </div>
       </section>
     </DocsLayout>
