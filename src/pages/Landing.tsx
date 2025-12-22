@@ -19,7 +19,52 @@ import {
   Gavel,
   TrendingUp,
   Lock,
+  Check,
+  X,
 } from 'lucide-react';
+
+const comparisonData = [
+  {
+    category: 'Primary Purpose',
+    nexus: 'Intelligence layer for decision support',
+    traditional: 'Task & project execution tracking',
+  },
+  {
+    category: 'Relationship to Tools',
+    nexus: 'Observes existing systems (Jira, M365, etc.)',
+    traditional: 'Replaces or competes with other tools',
+  },
+  {
+    category: 'AI Role',
+    nexus: 'Assists analysis, humans decide',
+    traditional: 'Automation focus, limited intelligence',
+  },
+  {
+    category: 'Target Users',
+    nexus: 'PMO, Executives, Program Managers',
+    traditional: 'Project Managers, Team Members',
+  },
+  {
+    category: 'Meeting Intelligence',
+    nexus: 'Auto MoM, action extraction, decisions',
+    traditional: 'Manual notes or basic transcription',
+  },
+  {
+    category: 'Reporting',
+    nexus: 'AI-generated executive summaries',
+    traditional: 'Manual report creation',
+  },
+  {
+    category: 'Decision Tracking',
+    nexus: 'Structured log with audit trail',
+    traditional: 'Scattered in emails/docs',
+  },
+  {
+    category: 'Governance',
+    nexus: 'Human-in-the-loop enforcement',
+    traditional: 'Process-dependent',
+  },
+];
 
 const features = [
   {
@@ -333,8 +378,66 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* What Nexus Is NOT */}
+      {/* Comparison Table */}
       <section className="py-20 px-6">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
+              Positioning
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              Nexus vs Traditional PM Tools
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Nexus is not another PM tool. It's an intelligence layer that works with your existing tools.
+            </p>
+          </div>
+
+          <div className="overflow-hidden rounded-xl border border-border bg-card/50 backdrop-blur-sm">
+            {/* Header */}
+            <div className="grid grid-cols-3 bg-muted/50">
+              <div className="p-4 font-semibold text-muted-foreground text-sm border-r border-border">
+                Capability
+              </div>
+              <div className="p-4 font-semibold text-primary text-sm border-r border-border flex items-center gap-2">
+                <Sparkles className="w-4 h-4" />
+                Nexus Project OS
+              </div>
+              <div className="p-4 font-semibold text-muted-foreground text-sm">
+                Traditional PM Tools
+              </div>
+            </div>
+            
+            {/* Rows */}
+            {comparisonData.map((row, index) => (
+              <div 
+                key={index} 
+                className={`grid grid-cols-3 ${index !== comparisonData.length - 1 ? 'border-b border-border' : ''}`}
+              >
+                <div className="p-4 text-sm font-medium text-foreground border-r border-border bg-muted/20">
+                  {row.category}
+                </div>
+                <div className="p-4 text-sm text-foreground border-r border-border flex items-start gap-2">
+                  <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                  <span>{row.nexus}</span>
+                </div>
+                <div className="p-4 text-sm text-muted-foreground flex items-start gap-2">
+                  <X className="w-4 h-4 text-muted-foreground/50 flex-shrink-0 mt-0.5" />
+                  <span>{row.traditional}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Bottom Note */}
+          <p className="text-center text-sm text-muted-foreground mt-6">
+            Nexus complements Jira, M365, Asana, Monday.com—it doesn't replace them.
+          </p>
+        </div>
+      </section>
+
+      {/* What Nexus Is NOT */}
+      <section className="py-20 px-6 bg-muted/30">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
             What Nexus Does <span className="text-muted-foreground">NOT</span> Do
@@ -350,7 +453,7 @@ const Landing = () => {
             ].map((item, index) => (
               <div key={index} className="flex items-center gap-3 p-4 rounded-lg bg-destructive/5 border border-destructive/20">
                 <div className="w-6 h-6 rounded-full bg-destructive/10 flex items-center justify-center flex-shrink-0">
-                  <span className="text-destructive text-sm">✕</span>
+                  <X className="w-3 h-3 text-destructive" />
                 </div>
                 <span className="text-foreground text-left">{item}</span>
               </div>
