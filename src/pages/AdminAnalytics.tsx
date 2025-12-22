@@ -7,12 +7,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Legend } from 'recharts';
-import { ArrowLeft, Users, Activity, TrendingUp, Clock, Shield, BarChart3, UserCog, Radio, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Users, Activity, TrendingUp, Clock, Shield, BarChart3, UserCog, Radio, MessageSquare, ToggleLeft } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { format, subDays, startOfDay, endOfDay } from 'date-fns';
 import UserManagement from '@/components/admin/UserManagement';
 import RoleAssignment from '@/components/admin/RoleAssignment';
 import RoleRequests from '@/components/admin/RoleRequests';
+import FeatureToggles from '@/components/admin/FeatureToggles';
 
 interface ActivityData {
   action_type: string;
@@ -192,6 +193,10 @@ const AdminAnalytics = () => {
               <BarChart3 className="h-4 w-4" />
               Analytics
             </TabsTrigger>
+            <TabsTrigger value="features" className="gap-2">
+              <ToggleLeft className="h-4 w-4" />
+              Feature Toggles
+            </TabsTrigger>
             <TabsTrigger value="roles" className="gap-2">
               <Shield className="h-4 w-4" />
               Role Assignment
@@ -368,6 +373,10 @@ const AdminAnalytics = () => {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="features">
+            <FeatureToggles />
           </TabsContent>
 
           <TabsContent value="roles">

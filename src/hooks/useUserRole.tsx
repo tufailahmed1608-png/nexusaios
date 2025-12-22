@@ -1,15 +1,20 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
-import { AppRole, hasFeatureAccess, hasMinimumRole, ROLE_HIERARCHY } from '@/lib/permissions';
+import { AppRole, hasMinimumRole, ROLE_HIERARCHY, FEATURE_PERMISSIONS } from '@/lib/permissions';
+
+interface DynamicPermissions {
+  [role: string]: string[];
+}
 
 export const useUserRole = () => {
   const { user } = useAuth();
   const [role, setRole] = useState<AppRole | null>(null);
   const [loading, setLoading] = useState(true);
+  const [dynamicPermissions, setDynamicPermissions] = useState<DynamicPermissions | null>(null);
 
   useEffect(() => {
-    const fetchUserRole = async () => {
+    const fetchUserRoleAndPermissions = async () => {
       if (!user) {
         setRole(null);
         setLoading(false);
@@ -17,17 +22,36 @@ export const useUserRole = () => {
       }
 
       try {
-        const { data, error } = await supabase
+        // Fetch user role
+        const { data: roleData, error: roleError } = await supabase
           .from('user_roles')
           .select('role')
           .eq('user_id', user.id)
           .maybeSingle();
 
-        if (error) {
-          console.error('Failed to fetch user role:', error);
-          setRole('user'); // Default to basic user
+        if (roleError) {
+          console.error('Failed to fetch user role:', roleError);
+          setRole('user');
         } else {
-          setRole((data?.role as AppRole) || 'user');
+          setRole((roleData?.role as AppRole) || 'user');
+        }
+
+        // Fetch dynamic permissions from role_definitions
+        const { data: permData, error: permError } = await supabase
+          .from('role_definitions')
+          .select('role, permissions');
+
+        if (!permError && permData && permData.length > 0) {
+          const permMap: DynamicPermissions = {};
+          permData.forEach((roleDef: any) => {
+            if (Array.isArray(roleDef.permissions) && roleDef.permissions.length > 0) {
+              permMap[roleDef.role] = roleDef.permissions;
+            }
+          });
+          
+          if (Object.keys(permMap).length > 0) {
+            setDynamicPermissions(permMap);
+          }
         }
       } catch (error) {
         console.error('Failed to fetch user role:', error);
@@ -37,14 +61,27 @@ export const useUserRole = () => {
       }
     };
 
-    fetchUserRole();
+    fetchUserRoleAndPermissions();
   }, [user]);
 
   const canAccess = useCallback(
     (feature: string): boolean => {
-      return hasFeatureAccess(role, feature);
+      if (!role) return false;
+      
+      // Admin always has full access
+      if (role === 'admin') return true;
+
+      // If we have dynamic permissions for this role, use them
+      if (dynamicPermissions && dynamicPermissions[role]) {
+        return dynamicPermissions[role].includes(feature);
+      }
+
+      // Fall back to hardcoded permissions
+      const allowedRoles = FEATURE_PERMISSIONS[feature];
+      if (!allowedRoles) return false;
+      return allowedRoles.includes(role);
     },
-    [role]
+    [role, dynamicPermissions]
   );
 
   const hasMinRole = useCallback(
@@ -71,5 +108,6 @@ export const useUserRole = () => {
     isSeniorPM,
     isProjectManager,
     hierarchyLevel: role ? ROLE_HIERARCHY[role] : 0,
+    hasDynamicPermissions: dynamicPermissions !== null,
   };
 };
