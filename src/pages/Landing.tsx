@@ -19,43 +19,43 @@ import {
 const features = [
   {
     icon: Brain,
-    title: 'AI-Powered Intelligence',
-    description: 'Automatically analyze emails, meetings, and documents to extract tasks and predict risks.',
+    title: 'Delivery Signal Processing',
+    description: 'Observe Jira, M365, and other delivery systems to convert signals into structured intelligence.',
   },
   {
     icon: Mail,
-    title: 'Smart Inbox',
-    description: 'Unified inbox with sentiment analysis, priority scoring, and one-click task extraction.',
+    title: 'Communication Intelligence',
+    description: 'Analyze emails and messages to surface critical decisions, risks, and governance needs.',
   },
   {
     icon: Video,
-    title: 'Meeting Hub',
-    description: 'Transform meeting transcripts into structured summaries, decisions, and action items.',
+    title: 'Meeting Intelligence',
+    description: 'Transform meeting transcripts into structured decisions, action items, and accountability records.',
   },
   {
     icon: BarChart3,
-    title: 'Strategic Dashboards',
-    description: 'Real-time KPIs, portfolio health tracking, and budget vs. actuals visualization.',
+    title: 'Executive Dashboards',
+    description: 'Real-time portfolio intelligence for PMO and executive decision-making.',
   },
   {
     icon: Shield,
-    title: 'Risk Prediction',
-    description: 'AI identifies potential project delays and recommends mitigation strategies.',
+    title: 'Risk & Governance',
+    description: 'AI-powered risk identification with human accountability enforcement.',
   },
   {
     icon: Users,
-    title: 'Stakeholder Management',
-    description: 'Track stakeholder influence, communication plans, and engagement history.',
+    title: 'Stakeholder Intelligence',
+    description: 'Track stakeholder engagement and communication patterns across your delivery ecosystem.',
   },
 ];
 
 const benefits = [
-  'Eliminate context switching between tools',
-  'Reduce administrative work by 60%',
-  'AI-generated weekly status reports',
-  'Unified view of all project communications',
-  'Automated task extraction from emails',
-  'Real-time collaboration features',
+  'Works alongside Jira, M365, and your existing tools',
+  'Converts delivery signals into executive insights',
+  'Enforces human accountability and governance',
+  'AI-generated intelligence reports',
+  'Supports PMO and executive decision-making',
+  'No replacement of existing workflows',
 ];
 
 const Landing = () => {
@@ -121,17 +121,17 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto text-center relative z-10">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6 nexus-fade-in border border-primary/20 backdrop-blur-sm">
             <Sparkles className="w-4 h-4" />
-            AI-First Project Management
+            PMO Intelligence Layer
           </div>
           
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6 nexus-slide-up">
-            Your Single Point of
-            <span className="block nexus-gradient-text mt-2">Project Intelligence</span>
+            Intelligence Layer for
+            <span className="block nexus-gradient-text mt-2">PMO & Executives</span>
           </h1>
           
           <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-10 nexus-fade-in" style={{ animationDelay: '0.2s' }}>
-            Nexus consolidates communication, strategy, and execution into one AI-powered workspace. 
-            Let AI handle the administrative work while you focus on decisions that matter.
+            Nexus observes your existing delivery systems—Jira, M365, email—and converts meetings and 
+            delivery signals into structured intelligence. Supporting decision-making, not replacing your tools.
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 nexus-fade-in" style={{ animationDelay: '0.4s' }}>
@@ -185,11 +185,11 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Everything You Need in One Place
+              Observe. Analyze. Decide.
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Stop switching between emails, spreadsheets, and multiple PMO tools. 
-              Nexus brings it all together with AI-powered automation.
+              Nexus doesn't replace Jira, email, or task systems. It sits above them—converting 
+              delivery signals into actionable intelligence for PMO and executives.
             </p>
           </div>
 
@@ -215,12 +215,12 @@ const Landing = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-                Focus on Strategy, <br />
-                <span className="nexus-gradient-text">Not Administration</span>
+                Human Accountability, <br />
+                <span className="nexus-gradient-text">AI-Powered Intelligence</span>
               </h2>
               <p className="text-lg text-muted-foreground mb-8">
-                Nexus uses AI to automatically handle routine tasks, analyze communications, 
-                and surface the insights that matter most to your projects.
+                Nexus enforces governance and accountability while AI converts your delivery 
+                signals into structured intelligence for executive decision-making.
               </p>
               <ul className="space-y-4">
                 {benefits.map((benefit, index) => (
@@ -235,27 +235,27 @@ const Landing = () => {
               <Card className="nexus-card p-6 col-span-2">
                 <div className="flex items-center gap-3 mb-3">
                   <Zap className="w-5 h-5 text-amber-500" />
-                  <span className="font-medium text-foreground">AI Task Extraction</span>
+                  <span className="font-medium text-foreground">Delivery Signal Processing</span>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  "Review budget proposal by Friday" automatically converted to task with deadline
+                  Jira updates, emails, and meeting notes converted into structured executive intelligence
                 </p>
               </Card>
               <Card className="nexus-card p-6">
-                <div className="text-3xl font-bold text-primary mb-1">60%</div>
-                <p className="text-sm text-muted-foreground">Less admin work</p>
+                <div className="text-3xl font-bold text-primary mb-1">Zero</div>
+                <p className="text-sm text-muted-foreground">Tool replacement</p>
               </Card>
               <Card className="nexus-card p-6">
-                <div className="text-3xl font-bold text-emerald-500 mb-1">3x</div>
-                <p className="text-sm text-muted-foreground">Faster decisions</p>
+                <div className="text-3xl font-bold text-emerald-500 mb-1">100%</div>
+                <p className="text-sm text-muted-foreground">Accountability</p>
               </Card>
               <Card className="nexus-card p-6 col-span-2">
                 <div className="flex items-center gap-3 mb-3">
                   <FileText className="w-5 h-5 text-primary" />
-                  <span className="font-medium text-foreground">Auto-Generated Reports</span>
+                  <span className="font-medium text-foreground">Intelligence Reports</span>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Weekly status reports created automatically from your project activity
+                  AI-generated insights from your delivery ecosystem for PMO and executive review
                 </p>
               </Card>
             </div>
@@ -267,10 +267,10 @@ const Landing = () => {
       <section className="py-20 px-6 bg-primary/5">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-            Ready to Transform Your Project Management?
+            Ready to Add Intelligence to Your PMO?
           </h2>
           <p className="text-lg text-muted-foreground mb-8">
-            Join thousands of project managers who've made Nexus their single point of work.
+            Keep your existing tools. Add the intelligence layer that executives and PMOs need.
           </p>
           <Button size="lg" onClick={() => navigate('/auth')} className="gap-2 text-lg px-8 py-6">
             Get Started Free <ArrowRight className="w-5 h-5" />
