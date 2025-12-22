@@ -1,6 +1,11 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { toast } from '@/hooks/use-toast';
 
 import {
   Brain,
@@ -142,8 +147,37 @@ const principles = [
   { icon: Shield, text: 'Every AI output has Draft → Reviewed → Approved lifecycle' },
 ];
 
+const testRoles = [
+  { id: 'executive', label: 'Executive', description: 'Portfolio overview, strategic dashboards, AI summaries' },
+  { id: 'pmo', label: 'PMO', description: 'Cross-project reporting, governance, resource management' },
+  { id: 'program_manager', label: 'Program Manager', description: 'Program health, dependencies, milestone tracking' },
+  { id: 'project_manager', label: 'Project Manager', description: 'Project delivery, team coordination, risk tracking' },
+];
+
 const Landing = () => {
   const navigate = useNavigate();
+  const [selectedRole, setSelectedRole] = useState('executive');
+  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleDemoRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !name) {
+      toast({ title: 'Please fill in all fields', variant: 'destructive' });
+      return;
+    }
+    setIsSubmitting(true);
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    toast({ 
+      title: 'Request Submitted!', 
+      description: `We'll set up your ${testRoles.find(r => r.id === selectedRole)?.label} demo access and contact you at ${email}.` 
+    });
+    setEmail('');
+    setName('');
+    setIsSubmitting(false);
+  };
 
   // Generate particle positions
   const particles = Array.from({ length: 20 }, (_, i) => ({
@@ -462,23 +496,119 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 px-6 bg-primary/5">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-            Ready to Add Intelligence to Your PMO?
-          </h2>
-          <p className="text-lg text-muted-foreground mb-8">
-            Keep your existing tools. Add the intelligence layer that executives and PMOs need.
-            Start with a governed pilot—6-8 weeks, limited scope, clean exit.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button size="lg" onClick={() => navigate('/auth')} className="gap-2 text-lg px-8 py-6">
-              Request Pilot Access <ArrowRight className="w-5 h-5" />
-            </Button>
-            <Button size="lg" variant="outline" onClick={() => navigate('/demo')} className="text-lg px-8 py-6">
-              See Demo
-            </Button>
+      {/* Request Demo Form Section */}
+      <section id="request-demo" className="py-20 px-6 bg-gradient-to-b from-background to-primary/5">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
+              <Zap className="w-4 h-4" />
+              Try Nexus
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              Request Demo Access
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Experience Nexus from any perspective. Select a role to see how PMOs, executives, 
+              and project managers benefit from the intelligence layer.
+            </p>
+          </div>
+
+          <Card className="border-border/50 bg-card/80 backdrop-blur-sm overflow-hidden">
+            <CardContent className="p-0">
+              <div className="grid lg:grid-cols-2">
+                {/* Role Selection */}
+                <div className="p-8 border-b lg:border-b-0 lg:border-r border-border">
+                  <h3 className="text-lg font-semibold text-foreground mb-4">Select Your Role</h3>
+                  <RadioGroup value={selectedRole} onValueChange={setSelectedRole} className="space-y-3">
+                    {testRoles.map((role) => (
+                      <div key={role.id} className="relative">
+                        <RadioGroupItem
+                          value={role.id}
+                          id={role.id}
+                          className="peer sr-only"
+                        />
+                        <Label
+                          htmlFor={role.id}
+                          className="flex flex-col p-4 rounded-lg border-2 cursor-pointer transition-all
+                            border-border hover:border-primary/50 
+                            peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5"
+                        >
+                          <span className="font-medium text-foreground">{role.label}</span>
+                          <span className="text-sm text-muted-foreground mt-1">{role.description}</span>
+                        </Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                </div>
+
+                {/* Form */}
+                <div className="p-8">
+                  <h3 className="text-lg font-semibold text-foreground mb-4">Your Details</h3>
+                  <form onSubmit={handleDemoRequest} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Full Name</Label>
+                      <Input
+                        id="name"
+                        type="text"
+                        placeholder="John Smith"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Work Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="john@company.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <Button type="submit" className="w-full gap-2" size="lg" disabled={isSubmitting}>
+                      {isSubmitting ? 'Submitting...' : 'Request Demo Access'}
+                      <ArrowRight className="w-4 h-4" />
+                    </Button>
+                    <p className="text-xs text-muted-foreground text-center">
+                      6-8 week pilot • Limited scope • Clean exit guaranteed
+                    </p>
+                  </form>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Pilot Details */}
+          <div className="mt-8 grid md:grid-cols-3 gap-4">
+            <div className="flex items-center gap-3 p-4 rounded-lg bg-card/50 border border-border/50">
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <CheckCircle2 className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <p className="font-medium text-foreground text-sm">Time-boxed Access</p>
+                <p className="text-xs text-muted-foreground">6-8 week pilot period</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-4 rounded-lg bg-card/50 border border-border/50">
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Shield className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <p className="font-medium text-foreground text-sm">Governed Trial</p>
+                <p className="text-xs text-muted-foreground">Full audit trail included</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-4 rounded-lg bg-card/50 border border-border/50">
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Users className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <p className="font-medium text-foreground text-sm">Role-based Demo</p>
+                <p className="text-xs text-muted-foreground">See exactly what you'll use</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
