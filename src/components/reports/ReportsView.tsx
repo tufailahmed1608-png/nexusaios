@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
+import { useAuditLog } from '@/hooks/useAuditLog';
 import { supabase } from '@/integrations/supabase/client';
 import {
   FileText,
@@ -19,7 +20,9 @@ import {
   CheckCircle2,
   Loader2,
   History,
+  ClipboardList,
 } from 'lucide-react';
+import AuditLogPanel from './AuditLogPanel';
 
 interface ReportType {
   id: string;
@@ -133,6 +136,7 @@ const mockProjectData = {
 
 const ReportsView = () => {
   const { toast } = useToast();
+  const { logStatusChange } = useAuditLog();
   const [activeTab, setActiveTab] = useState('generate');
   const [isGenerating, setIsGenerating] = useState<string | null>(null);
   const [generatedReports, setGeneratedReports] = useState<GeneratedReport[]>([]);
@@ -244,6 +248,10 @@ const ReportsView = () => {
           <TabsTrigger value="history">
             History ({generatedReports.length})
           </TabsTrigger>
+          <TabsTrigger value="audit" className="gap-1.5">
+            <ClipboardList className="h-3.5 w-3.5" />
+            Audit Log
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="generate" className="mt-6">
@@ -353,12 +361,22 @@ const ReportsView = () => {
                   <div className="border-t border-border pt-4">
                     <AIOutputStatusWorkflow 
                       status={selectedReport.status} 
-                      onStatusChange={(newStatus) => {
+                      onStatusChange={async (newStatus) => {
+                        const previousStatus = selectedReport.status;
                         const updatedReport = { ...selectedReport, status: newStatus };
                         setSelectedReport(updatedReport);
                         setGeneratedReports(prev => 
                           prev.map(r => r.id === selectedReport.id ? updatedReport : r)
                         );
+                        
+                        // Log to audit
+                        await logStatusChange({
+                          reportType: selectedReport.type,
+                          reportName: selectedReport.name,
+                          previousStatus,
+                          newStatus,
+                        });
+                        
                         toast({
                           title: "Status Updated",
                           description: `Report status changed to ${newStatus}.`,
@@ -431,6 +449,10 @@ const ReportsView = () => {
               ))}
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="audit" className="mt-6">
+          <AuditLogPanel />
         </TabsContent>
       </Tabs>
     </div>
