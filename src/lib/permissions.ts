@@ -82,8 +82,11 @@ export const FEATURE_PERMISSIONS: Record<string, AppRole[]> = {
   // Stakeholder Management - Primary for: Program Manager, PMO | Hidden for: PM, Executive
   stakeholders: ['program_manager', 'pmo', 'admin'],
   
-  // Activity/Audit (Decision Log) - Primary for: Executive, PMO
+  // Activity/Audit - Primary for: Executive, PMO
   activity: ['executive', 'pmo', 'admin'],
+  
+  // Decision Log - Primary for: Executive, PMO (Accountability)
+  decisions: ['executive', 'pmo', 'admin'],
   
   // Knowledge Base - PMO and Admin only
   knowledge: ['pmo', 'admin'],

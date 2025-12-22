@@ -27,6 +27,7 @@ import {
   BookOpen,
   Palette,
   User,
+  Gavel,
 } from 'lucide-react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
@@ -52,6 +53,7 @@ const menuItems = [
   { id: 'branding', labelKey: 'branding', icon: Palette },
   { id: 'stakeholders', labelKey: 'stakeholders', icon: UserCircle },
   { id: 'reports', labelKey: 'reports', icon: ClipboardList },
+  { id: 'decisions', labelKey: 'decisions', icon: Gavel },
   { id: 'weeklyDigest', labelKey: 'weeklyDigest', icon: Calendar },
   { id: 'riskPrediction', labelKey: 'riskPrediction', icon: Brain },
   { id: 'activity', labelKey: 'activity', icon: Activity },

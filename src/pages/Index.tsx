@@ -17,6 +17,7 @@ import ActivityView from '@/components/activity/ActivityView';
 import ReportsView from '@/components/reports/ReportsView';
 import RiskPredictionView from '@/components/risk/RiskPredictionView';
 import WeeklyDigestView from '@/components/digest/WeeklyDigestView';
+import DecisionLog from '@/components/decisions/DecisionLog';
 import { KnowledgeBase } from '@/components/knowledge/KnowledgeBase';
 import { BrandingView } from '@/components/branding/BrandingView';
 import { ProtectedFeature } from '@/components/auth/ProtectedFeature';
@@ -105,6 +106,12 @@ const Index = () => {
         return (
           <ProtectedFeature feature="activity">
             <ActivityView />
+          </ProtectedFeature>
+        );
+      case 'decisions':
+        return (
+          <ProtectedFeature feature="decisions">
+            <DecisionLog />
           </ProtectedFeature>
         );
       case 'strategy':

@@ -92,6 +92,107 @@ export type Database = {
         }
         Relationships: []
       }
+      decision_audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          decision_id: string
+          id: string
+          new_status: string | null
+          notes: string | null
+          previous_status: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          decision_id: string
+          id?: string
+          new_status?: string | null
+          notes?: string | null
+          previous_status?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          decision_id?: string
+          id?: string
+          new_status?: string | null
+          notes?: string | null
+          previous_status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "decision_audit_logs_decision_id_fkey"
+            columns: ["decision_id"]
+            isOneToOne: false
+            referencedRelation: "decisions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      decisions: {
+        Row: {
+          amount: string | null
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_type: string
+          description: string | null
+          due_date: string | null
+          id: string
+          impact: string | null
+          priority: string
+          project_name: string | null
+          rationale: string | null
+          stakeholders: string[] | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: string | null
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_type?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          impact?: string | null
+          priority?: string
+          project_name?: string | null
+          rationale?: string | null
+          stakeholders?: string[] | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: string | null
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_type?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          impact?: string | null
+          priority?: string
+          project_name?: string | null
+          rationale?: string | null
+          stakeholders?: string[] | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       document_templates: {
         Row: {
           content: string
