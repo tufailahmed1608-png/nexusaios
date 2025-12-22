@@ -226,21 +226,22 @@ Nexus implements a comprehensive role-based access control system that ensures u
 
 **Role-Feature Matrix:**
 
-| Feature | PMO | Program Manager | Sr. PM / PM | User (Pilot) |
-|---------|-----|-----------------|-------------|--------------|
-| Executive Dashboard | ⭐ Primary | ⭐ Primary | ◽ Secondary | ⭐ Primary (scoped) |
-| Auto-Generated Reports | ⭐ Primary | ⭐ Primary | ◽ Secondary | ◽ Secondary (draft) |
-| Meeting Hub | ⭐ Primary | ◽ Secondary | ⭐ Primary | ⭐ Primary |
-| Strategy View | ⭐ Primary | 🚫 Hidden | 🚫 Hidden | 🚫 Hidden |
-| Stakeholder Management | ⭐ Primary | ⭐ Primary | 🚫 Hidden | 🚫 Hidden |
-| Risk Prediction | ◽ Secondary | ⭐ Primary | 🚫 Hidden | 🚫 Hidden |
-| Task Board | ◽ Secondary | ◽ Secondary | ⭐ Primary | 🚫 Hidden |
-| Smart Inbox | 🚫 Hidden | ◽ Secondary | ⭐ Primary | 🚫 Hidden |
-| Calendar | ◽ Secondary | ◽ Secondary | ⭐ Primary | 🚫 Hidden |
-| Documents | ◽ Secondary | ◽ Secondary | ◽ Secondary | 🚫 Hidden |
-| Feedback Widget | ◽ Secondary | ◽ Secondary | ◽ Secondary | ⭐ Primary |
-| Admin / AI Controls | ◽ Secondary | 🚫 Hidden | 🚫 Hidden | 🚫 Hidden |
-| Audit & Explainability | ⭐ Primary | ◽ Secondary | 🚫 Hidden | 🚫 Hidden |
+| Feature | Executive | PMO | Program Manager | Sr. PM / PM | User (Pilot) |
+|---------|-----------|-----|-----------------|-------------|--------------|
+| Executive Dashboard | ⭐ Primary | ⭐ Primary | ⭐ Primary | ◽ Secondary | ⭐ Primary (scoped) |
+| Decision Log | ⭐ Primary | ⭐ Primary | 🚫 Hidden | 🚫 Hidden | 🚫 Hidden |
+| Auto-Generated Reports | ⭐ Primary (approved) | ⭐ Primary | ⭐ Primary | ◽ Secondary | ◽ Secondary (draft) |
+| Meeting Hub | 🚫 Hidden | ⭐ Primary | ◽ Secondary | ⭐ Primary | ⭐ Primary |
+| Strategy View | ⭐ Primary | ⭐ Primary | 🚫 Hidden | 🚫 Hidden | 🚫 Hidden |
+| Stakeholder Management | 🚫 Hidden | ⭐ Primary | ⭐ Primary | 🚫 Hidden | 🚫 Hidden |
+| Risk Prediction | 🚫 Hidden | ◽ Secondary | ⭐ Primary | 🚫 Hidden | 🚫 Hidden |
+| Task Board | 🚫 Hidden | ◽ Secondary | ◽ Secondary | ⭐ Primary | 🚫 Hidden |
+| Smart Inbox | 🚫 Hidden | 🚫 Hidden | ◽ Secondary | ⭐ Primary | 🚫 Hidden |
+| Calendar | 🚫 Hidden | ◽ Secondary | ◽ Secondary | ⭐ Primary | 🚫 Hidden |
+| Documents | 🚫 Hidden | ◽ Secondary | ◽ Secondary | ◽ Secondary | 🚫 Hidden |
+| Activity Feed | ⭐ Primary | ⭐ Primary | ◽ Secondary | ◽ Secondary | 🚫 Hidden |
+| Admin / AI Controls | 🚫 Hidden | ◽ Secondary | 🚫 Hidden | 🚫 Hidden | 🚫 Hidden |
+| Audit & Explainability | 🚫 Hidden | ⭐ Primary | ◽ Secondary | 🚫 Hidden | 🚫 Hidden |
 
 **Legend:** ⭐ Primary value | ◽ Secondary value | 🚫 Hidden/Restricted
 
@@ -252,6 +253,7 @@ Nexus implements a comprehensive role-based access control system that ensures u
 | Senior Project Manager | Same as PM – extended project ownership |
 | Program Manager | Dashboard, Reports, Risk Prediction, Stakeholders – cross-project visibility |
 | PMO | Executive Dashboard, Reports, Strategy, Stakeholders, Audit – portfolio truth & leadership confidence |
+| Executive | Executive Dashboard, Decision Log, Strategy, Approved Reports – strategic oversight & governance |
 | Admin | Full access – system administration & user management |
 
 **Role Request Workflow:**
@@ -269,7 +271,34 @@ Nexus implements a comprehensive role-based access control system that ensures u
 
 ---
 
-### 12. Activity Feed
+### 12. Decision Log
+**Executive Decision Tracking & Governance**
+
+A comprehensive system for tracking, recording, and auditing executive decisions with full transparency and accountability.
+
+**Key Capabilities:**
+- **Decision Categories:** Strategic, Budget, Resource, Policy, Risk decisions
+- **Status Workflow:** Draft → Under Review → Approved → Published
+- **Priority Levels:** Critical, High, Medium, Low
+- **Full Audit Trail:** Complete history of all status changes with timestamps and user attribution
+- **Stakeholder Tracking:** Associate stakeholders with each decision
+- **Impact & Rationale Recording:** Document decision reasoning and expected outcomes
+
+**Audit Trail Features:**
+- Automatic logging of all status transitions
+- User attribution for each action
+- Timestamped history
+- Notes and comments on changes
+- Exportable audit reports
+
+**Access Control:**
+- Executives, PMO, and Admins can view all decisions
+- Users can create and manage their own decisions
+- Hierarchical approval workflows
+
+---
+
+### 13. Activity Feed
 **Project Activity Timeline**
 
 Real-time activity tracking across all project activities.
@@ -348,10 +377,11 @@ Nexus leverages Google's Gemini AI model for:
 - Role-based feature access control
 
 ### Role-Based Access Control
-- **Hierarchical Roles:** Admin, PMO, Program Manager, Senior PM, PM, User
+- **Hierarchical Roles:** Admin, Executive, PMO, Program Manager, Senior PM, PM, User
 - **Permission-Based Views:** Features shown based on user role
 - **Role Request System:** Users can request role upgrades
 - **Admin Management:** Centralized role assignment dashboard
+- **Role-Specific Dashboards:** Executive role gets dedicated strategic dashboard
 
 ### Data Security
 - Row Level Security (RLS) on all data tables
@@ -408,5 +438,20 @@ For more information about Nexus Project OS, contact the product team.
 
 ---
 
-*Document Version: 1.1*
+## Test Accounts
+
+The following test accounts are available for demonstration purposes:
+
+| Email | Role | Password |
+|-------|------|----------|
+| pm@nexusaios.com | Project Manager | Jan@2026* |
+| spm@nexusaios.com | Senior Project Manager | Jan@2026* |
+| pgm@nexusaios.com | Program Manager | Jan@2026* |
+| pmo@nexusaios.com | PMO | Jan@2026* |
+| exc@nexusaios.com | Executive | Jan@2026* |
+| admin@nexusaios.com | Admin | Jan@2026* |
+
+---
+
+*Document Version: 1.2*
 *Last Updated: December 2024*
