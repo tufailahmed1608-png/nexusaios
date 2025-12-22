@@ -306,24 +306,96 @@ const DocsCover = () => {
       addSubtitle('Key Positioning');
       addParagraph('Nexus is not another PM tool. It is an intelligence layer that works WITH your existing tools.');
 
-      yPos += 4;
-      addSubtitle('Comparison');
-      addBullet('Primary Purpose: Intelligence layer for decision support vs. task execution tracking');
-      addBullet('Relationship to Tools: Observes existing systems (Jira, M365) vs. replaces them');
-      addBullet('AI Role: Assists analysis, humans decide vs. automation focus');
-      addBullet('Target Users: PMO, Executives, Program Managers vs. Project teams');
-      addBullet('Meeting Intelligence: Auto MoM, action extraction, decisions vs. manual notes');
-      addBullet('Reporting: AI-generated executive summaries vs. manual report creation');
-      addBullet('Decision Tracking: Structured log with audit trail vs. scattered in emails');
-      addBullet('Governance: Human-in-the-loop enforcement vs. process-dependent');
-
       yPos += 6;
+      
+      // Comparison Table
+      const comparisonData = [
+        { category: 'Primary Purpose', nexus: 'Intelligence layer for decision support', traditional: 'Task & project execution tracking' },
+        { category: 'Relationship to Tools', nexus: 'Observes existing systems (Jira, M365)', traditional: 'Replaces or competes with other tools' },
+        { category: 'AI Role', nexus: 'Assists analysis, humans decide', traditional: 'Automation focus, limited intelligence' },
+        { category: 'Target Users', nexus: 'PMO, Executives, Program Managers', traditional: 'Project Managers, Team Members' },
+        { category: 'Meeting Intelligence', nexus: 'Auto MoM, action extraction, decisions', traditional: 'Manual notes or basic transcription' },
+        { category: 'Reporting', nexus: 'AI-generated executive summaries', traditional: 'Manual report creation' },
+        { category: 'Decision Tracking', nexus: 'Structured log with audit trail', traditional: 'Scattered in emails/docs' },
+        { category: 'Governance', nexus: 'Human-in-the-loop enforcement', traditional: 'Process-dependent' },
+      ];
+
+      // Table header
+      const tableStartY = yPos;
+      const col1Width = 45;
+      const col2Width = 55;
+      const col3Width = 55;
+      const rowHeight = 12;
+      const tableX = margin;
+
+      // Header row
+      pdf.setFillColor(79, 70, 229);
+      pdf.rect(tableX, yPos - 4, col1Width + col2Width + col3Width, rowHeight, 'F');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(9);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Category', tableX + 2, yPos + 3);
+      pdf.text('Nexus', tableX + col1Width + 2, yPos + 3);
+      pdf.text('Traditional PM Tools', tableX + col1Width + col2Width + 2, yPos + 3);
+      yPos += rowHeight;
+
+      // Data rows
+      comparisonData.forEach((row, idx) => {
+        if (checkPageBreak(rowHeight + 5)) {
+          addHeader('Positioning', 6);
+          yPos += 10;
+        }
+        
+        // Alternate row background
+        if (idx % 2 === 0) {
+          pdf.setFillColor(241, 245, 249);
+          pdf.rect(tableX, yPos - 4, col1Width + col2Width + col3Width, rowHeight, 'F');
+        }
+        
+        // Draw cell borders
+        pdf.setDrawColor(200, 200, 200);
+        pdf.rect(tableX, yPos - 4, col1Width, rowHeight);
+        pdf.rect(tableX + col1Width, yPos - 4, col2Width, rowHeight);
+        pdf.rect(tableX + col1Width + col2Width, yPos - 4, col3Width, rowHeight);
+        
+        // Cell content
+        pdf.setTextColor(30, 41, 59);
+        pdf.setFontSize(8);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(row.category, tableX + 2, yPos + 2);
+        
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(79, 70, 229);
+        const nexusLines = pdf.splitTextToSize(row.nexus, col2Width - 4);
+        pdf.text(nexusLines[0], tableX + col1Width + 2, yPos + 2);
+        
+        pdf.setTextColor(100, 116, 139);
+        const tradLines = pdf.splitTextToSize(row.traditional, col3Width - 4);
+        pdf.text(tradLines[0], tableX + col1Width + col2Width + 2, yPos + 2);
+        
+        yPos += rowHeight;
+      });
+
+      yPos += 8;
       addSubtitle('What Nexus Does NOT Do');
-      addBullet('Replace task or email systems');
-      addBullet('Score or rank individuals');
-      addBullet('Perform autonomous task assignment');
-      addBullet('Make decisions without humans');
-      addBullet('Act as a system of record');
+      
+      const notDoList = [
+        'Replace Jira, Asana, or Monday.com',
+        'Manage individual task assignments',
+        'Run daily standups or sprints',
+        'Automate decisions without human approval',
+        'Operate independently of your existing tools',
+      ];
+      
+      notDoList.forEach(item => {
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(220, 38, 38);
+        pdf.text('✗', margin, yPos);
+        pdf.setTextColor(51, 65, 85);
+        pdf.text(item, margin + 8, yPos);
+        yPos += 6;
+      });
 
       // Page 6: Roles & User Journeys
       pdf.addPage();
