@@ -411,13 +411,17 @@ const DocsCover = () => {
         </h1>
         
         <p className="text-2xl text-indigo-300 font-medium mb-2">
-          AI-First Project Management Operating System
+          Intelligence, Not Execution
+        </p>
+        
+        <p className="text-lg text-slate-400 mb-4">
+          PMO Intelligence Layer for Executives & Decision Makers
         </p>
         
         <div className="w-32 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 mx-auto my-8 rounded-full" />
         
-        <p className="text-lg text-slate-400 mb-12 max-w-xl mx-auto">
-          Product Documentation & Technical Specifications
+        <p className="text-base text-slate-500 mb-12 max-w-xl mx-auto">
+          Observes your existing delivery systems and converts meetings and delivery signals into structured intelligence—supporting decision-making, not replacing your tools.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
@@ -447,7 +451,7 @@ const DocsCover = () => {
 
         <div className="bg-slate-800/50 rounded-lg p-4 mb-8 inline-flex items-center gap-3 text-sm text-slate-400">
           <FileText className="w-5 h-5 text-indigo-400" />
-          <span>Complete 7-page documentation bundle with cover page</span>
+          <span>Complete 7-page documentation bundle with clickable Table of Contents</span>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
@@ -473,7 +477,7 @@ const DocsCover = () => {
             onClick={() => navigate('/docs/ai-integration')}
             className="text-slate-400 hover:text-indigo-400 transition-colors"
           >
-            4. AI Integration
+            4. AI & Governance
           </button>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
@@ -481,7 +485,7 @@ const DocsCover = () => {
             onClick={() => navigate('/docs/competitive-analysis')}
             className="text-slate-400 hover:text-indigo-400 transition-colors"
           >
-            5. Competitive Analysis
+            5. Positioning
           </button>
           <button 
             onClick={() => navigate('/docs/roles-user-journeys')}
