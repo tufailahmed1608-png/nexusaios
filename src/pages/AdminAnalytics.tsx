@@ -7,10 +7,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Legend } from 'recharts';
-import { ArrowLeft, Users, Activity, TrendingUp, Clock, Shield, BarChart3, UserCog, Radio } from 'lucide-react';
+import { ArrowLeft, Users, Activity, TrendingUp, Clock, Shield, BarChart3, UserCog, Radio, MessageSquare } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { format, subDays, startOfDay, endOfDay } from 'date-fns';
 import UserManagement from '@/components/admin/UserManagement';
+import RoleAssignment from '@/components/admin/RoleAssignment';
+import RoleRequests from '@/components/admin/RoleRequests';
 
 interface ActivityData {
   action_type: string;
@@ -190,6 +192,14 @@ const AdminAnalytics = () => {
               <BarChart3 className="h-4 w-4" />
               Analytics
             </TabsTrigger>
+            <TabsTrigger value="roles" className="gap-2">
+              <Shield className="h-4 w-4" />
+              Role Assignment
+            </TabsTrigger>
+            <TabsTrigger value="requests" className="gap-2">
+              <MessageSquare className="h-4 w-4" />
+              Role Requests
+            </TabsTrigger>
             <TabsTrigger value="users" className="gap-2">
               <UserCog className="h-4 w-4" />
               User Management
@@ -358,6 +368,14 @@ const AdminAnalytics = () => {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="roles">
+            <RoleAssignment currentUserId={user?.id || ''} />
+          </TabsContent>
+
+          <TabsContent value="requests">
+            <RoleRequests currentUserId={user?.id || ''} />
           </TabsContent>
 
           <TabsContent value="users">
