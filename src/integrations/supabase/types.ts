@@ -394,6 +394,39 @@ export type Database = {
         }
         Relationships: []
       }
+      tenant_settings: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          setting_key: string
+          setting_value: Json
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          setting_key: string
+          setting_value?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          setting_key?: string
+          setting_value?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       user_activities: {
         Row: {
           action_details: Json | null
@@ -464,6 +497,7 @@ export type Database = {
         | "program_manager"
         | "pmo"
         | "executive"
+        | "tenant_admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -599,6 +633,7 @@ export const Constants = {
         "program_manager",
         "pmo",
         "executive",
+        "tenant_admin",
       ],
     },
   },
