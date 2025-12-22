@@ -14,48 +14,87 @@ import {
   ArrowRight,
   CheckCircle2,
   Sparkles,
+  Eye,
+  GitBranch,
+  Gavel,
+  TrendingUp,
+  Lock,
 } from 'lucide-react';
 
 const features = [
   {
-    icon: Brain,
-    title: 'Delivery Signal Processing',
-    description: 'Observe Jira, M365, and other delivery systems to convert signals into structured intelligence.',
-  },
-  {
-    icon: Mail,
-    title: 'Communication Intelligence',
-    description: 'Analyze emails and messages to surface critical decisions, risks, and governance needs.',
-  },
-  {
     icon: Video,
-    title: 'Meeting Intelligence',
-    description: 'Transform meeting transcripts into structured decisions, action items, and accountability records.',
+    title: 'Meeting Intelligence Hub',
+    description: 'Automated MoM generation, extraction of actions, decisions, and risks from meetings.',
+    primary: true,
+  },
+  {
+    icon: FileText,
+    title: 'Executive & PMO Reporting',
+    description: 'Auto-generated weekly, monthly, and executive reports with portfolio summaries.',
+    primary: true,
   },
   {
     icon: BarChart3,
-    title: 'Executive Dashboards',
-    description: 'Real-time portfolio intelligence for PMO and executive decision-making.',
+    title: 'Executive Dashboard',
+    description: 'Portfolio health, KPI heatmaps, and risk concentration views for leadership.',
+    primary: true,
+  },
+  {
+    icon: Gavel,
+    title: 'Decision Log',
+    description: 'Capture decisions from meetings with approval workflow and source traceability.',
+    primary: true,
+  },
+  {
+    icon: TrendingUp,
+    title: 'Strategy View',
+    description: 'Strategic pillar alignment, initiative contribution, and high-level ROI indicators.',
+    primary: true,
   },
   {
     icon: Shield,
-    title: 'Risk & Governance',
-    description: 'AI-powered risk identification with human accountability enforcement.',
-  },
-  {
-    icon: Users,
-    title: 'Stakeholder Intelligence',
-    description: 'Track stakeholder engagement and communication patterns across your delivery ecosystem.',
+    title: 'Governance & Accountability',
+    description: 'Human-in-the-loop enforcement with AI output lifecycle and explainability.',
+    primary: true,
   },
 ];
 
-const benefits = [
-  'Works alongside Jira, M365, and your existing tools',
-  'Converts delivery signals into executive insights',
-  'Enforces human accountability and governance',
-  'AI-generated intelligence reports',
-  'Supports PMO and executive decision-making',
-  'No replacement of existing workflows',
+const integrations = [
+  { name: 'Jira', color: 'bg-blue-500' },
+  { name: 'M365', color: 'bg-orange-500' },
+  { name: 'Teams', color: 'bg-purple-500' },
+  { name: 'Outlook', color: 'bg-cyan-500' },
+  { name: 'Confluence', color: 'bg-blue-600' },
+  { name: 'Slack', color: 'bg-pink-500' },
+];
+
+const howItWorks = [
+  {
+    step: '01',
+    title: 'Observe',
+    description: 'Connect to your existing delivery systems—Jira, M365, email, meetings—without replacing them.',
+    icon: Eye,
+  },
+  {
+    step: '02',
+    title: 'Analyze',
+    description: 'AI converts meetings and delivery signals into structured intelligence with full explainability.',
+    icon: Brain,
+  },
+  {
+    step: '03',
+    title: 'Decide',
+    description: 'Executives and PMO receive approved, auditable intelligence. Humans remain accountable.',
+    icon: Gavel,
+  },
+];
+
+const principles = [
+  { icon: Brain, text: 'AI assists preparation and analysis' },
+  { icon: Users, text: 'Humans approve, decide, and remain accountable' },
+  { icon: Lock, text: 'No autonomous decision-making' },
+  { icon: Shield, text: 'Every AI output has Draft → Reviewed → Approved lifecycle' },
 ];
 
 const Landing = () => {
@@ -95,7 +134,7 @@ const Landing = () => {
         </div>
       </header>
 
-      {/* Hero Section with Animations */}
+      {/* Hero Section */}
       <section className="relative pt-32 pb-20 px-6 overflow-hidden hero-gradient min-h-[90vh] flex items-center">
         {/* Animated glow orbs */}
         <div className="hero-glow hero-glow-1" />
@@ -125,71 +164,90 @@ const Landing = () => {
           </div>
           
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6 nexus-slide-up">
-            Intelligence Layer for
-            <span className="block nexus-gradient-text mt-2">PMO & Executives</span>
+            Intelligence, Not Execution
+            <span className="block nexus-gradient-text mt-2">For PMO & Executives</span>
           </h1>
           
-          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-10 nexus-fade-in" style={{ animationDelay: '0.2s' }}>
-            Nexus observes your existing delivery systems—Jira, M365, email—and converts meetings and 
-            delivery signals into structured intelligence. Supporting decision-making, not replacing your tools.
+          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-6 nexus-fade-in" style={{ animationDelay: '0.2s' }}>
+            Nexus observes your existing delivery systems and converts meetings and delivery signals 
+            into structured intelligence. Supporting decision-making, not replacing your tools.
+          </p>
+
+          <p className="text-sm text-muted-foreground max-w-2xl mx-auto mb-10 nexus-fade-in" style={{ animationDelay: '0.3s' }}>
+            Works alongside <span className="text-foreground font-medium">Jira</span>, <span className="text-foreground font-medium">Microsoft 365</span>, <span className="text-foreground font-medium">Email</span>, and your existing workflows
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 nexus-fade-in" style={{ animationDelay: '0.4s' }}>
             <Button size="lg" onClick={() => navigate('/auth')} className="gap-2 text-lg px-8 py-6 nexus-pulse-glow">
-              Start Free Trial <ArrowRight className="w-5 h-5" />
+              Request Pilot Access <ArrowRight className="w-5 h-5" />
             </Button>
             <Button size="lg" variant="outline" onClick={() => navigate('/demo')} className="text-lg px-8 py-6 backdrop-blur-sm">
               See Demo
             </Button>
           </div>
 
-          {/* Hero Visual */}
-          <div className="mt-16 relative nexus-fade-in" style={{ animationDelay: '0.6s' }}>
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent z-10 pointer-events-none" />
-            <div className="nexus-glass rounded-2xl p-2 mx-auto max-w-5xl border border-border/50 shadow-2xl shadow-primary/20 hover:shadow-primary/30 transition-shadow duration-500">
-              <div className="bg-card rounded-xl overflow-hidden">
-                <div className="h-8 bg-muted/50 flex items-center px-4 gap-2">
-                  <div className="w-3 h-3 rounded-full bg-destructive/60" />
-                  <div className="w-3 h-3 rounded-full bg-amber-500/60" />
-                  <div className="w-3 h-3 rounded-full bg-emerald-500/60" />
-                </div>
-                <div className="p-6 grid grid-cols-3 gap-4 min-h-[300px]">
-                  <div className="col-span-1 space-y-3">
-                    <div className="h-8 bg-muted/30 rounded-lg animate-pulse" />
-                    <div className="h-6 bg-muted/20 rounded-lg w-3/4" />
-                    <div className="h-6 bg-primary/20 rounded-lg animate-pulse" style={{ animationDelay: '0.5s' }} />
-                    <div className="h-6 bg-muted/20 rounded-lg w-2/3" />
-                    <div className="h-6 bg-muted/20 rounded-lg w-4/5" />
-                  </div>
-                  <div className="col-span-2 space-y-3">
-                    <div className="flex gap-3">
-                      <div className="flex-1 h-24 bg-muted/20 rounded-xl" />
-                      <div className="flex-1 h-24 bg-muted/20 rounded-xl animate-pulse" style={{ animationDelay: '1s' }} />
-                      <div className="flex-1 h-24 bg-primary/10 rounded-xl" />
-                    </div>
-                    <div className="h-32 bg-muted/10 rounded-xl" />
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="h-16 bg-muted/20 rounded-xl" />
-                      <div className="h-16 bg-primary/10 rounded-xl animate-pulse" style={{ animationDelay: '1.5s' }} />
-                    </div>
-                  </div>
-                </div>
+          {/* Integration Badges */}
+          <div className="mt-12 flex flex-wrap items-center justify-center gap-3 nexus-fade-in" style={{ animationDelay: '0.5s' }}>
+            {integrations.map((integration, index) => (
+              <div 
+                key={index}
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-card/50 border border-border/50 backdrop-blur-sm"
+              >
+                <div className={`w-2 h-2 rounded-full ${integration.color}`} />
+                <span className="text-sm text-muted-foreground">{integration.name}</span>
               </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* How It Works Section */}
       <section className="py-20 px-6 bg-muted/30">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Observe. Analyze. Decide.
+              How Nexus Works
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Nexus doesn't replace Jira, email, or task systems. It sits above them—converting 
-              delivery signals into actionable intelligence for PMO and executives.
+              Observe → Analyze → Decide. Intelligence layer, not a replacement.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {howItWorks.map((item, index) => (
+              <div key={index} className="relative">
+                {index < howItWorks.length - 1 && (
+                  <div className="hidden md:block absolute top-16 left-[60%] w-[80%] h-0.5 bg-gradient-to-r from-primary/50 to-transparent" />
+                )}
+                <Card className="nexus-card-hover border-border/50 bg-card/50 backdrop-blur-sm text-center">
+                  <CardContent className="p-8">
+                    <div className="text-5xl font-bold text-primary/20 mb-4">{item.step}</div>
+                    <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                      <item.icon className="w-8 h-8 text-primary" />
+                    </div>
+                    <h3 className="text-xl font-bold text-foreground mb-3">{item.title}</h3>
+                    <p className="text-muted-foreground">{item.description}</p>
+                  </CardContent>
+                </Card>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Core Intelligence Features */}
+      <section className="py-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
+              Core Intelligence Layer
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              Primary Value Proposition
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              These features define Nexus. Meeting intelligence, executive reporting, 
+              decision tracking, and governance enforcement.
             </p>
           </div>
 
@@ -209,37 +267,49 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Benefits Section */}
-      <section className="py-20 px-6">
+      {/* AI Operating Principles */}
+      <section className="py-20 px-6 bg-muted/30">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
+                <Shield className="w-4 h-4" />
+                Trustworthy AI
+              </div>
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
                 Human Accountability, <br />
                 <span className="nexus-gradient-text">AI-Powered Intelligence</span>
               </h2>
               <p className="text-lg text-muted-foreground mb-8">
-                Nexus enforces governance and accountability while AI converts your delivery 
-                signals into structured intelligence for executive decision-making.
+                Nexus enforces human-in-the-loop governance. AI assists analysis, 
+                humans approve and decide. Every AI output follows a controlled lifecycle.
               </p>
-              <ul className="space-y-4">
-                {benefits.map((benefit, index) => (
-                  <li key={index} className="flex items-center gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />
-                    <span className="text-foreground">{benefit}</span>
-                  </li>
+              <div className="space-y-4">
+                {principles.map((principle, index) => (
+                  <div key={index} className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <principle.icon className="w-5 h-5 text-primary" />
+                    </div>
+                    <span className="text-foreground">{principle.text}</span>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <Card className="nexus-card p-6 col-span-2">
                 <div className="flex items-center gap-3 mb-3">
-                  <Zap className="w-5 h-5 text-amber-500" />
-                  <span className="font-medium text-foreground">Delivery Signal Processing</span>
+                  <GitBranch className="w-5 h-5 text-primary" />
+                  <span className="font-medium text-foreground">AI Output Lifecycle</span>
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  Jira updates, emails, and meeting notes converted into structured executive intelligence
-                </p>
+                <div className="flex items-center gap-2 mt-4">
+                  <span className="px-3 py-1 rounded-full bg-muted text-xs font-medium text-muted-foreground">Draft</span>
+                  <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                  <span className="px-3 py-1 rounded-full bg-amber-500/20 text-xs font-medium text-amber-600">Reviewed</span>
+                  <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                  <span className="px-3 py-1 rounded-full bg-primary/20 text-xs font-medium text-primary">Approved</span>
+                  <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                  <span className="px-3 py-1 rounded-full bg-success/20 text-xs font-medium text-success">Published</span>
+                </div>
               </Card>
               <Card className="nexus-card p-6">
                 <div className="text-3xl font-bold text-primary mb-1">Zero</div>
@@ -247,18 +317,44 @@ const Landing = () => {
               </Card>
               <Card className="nexus-card p-6">
                 <div className="text-3xl font-bold text-emerald-500 mb-1">100%</div>
-                <p className="text-sm text-muted-foreground">Accountability</p>
+                <p className="text-sm text-muted-foreground">Human accountability</p>
               </Card>
               <Card className="nexus-card p-6 col-span-2">
                 <div className="flex items-center gap-3 mb-3">
-                  <FileText className="w-5 h-5 text-primary" />
-                  <span className="font-medium text-foreground">Intelligence Reports</span>
+                  <Eye className="w-5 h-5 text-primary" />
+                  <span className="font-medium text-foreground">Full Explainability</span>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  AI-generated insights from your delivery ecosystem for PMO and executive review
+                  Every AI insight shows source, rationale, confidence, and approval status
                 </p>
               </Card>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* What Nexus Is NOT */}
+      <section className="py-20 px-6">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
+            What Nexus Does <span className="text-muted-foreground">NOT</span> Do
+          </h2>
+          <div className="grid md:grid-cols-2 gap-4 mt-10">
+            {[
+              'Replace task or email systems',
+              'Score or rank individuals',
+              'Perform autonomous task assignment',
+              'Predict employee performance',
+              'Act as a system of record',
+              'Make decisions without humans',
+            ].map((item, index) => (
+              <div key={index} className="flex items-center gap-3 p-4 rounded-lg bg-destructive/5 border border-destructive/20">
+                <div className="w-6 h-6 rounded-full bg-destructive/10 flex items-center justify-center flex-shrink-0">
+                  <span className="text-destructive text-sm">✕</span>
+                </div>
+                <span className="text-foreground text-left">{item}</span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -271,10 +367,16 @@ const Landing = () => {
           </h2>
           <p className="text-lg text-muted-foreground mb-8">
             Keep your existing tools. Add the intelligence layer that executives and PMOs need.
+            Start with a governed pilot—6-8 weeks, limited scope, clean exit.
           </p>
-          <Button size="lg" onClick={() => navigate('/auth')} className="gap-2 text-lg px-8 py-6">
-            Get Started Free <ArrowRight className="w-5 h-5" />
-          </Button>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Button size="lg" onClick={() => navigate('/auth')} className="gap-2 text-lg px-8 py-6">
+              Request Pilot Access <ArrowRight className="w-5 h-5" />
+            </Button>
+            <Button size="lg" variant="outline" onClick={() => navigate('/demo')} className="text-lg px-8 py-6">
+              See Demo
+            </Button>
+          </div>
         </div>
       </section>
 
@@ -288,7 +390,7 @@ const Landing = () => {
             <span className="font-semibold text-foreground">Nexus Project OS</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            © 2025 Nexus Project OS. All rights reserved.
+            © 2025 Nexus Project OS. Intelligence, not execution.
           </p>
         </div>
       </footer>
