@@ -97,13 +97,16 @@ const DocsCover = () => {
       pdf.setFontSize(36);
       pdf.text('Nexus Project OS', pageWidth / 2, 130, { align: 'center' });
       
-      pdf.setFontSize(16);
+      pdf.setFontSize(18);
       pdf.setTextColor(165, 180, 252);
-      pdf.text('AI-First Project Management Operating System', pageWidth / 2, 145, { align: 'center' });
+      pdf.text('Intelligence, Not Execution', pageWidth / 2, 148, { align: 'center' });
       
-      pdf.setFontSize(12);
+      pdf.setFontSize(14);
       pdf.setTextColor(148, 163, 184);
-      pdf.text('Product Documentation & Technical Specifications', pageWidth / 2, 165, { align: 'center' });
+      pdf.text('PMO Intelligence Layer for Executives & Decision Makers', pageWidth / 2, 165, { align: 'center' });
+      
+      pdf.setFontSize(11);
+      pdf.text('Product Documentation & Technical Specifications', pageWidth / 2, 185, { align: 'center' });
       
       pdf.setFontSize(10);
       pdf.text('Document Version: 1.0 | December 2025', pageWidth / 2, pageHeight - 30, { align: 'center' });
@@ -130,13 +133,13 @@ const DocsCover = () => {
       
       // TOC entries with clickable links
       const tocEntries = [
-        { title: 'Executive Summary', page: 3, desc: 'Overview of Nexus Project OS and key value propositions' },
-        { title: 'Core Features', page: 4, desc: 'Smart Inbox, Meeting Hub, Dashboard, Task Board & more' },
+        { title: 'Executive Summary', page: 3, desc: 'Intelligence layer overview and core philosophy' },
+        { title: 'Core Intelligence Features', page: 4, desc: 'Meeting Hub, Executive Reporting, Decision Log & more' },
         { title: 'Technical Specifications', page: 5, desc: 'Technology stack, security, and integrations' },
-        { title: 'AI Integration', page: 6, desc: 'Google Gemini capabilities and intelligent automation' },
-        { title: 'Competitive Analysis', page: 7, desc: 'Market comparison and key differentiators' },
-        { title: 'Roles & User Journeys', page: 8, desc: 'Role hierarchy, permissions, and user workflows' },
-        { title: 'Market Position', page: 9, desc: 'Market overview, target segments, and go-to-market strategy' },
+        { title: 'AI & Governance', page: 6, desc: 'Human-in-the-loop AI with full explainability' },
+        { title: 'Positioning', page: 7, desc: 'Nexus vs traditional PM tools comparison' },
+        { title: 'Roles & User Journeys', page: 8, desc: 'PMO, Executive, and PM workflows' },
+        { title: 'Market Position', page: 9, desc: 'Target market and go-to-market strategy' },
       ];
 
       tocEntries.forEach((entry, idx) => {
@@ -193,43 +196,47 @@ const DocsCover = () => {
       // Page 1: Executive Summary
       pdf.addPage();
       addHeader('Executive Summary', 2);
-      addTitle('Executive Summary');
+      addTitle('Intelligence, Not Execution');
       
-      addParagraph('Nexus Project OS is an AI-first Project Management Operating System designed to consolidate communication, strategy, and execution into a single interface. Unlike traditional tools (Jira, Asana, Monday.com), Nexus uses AI to actively analyze incoming data—emails, meeting transcripts, and documents—to automatically generate tasks, assess sentiment, and predict risks.');
+      addParagraph('Nexus Project OS is a PMO Intelligence Layer designed for executives and decision makers. Unlike traditional PM tools that focus on task execution, Nexus observes your existing delivery systems and converts meetings and delivery signals into structured intelligence—supporting decision-making, not replacing your tools.');
+      
+      yPos += 4;
+      addSubtitle('How Nexus Works');
+      addBullet('Observe: Connect to existing systems (Jira, M365, email, meetings) without replacing them');
+      addBullet('Analyze: AI converts meetings and delivery signals into structured intelligence with full explainability');
+      addBullet('Decide: Executives and PMO receive approved, auditable intelligence. Humans remain accountable');
       
       yPos += 4;
       addSubtitle('Target Users');
-      addParagraph('Enterprise project managers, PMO teams, and executives who need unified visibility across communication and project execution.');
+      addParagraph('PMO teams, Executives, and Program Managers who need intelligence for decision support—not another task tracker.');
       
       addSubtitle('Core Philosophy');
-      addParagraph('Nexus is designed to be the single point of work for project managers, eliminating context switching between emails, spreadsheets, PowerPoint presentations, and multiple PMO tools.');
+      addParagraph('Nexus complements Jira, M365, Asana, Monday.com—it does not replace them. AI assists preparation and analysis; humans approve, decide, and remain accountable. No autonomous decision-making.');
       
       yPos += 4;
-      addSubtitle('Key Value Propositions');
-      addBullet('Unified Workspace: Single platform for emails, meetings, tasks, and reports');
-      addBullet('AI-Powered Insights: Automatic sentiment analysis, task extraction, and risk prediction');
-      addBullet('Real-Time Intelligence: Live dashboards with KPIs and portfolio health');
-      addBullet('Automated Reporting: Generate comprehensive status reports with a single click');
+      addSubtitle('Key Differentiators');
+      addBullet('Intelligence layer for decision support, not task execution tracking');
+      addBullet('Works alongside existing tools, zero tool replacement required');
+      addBullet('Human-in-the-loop governance with full AI output lifecycle');
 
-      // Page 2: Core Features
+      // Page 2: Core Intelligence Features
       pdf.addPage();
-      addHeader('Core Features', 3);
-      addTitle('Core Features');
+      addHeader('Core Intelligence Features', 3);
+      addTitle('Primary Value Proposition');
+      
+      addParagraph('These features define Nexus. Meeting intelligence, executive reporting, decision tracking, and governance enforcement.');
 
       const features = [
-        { name: 'Smart Inbox', desc: 'AI-powered email intelligence with sentiment analysis, escalation matrix, and task extraction' },
-        { name: 'Meeting Hub', desc: 'Intelligent meeting management with transcript analysis and auto-generated minutes' },
-        { name: 'Executive Dashboard', desc: 'Real-time portfolio intelligence with KPIs, budget tracking, and velocity charts' },
-        { name: 'Task Board', desc: 'AI-enhanced Kanban task management with auto-generated tasks' },
-        { name: 'Strategy View', desc: 'Strategic alignment dashboards with ROI tracking and portfolio analytics' },
-        { name: 'Stakeholder Management', desc: 'Comprehensive stakeholder tracking with communication planning' },
-        { name: 'Auto-Generated Reports', desc: 'AI-powered status reporting with one-click generation' },
-        { name: 'Documents & Templates', desc: 'Centralized document management with cloud sync' },
-        { name: 'Smart Notifications', desc: 'AI-prioritized alerts for critical project events' },
+        { name: 'Meeting Intelligence Hub', desc: 'Automated MoM generation, extraction of actions, decisions, and risks from meetings.' },
+        { name: 'Executive & PMO Reporting', desc: 'Auto-generated weekly, monthly, and executive reports with portfolio summaries.' },
+        { name: 'Executive Dashboard', desc: 'Portfolio health, KPI heatmaps, and risk concentration views for leadership.' },
+        { name: 'Decision Log', desc: 'Capture decisions from meetings with approval workflow and source traceability.' },
+        { name: 'Strategy View', desc: 'Strategic pillar alignment, initiative contribution, and high-level ROI indicators.' },
+        { name: 'Governance & Accountability', desc: 'Human-in-the-loop enforcement with AI output lifecycle and explainability.' },
       ];
 
       features.forEach((feature, idx) => {
-        if (checkPageBreak(20)) addHeader('Core Features', 3);
+        if (checkPageBreak(20)) addHeader('Core Intelligence Features', 3);
         addSubtitle(`${idx + 1}. ${feature.name}`);
         addParagraph(feature.desc);
         yPos += 2;
@@ -265,104 +272,111 @@ const DocsCover = () => {
       addBullet('Project Tools: Jira, Slack widgets');
       addBullet('Email: Gmail, Outlook (planned)');
 
-      // Page 4: AI Integration
+      // Page 4: AI & Governance
       pdf.addPage();
-      addHeader('AI Integration', 5);
-      addTitle('AI Integration');
+      addHeader('AI & Governance', 5);
+      addTitle('Human Accountability, AI-Powered Intelligence');
 
-      addSubtitle('Powered by Google Gemini');
-      addParagraph('Nexus leverages advanced AI capabilities integrated throughout the platform for intelligent automation and insights.');
+      addSubtitle('Trustworthy AI Principles');
+      addBullet('AI assists preparation and analysis');
+      addBullet('Humans approve, decide, and remain accountable');
+      addBullet('No autonomous decision-making');
+      addBullet('Every AI output has Draft → Reviewed → Approved → Published lifecycle');
+
+      yPos += 4;
+      addSubtitle('AI Output Lifecycle');
+      addParagraph('All AI-generated content follows a controlled workflow: Draft (AI generates) → Reviewed (human reviews) → Approved (authorized sign-off) → Published (ready for use). Full audit trail included.');
+
+      yPos += 4;
+      addSubtitle('Full Explainability');
+      addParagraph('Every AI insight shows source, rationale, confidence score, and approval status. No black-box decisions.');
 
       yPos += 4;
       addSubtitle('AI Capabilities');
-      addBullet('Smart Inbox: Sentiment analysis, escalation determination, task extraction');
-      addBullet('Meeting Hub: Transcript analysis, summary generation, action item extraction');
-      addBullet('Reports: Auto-generation from project data');
-      addBullet('Smart Reply: Context-aware email response generation');
-      addBullet('Risk Prediction: AI-powered risk assessment and mitigation suggestions');
-      addBullet('Task Suggestions: Intelligent recommendations based on context');
+      addBullet('Meeting Intelligence: Transcript analysis, MoM generation, action extraction');
+      addBullet('Executive Reporting: Auto-generated summaries from delivery signals');
+      addBullet('Decision Support: Structured decision capture with source traceability');
+      addBullet('Risk Detection: Pattern recognition across portfolio for early warnings');
 
-      yPos += 4;
-      addSubtitle('Natural Language Processing');
-      addBullet('Sentiment detection with confidence scores');
-      addBullet('Entity extraction from communications');
-      addBullet('Context-aware response generation');
-
-      yPos += 4;
-      addSubtitle('Predictive Analytics');
-      addBullet('Risk assessment and prediction');
-      addBullet('Project health forecasting');
-      addBullet('Resource optimization suggestions');
-
-      // Page 5: Competitive Analysis
+      // Page 5: Positioning
       pdf.addPage();
-      addHeader('Competitive Analysis', 6);
-      addTitle('Competitive Analysis');
+      addHeader('Positioning', 6);
+      addTitle('Nexus vs Traditional PM Tools');
 
-      addSubtitle('Key Differentiators');
-      addBullet('AI-First Architecture: Built from ground up with AI at its core');
-      addBullet('Unified Communication Hub: Email, meetings, and tasks in one place');
-      addBullet('Automated Intelligence: Tasks and insights generated automatically');
-      addBullet('Enterprise-Ready: Built for PMO teams with executive dashboards');
+      addSubtitle('Key Positioning');
+      addParagraph('Nexus is not another PM tool. It is an intelligence layer that works WITH your existing tools.');
 
       yPos += 4;
-      addSubtitle('Feature Comparison');
-      addParagraph('Nexus offers unique capabilities not found in competitors like Jira, Asana, or Monday.com:');
-      addBullet('AI Sentiment Analysis: ✓ Nexus only');
-      addBullet('Auto Task Extraction: ✓ Nexus only');
-      addBullet('Meeting Transcript Analysis: ✓ Nexus only');
-      addBullet('AI Report Generation: ✓ Nexus only');
-      addBullet('Escalation Matrix: ✓ Nexus only');
+      addSubtitle('Comparison');
+      addBullet('Primary Purpose: Intelligence layer for decision support vs. task execution tracking');
+      addBullet('Relationship to Tools: Observes existing systems (Jira, M365) vs. replaces them');
+      addBullet('AI Role: Assists analysis, humans decide vs. automation focus');
+      addBullet('Target Users: PMO, Executives, Program Managers vs. Project teams');
+      addBullet('Meeting Intelligence: Auto MoM, action extraction, decisions vs. manual notes');
+      addBullet('Reporting: AI-generated executive summaries vs. manual report creation');
+      addBullet('Decision Tracking: Structured log with audit trail vs. scattered in emails');
+      addBullet('Governance: Human-in-the-loop enforcement vs. process-dependent');
+
+      yPos += 6;
+      addSubtitle('What Nexus Does NOT Do');
+      addBullet('Replace task or email systems');
+      addBullet('Score or rank individuals');
+      addBullet('Perform autonomous task assignment');
+      addBullet('Make decisions without humans');
+      addBullet('Act as a system of record');
 
       // Page 6: Roles & User Journeys
       pdf.addPage();
       addHeader('Roles & User Journeys', 7);
       addTitle('Roles & User Journeys');
 
-      addSubtitle('Role Hierarchy');
-      addBullet('Executive: Strategic oversight, governance, decision approval');
-      addBullet('PMO: Portfolio governance, reporting, AI controls');
-      addBullet('Program Manager: Cross-project oversight, risk prediction, stakeholders');
-      addBullet('Project Manager: Task execution, inbox management, meetings');
-      addBullet('User (Pilot): Meeting Hub access, scoped dashboard, feedback');
+      addSubtitle('Target User Roles');
+      addBullet('Executive: Portfolio overview, strategic dashboards, AI summaries');
+      addBullet('PMO: Cross-project reporting, governance, resource management');
+      addBullet('Program Manager: Program health, dependencies, milestone tracking');
+      addBullet('Project Manager: Project delivery, team coordination, risk tracking');
 
       yPos += 4;
       addSubtitle('User Journey: Executive');
-      addParagraph('Login → Executive Dashboard → Review KPIs → Check Decision Log → Approve Decisions → View Strategy → Generate Report');
-      addParagraph('Time saved: 2+ hours/week on status meetings and report review');
+      addParagraph('Login → Executive Dashboard → Review portfolio KPIs → Check Decision Log → Approve AI outputs → View Strategy → Receive weekly digest');
+      addParagraph('Value: Structured intelligence for faster, better-informed decisions');
 
       yPos += 4;
-      addSubtitle('User Journey: Project Manager');
-      addParagraph('Login → Smart Inbox → Process Emails → Extract Tasks → Update Task Board → Meeting Hub → Generate Minutes');
-      addParagraph('Time saved: 8+ hours/week on email processing and documentation');
+      addSubtitle('User Journey: PMO');
+      addParagraph('Login → Portfolio Dashboard → Review cross-project reports → Audit AI outputs → Configure governance rules → Generate executive summaries');
+      addParagraph('Value: Single source of truth with full explainability');
+
+      yPos += 4;
+      addSubtitle('Pilot Program');
+      addBullet('6-8 week time-boxed access with limited scope');
+      addBullet('Full audit trail and governance included');
+      addBullet('Role-based demo to see exactly what you will use');
+      addBullet('Clean exit guaranteed');
 
       // Page 7: Market Position
       pdf.addPage();
       addHeader('Market Position', 8);
       addTitle('Market Position & Strategy');
 
-      addSubtitle('Market Overview');
+      addSubtitle('Market Opportunity');
       addBullet('$8.2B: Project Management Software Market (2024)');
       addBullet('15.7%: CAGR Growth Rate (2024-2030)');
-      addBullet('$20.6B: Projected Market Size (2030)');
+      addBullet('Gap: No incumbent focuses on PMO intelligence layer');
 
       yPos += 4;
-      addSubtitle('Target Market');
-      addParagraph('Primary: Enterprise PMO & Executives - Fortune 500 companies with complex portfolios');
-      addParagraph('Secondary: Mid-Market Project Teams - Growing companies with 100-1000 employees');
+      addSubtitle('Target Customers');
+      addParagraph('Primary: Enterprise PMO & Executives in Fortune 500 companies needing decision intelligence, not more task tracking.');
+      addParagraph('Secondary: Mid-market organizations scaling governance and reporting.');
 
       yPos += 4;
       addSubtitle('Go-To-Market Strategy');
-      addBullet('Phase 1 (Current): Limited pilot with select enterprise customers');
-      addBullet('Phase 2 (Q2 2025): Expand to 50+ customers, launch partner program');
-      addBullet('Phase 3 (Q4 2025): General availability, API platform, global expansion');
+      addBullet('Phase 1 (Current): Controlled pilot with select enterprise customers');
+      addBullet('Phase 2: Partner with delivery tool vendors (Jira, M365 integrations)');
+      addBullet('Phase 3: Self-service mid-market tier and API platform');
 
       yPos += 4;
-      addSubtitle('Key Success Metrics');
-      addBullet('60% reduction in email processing time');
-      addBullet('8+ hours saved per PM per week');
-      addBullet('90% accuracy in task extraction');
-      addBullet('40% faster status reporting');
+      addSubtitle('Why Now');
+      addParagraph('AI maturity enables reliable meeting transcription and summarization. Remote work increased meeting volume. Executives demand structured intelligence, not more tools.');
 
       // Save the PDF
       pdf.save('Nexus-Project-OS-Complete-Documentation.pdf');
