@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from '@/hooks/use-toast';
+import RoleDashboardPreview from '@/components/landing/RoleDashboardPreview';
 
 import {
   Brain,
@@ -498,7 +499,7 @@ const Landing = () => {
 
       {/* Request Demo Form Section */}
       <section id="request-demo" className="py-20 px-6 bg-gradient-to-b from-background to-primary/5">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
               <Zap className="w-4 h-4" />
@@ -515,11 +516,11 @@ const Landing = () => {
 
           <Card className="border-border/50 bg-card/80 backdrop-blur-sm overflow-hidden">
             <CardContent className="p-0">
-              <div className="grid lg:grid-cols-2">
+              <div className="grid lg:grid-cols-3">
                 {/* Role Selection */}
-                <div className="p-8 border-b lg:border-b-0 lg:border-r border-border">
+                <div className="p-6 border-b lg:border-b-0 lg:border-r border-border">
                   <h3 className="text-lg font-semibold text-foreground mb-4">Select Your Role</h3>
-                  <RadioGroup value={selectedRole} onValueChange={setSelectedRole} className="space-y-3">
+                  <RadioGroup value={selectedRole} onValueChange={setSelectedRole} className="space-y-2">
                     {testRoles.map((role) => (
                       <div key={role.id} className="relative">
                         <RadioGroupItem
@@ -529,24 +530,30 @@ const Landing = () => {
                         />
                         <Label
                           htmlFor={role.id}
-                          className="flex flex-col p-4 rounded-lg border-2 cursor-pointer transition-all
+                          className="flex flex-col p-3 rounded-lg border-2 cursor-pointer transition-all
                             border-border hover:border-primary/50 
                             peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5"
                         >
-                          <span className="font-medium text-foreground">{role.label}</span>
-                          <span className="text-sm text-muted-foreground mt-1">{role.description}</span>
+                          <span className="font-medium text-foreground text-sm">{role.label}</span>
+                          <span className="text-xs text-muted-foreground mt-0.5">{role.description}</span>
                         </Label>
                       </div>
                     ))}
                   </RadioGroup>
                 </div>
 
+                {/* Dashboard Preview */}
+                <div className="p-6 border-b lg:border-b-0 lg:border-r border-border bg-muted/20">
+                  <h3 className="text-lg font-semibold text-foreground mb-4">Dashboard Preview</h3>
+                  <RoleDashboardPreview role={selectedRole} />
+                </div>
+
                 {/* Form */}
-                <div className="p-8">
+                <div className="p-6">
                   <h3 className="text-lg font-semibold text-foreground mb-4">Your Details</h3>
-                  <form onSubmit={handleDemoRequest} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Full Name</Label>
+                  <form onSubmit={handleDemoRequest} className="space-y-3">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="name" className="text-sm">Full Name</Label>
                       <Input
                         id="name"
                         type="text"
@@ -556,8 +563,8 @@ const Landing = () => {
                         required
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Work Email</Label>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="email" className="text-sm">Work Email</Label>
                       <Input
                         id="email"
                         type="email"
