@@ -10,33 +10,86 @@ export const ROLE_HIERARCHY = {
 
 export type AppRole = keyof typeof ROLE_HIERARCHY;
 
-// Feature permissions mapping
+// Feature permissions mapping with primary (⭐) and secondary (◽) value per role
+// Primary = core value proposition, Secondary = oversight/limited access
 export const FEATURE_PERMISSIONS: Record<string, AppRole[]> = {
-  // Basic user - only dashboard and inbox
-  dashboard: ['user', 'project_manager', 'senior_project_manager', 'program_manager', 'pmo', 'admin'],
-  inbox: ['user', 'project_manager', 'senior_project_manager', 'program_manager', 'pmo', 'admin'],
+  // ========== USER (Pilot/Evaluator) ==========
+  // ⭐ Primary: Meeting Hub, Dashboard (pilot-scoped), Feedback Widget
+  // ◽ Secondary: Reports (draft only)
+  // 🚫 Hidden: Admin/AI Controls
   
-  // Project management features - PM and above
+  // ========== PROJECT MANAGER ==========
+  // ⭐ Primary: Task Board, Smart Inbox, Calendar, Meeting Hub
+  // ◽ Secondary: Dashboard, Documents, Reports (view), Notifications
+  // 🚫 Hidden: Stakeholder Map, Admin/AI, Branding
+  
+  // ========== SENIOR PROJECT MANAGER = PROJECT MANAGER ==========
+  
+  // ========== PROGRAM MANAGER ==========
+  // ⭐ Primary: Dashboard, Reports, Risk Prediction, Stakeholder Map
+  // ◽ Secondary: Meeting Hub, Tasks (oversight), Inbox
+  // 🚫 Hidden: Admin/AI, Branding
+  
+  // ========== PMO ==========
+  // ⭐ Primary: Executive Dashboard, Reports, Meeting Hub, Strategy, Stakeholder Mgmt, Audit
+  // ◽ Secondary: Task Board (oversight)
+  // 🚫 Hidden: Smart Inbox
+  
+  // ========== ADMIN ==========
+  // Full access to all features
+  
+  // Dashboard - Primary for: User (pilot-scoped), Program Manager, PMO | Secondary for: PM
+  dashboard: ['user', 'project_manager', 'senior_project_manager', 'program_manager', 'pmo', 'admin'],
+  
+  // Meeting Hub - Primary for: User, PM, PMO | Secondary for: Program Manager
+  meetings: ['user', 'project_manager', 'senior_project_manager', 'program_manager', 'pmo', 'admin'],
+  
+  // Task Board - Primary for: PM | Secondary for: PMO (oversight)
   tasks: ['project_manager', 'senior_project_manager', 'program_manager', 'pmo', 'admin'],
+  
+  // Smart Inbox - Primary for: PM | Secondary for: Program Manager | Hidden for: PMO, User
+  inbox: ['project_manager', 'senior_project_manager', 'program_manager', 'admin'],
+  
+  // Calendar - Primary for: PM
   calendar: ['project_manager', 'senior_project_manager', 'program_manager', 'pmo', 'admin'],
+  
+  // Documents - Secondary for: PM
   documents: ['project_manager', 'senior_project_manager', 'program_manager', 'pmo', 'admin'],
+  
+  // Projects
   projects: ['project_manager', 'senior_project_manager', 'program_manager', 'pmo', 'admin'],
-  meetings: ['project_manager', 'senior_project_manager', 'program_manager', 'pmo', 'admin'],
-  stakeholders: ['project_manager', 'senior_project_manager', 'program_manager', 'pmo', 'admin'],
+  
+  // Team
   team: ['project_manager', 'senior_project_manager', 'program_manager', 'pmo', 'admin'],
   
-  // Advanced features - Senior PM and above
-  reports: ['senior_project_manager', 'program_manager', 'pmo', 'admin'],
-  riskPrediction: ['senior_project_manager', 'program_manager', 'pmo', 'admin'],
-  weeklyDigest: ['senior_project_manager', 'program_manager', 'pmo', 'admin'],
+  // Reports - Primary for: Program Manager, PMO | Secondary for: PM (view), User (draft only)
+  reports: ['user', 'project_manager', 'senior_project_manager', 'program_manager', 'pmo', 'admin'],
   
-  // Strategic features - Program Manager and above
-  strategy: ['program_manager', 'pmo', 'admin'],
-  activity: ['program_manager', 'pmo', 'admin'],
+  // Risk Prediction - Primary for: Program Manager
+  riskPrediction: ['program_manager', 'pmo', 'admin'],
   
-  // PMO/Admin features
+  // Weekly Digest
+  weeklyDigest: ['program_manager', 'pmo', 'admin'],
+  
+  // Strategy View - Primary for: PMO
+  strategy: ['pmo', 'admin'],
+  
+  // Stakeholder Management - Primary for: Program Manager, PMO | Hidden for: PM
+  stakeholders: ['program_manager', 'pmo', 'admin'],
+  
+  // Activity/Audit - Primary for: PMO
+  activity: ['pmo', 'admin'],
+  
+  // Knowledge Base - PMO and Admin only
   knowledge: ['pmo', 'admin'],
+  
+  // Branding - PMO and Admin only | Hidden for: PM, Program Manager
   branding: ['pmo', 'admin'],
+  
+  // Feedback Widget - Primary for: User
+  feedback: ['user', 'project_manager', 'senior_project_manager', 'program_manager', 'pmo', 'admin'],
+  
+  // Admin Dashboard - Admin only | Hidden for: User, PM, Program Manager
   adminDashboard: ['admin'],
 };
 
