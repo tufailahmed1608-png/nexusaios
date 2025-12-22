@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils';
 import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
 import Dashboard from '@/components/dashboard/Dashboard';
+import ExecutiveDashboard from '@/components/dashboard/ExecutiveDashboard';
 import SmartInbox from '@/components/inbox/SmartInbox';
 import TaskBoard from '@/components/tasks/TaskBoard';
 import MeetingHub from '@/components/meetings/MeetingHub';
@@ -24,6 +25,7 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePresence } from '@/hooks/usePresence';
 import { useActivityTracking } from '@/hooks/useActivityTracking';
+import { useUserRole } from '@/hooks/useUserRole';
 
 const Index = () => {
   const [activeView, setActiveView] = useState('dashboard');
@@ -33,6 +35,9 @@ const Index = () => {
   const isMobile = useIsMobile();
   const { onlineUsers } = usePresence(activeView);
   const { trackAction } = useActivityTracking();
+  const { role } = useUserRole();
+  
+  const isExecutive = role === 'executive';
 
   useEffect(() => {
     if (isDark) {
@@ -50,7 +55,8 @@ const Index = () => {
   const renderContent = () => {
     switch (activeView) {
       case 'dashboard':
-        return <Dashboard />;
+        // Show Executive Dashboard for executive role
+        return isExecutive ? <ExecutiveDashboard /> : <Dashboard />;
       case 'inbox':
         return <SmartInbox />;
       case 'tasks':
