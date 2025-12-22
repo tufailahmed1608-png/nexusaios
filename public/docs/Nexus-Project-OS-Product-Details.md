@@ -222,36 +222,50 @@ Comprehensive team member management and resource allocation.
 ### 11. Role-Based Access Control
 **Granular Permission Management**
 
-Nexus implements a comprehensive role-based access control system that ensures users only see features relevant to their responsibilities.
+Nexus implements a comprehensive role-based access control system that ensures users only see features relevant to their responsibilities and role-specific value.
+
+**Role-Feature Matrix:**
+
+| Feature | PMO | Program Manager | Sr. PM / PM | User (Pilot) |
+|---------|-----|-----------------|-------------|--------------|
+| Executive Dashboard | ⭐ Primary | ⭐ Primary | ◽ Secondary | ⭐ Primary (scoped) |
+| Auto-Generated Reports | ⭐ Primary | ⭐ Primary | ◽ Secondary | ◽ Secondary (draft) |
+| Meeting Hub | ⭐ Primary | ◽ Secondary | ⭐ Primary | ⭐ Primary |
+| Strategy View | ⭐ Primary | 🚫 Hidden | 🚫 Hidden | 🚫 Hidden |
+| Stakeholder Management | ⭐ Primary | ⭐ Primary | 🚫 Hidden | 🚫 Hidden |
+| Risk Prediction | ◽ Secondary | ⭐ Primary | 🚫 Hidden | 🚫 Hidden |
+| Task Board | ◽ Secondary | ◽ Secondary | ⭐ Primary | 🚫 Hidden |
+| Smart Inbox | 🚫 Hidden | ◽ Secondary | ⭐ Primary | 🚫 Hidden |
+| Calendar | ◽ Secondary | ◽ Secondary | ⭐ Primary | 🚫 Hidden |
+| Documents | ◽ Secondary | ◽ Secondary | ◽ Secondary | 🚫 Hidden |
+| Feedback Widget | ◽ Secondary | ◽ Secondary | ◽ Secondary | ⭐ Primary |
+| Admin / AI Controls | ◽ Secondary | 🚫 Hidden | 🚫 Hidden | 🚫 Hidden |
+| Audit & Explainability | ⭐ Primary | ◽ Secondary | 🚫 Hidden | 🚫 Hidden |
+
+**Legend:** ⭐ Primary value | ◽ Secondary value | 🚫 Hidden/Restricted
 
 **Available Roles:**
-| Role | Description | Access Level |
-|------|-------------|--------------|
-| User | Basic access | Dashboard, Smart Inbox |
-| Project Manager | Full project access | All project features |
-| Senior Project Manager | Extended access | All features + advanced analytics |
-| Program Manager | Multi-project oversight | Cross-project visibility |
-| PMO | Portfolio management | Full platform access |
-| Admin | System administration | User management, role assignment |
+| Role | Core Value Proposition |
+|------|------------------------|
+| User (Pilot/Evaluator) | Meeting Hub, Dashboard, Feedback – immediate wow factor & psychological safety |
+| Project Manager | Task Board, Smart Inbox, Calendar – day-to-day execution efficiency |
+| Senior Project Manager | Same as PM – extended project ownership |
+| Program Manager | Dashboard, Reports, Risk Prediction, Stakeholders – cross-project visibility |
+| PMO | Executive Dashboard, Reports, Strategy, Stakeholders, Audit – portfolio truth & leadership confidence |
+| Admin | Full access – system administration & user management |
 
 **Role Request Workflow:**
-1. **New User Onboarding:** New users start with basic access (Dashboard & Smart Inbox only)
+1. **New User Onboarding:** New users start with Pilot User access (Meeting Hub, Dashboard, Feedback)
 2. **Role Request:** Users can request elevated roles through Settings
 3. **Admin Review:** Administrators review pending role requests
 4. **Approval/Rejection:** Admins approve or reject with optional notes
 5. **Instant Access:** Approved users immediately gain new permissions
 
-**Admin Capabilities:**
-- View all users and their current roles
-- Assign roles directly to any user
-- Review and process role upgrade requests
-- Add notes when approving/rejecting requests
-
 **Benefits:**
+- Role-specific feature visibility reduces cognitive overload
+- Primary/secondary distinction highlights core value per persona
 - Secure access control based on organizational hierarchy
 - Self-service role request reduces admin overhead
-- Clear audit trail for role changes
-- Flexible permission system adapts to team structure
 
 ---
 
