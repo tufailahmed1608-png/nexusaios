@@ -12,16 +12,14 @@ export type AppRole = keyof typeof ROLE_HIERARCHY;
 
 // Feature permissions mapping
 export const FEATURE_PERMISSIONS: Record<string, AppRole[]> = {
-  // Dashboard - everyone
+  // Basic user - only dashboard and inbox
   dashboard: ['user', 'project_manager', 'senior_project_manager', 'program_manager', 'pmo', 'admin'],
-  
-  // Basic features - all authenticated users
   inbox: ['user', 'project_manager', 'senior_project_manager', 'program_manager', 'pmo', 'admin'],
-  tasks: ['user', 'project_manager', 'senior_project_manager', 'program_manager', 'pmo', 'admin'],
-  calendar: ['user', 'project_manager', 'senior_project_manager', 'program_manager', 'pmo', 'admin'],
-  documents: ['user', 'project_manager', 'senior_project_manager', 'program_manager', 'pmo', 'admin'],
   
-  // Project management - PM and above
+  // Project management features - PM and above
+  tasks: ['project_manager', 'senior_project_manager', 'program_manager', 'pmo', 'admin'],
+  calendar: ['project_manager', 'senior_project_manager', 'program_manager', 'pmo', 'admin'],
+  documents: ['project_manager', 'senior_project_manager', 'program_manager', 'pmo', 'admin'],
   projects: ['project_manager', 'senior_project_manager', 'program_manager', 'pmo', 'admin'],
   meetings: ['project_manager', 'senior_project_manager', 'program_manager', 'pmo', 'admin'],
   stakeholders: ['project_manager', 'senior_project_manager', 'program_manager', 'pmo', 'admin'],

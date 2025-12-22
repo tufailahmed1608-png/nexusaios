@@ -21,14 +21,18 @@ import {
   Check,
   ExternalLink,
   BookOpen,
-  Presentation
+  Presentation,
+  Shield
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useUserRole } from '@/hooks/useUserRole';
+import RoleRequestForm from '@/components/settings/RoleRequestForm';
 
 const Settings = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { role, loading: roleLoading } = useUserRole();
   
   // Profile state
   const [displayName, setDisplayName] = useState('');
@@ -213,10 +217,14 @@ const Settings = () => {
 
       <div className="max-w-4xl mx-auto px-4 py-8">
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:inline-grid">
             <TabsTrigger value="profile" className="gap-2">
               <User className="h-4 w-4" />
               <span className="hidden sm:inline">Profile</span>
+            </TabsTrigger>
+            <TabsTrigger value="role" className="gap-2">
+              <Shield className="h-4 w-4" />
+              <span className="hidden sm:inline">Role</span>
             </TabsTrigger>
             <TabsTrigger value="security" className="gap-2">
               <Lock className="h-4 w-4" />
@@ -235,6 +243,13 @@ const Settings = () => {
               <span className="hidden sm:inline">Resources</span>
             </TabsTrigger>
           </TabsList>
+
+          {/* Role Tab */}
+          <TabsContent value="role" className="space-y-6">
+            {user && !roleLoading && (
+              <RoleRequestForm userId={user.id} currentRole={role} />
+            )}
+          </TabsContent>
 
           {/* Profile Tab */}
           <TabsContent value="profile" className="space-y-6">
