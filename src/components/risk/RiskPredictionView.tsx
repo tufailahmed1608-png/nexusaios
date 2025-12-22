@@ -56,6 +56,7 @@ import {
 } from '@/components/ui/tooltip';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { AIExplainability, type AIExplanation } from '@/components/ai/AIExplainability';
 
 interface MitigationRecommendation {
   id: number;
@@ -74,8 +75,21 @@ interface MitigationData {
   estimatedDelayReduction: string;
 }
 
+interface ProjectRiskWithExplanation {
+  id: string;
+  name: string;
+  riskScore: number;
+  delayProbability: number;
+  predictedDelay: number;
+  confidence: number;
+  trend: string;
+  factors: { name: string; score: number; impact: string }[];
+  historicalRisk: { week: string; score: number }[];
+  explanation?: AIExplanation;
+}
+
 // Risk prediction data
-const projectRisks = [
+const initialProjectRisks: ProjectRiskWithExplanation[] = [
   {
     id: '1',
     name: 'Enterprise Platform Migration',
@@ -294,9 +308,11 @@ const TrendIndicator = ({ trend }: { trend: string }) => {
 
 const RiskPredictionView = () => {
   const { isRTL } = useLanguage();
-  const [selectedProject, setSelectedProject] = useState(projectRisks[0]);
+  const [projectRisks, setProjectRisks] = useState<ProjectRiskWithExplanation[]>(initialProjectRisks);
+  const [selectedProject, setSelectedProject] = useState<ProjectRiskWithExplanation>(initialProjectRisks[0]);
   const [mitigationData, setMitigationData] = useState<MitigationData | null>(null);
   const [isGeneratingMitigation, setIsGeneratingMitigation] = useState(false);
+  const [isLoadingExplanation, setIsLoadingExplanation] = useState(false);
 
   const radarData = selectedProject.factors.map(f => ({
     factor: f.name.split(' ')[0],
@@ -317,6 +333,40 @@ const RiskPredictionView = () => {
   );
   const highRiskCount = projectRisks.filter(p => p.riskScore >= 70).length;
   const atRiskCount = projectRisks.filter(p => p.riskScore >= 50 && p.riskScore < 70).length;
+
+  const generateExplanation = async (project: ProjectRiskWithExplanation) => {
+    setIsLoadingExplanation(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-ai-explanation', {
+        body: {
+          type: 'risk',
+          context: {
+            projectName: project.name,
+            riskScore: project.riskScore,
+            delayProbability: project.delayProbability,
+            predictedDelay: project.predictedDelay,
+            riskFactors: project.factors,
+            trend: project.trend,
+          },
+        },
+      });
+
+      if (error) throw error;
+
+      const updatedProject = { ...project, explanation: data };
+      setSelectedProject(updatedProject);
+      setProjectRisks(prev =>
+        prev.map(p => (p.id === project.id ? updatedProject : p))
+      );
+
+      toast.success('AI explanation generated');
+    } catch (error) {
+      console.error('Error generating explanation:', error);
+      toast.error('Could not generate AI explanation');
+    } finally {
+      setIsLoadingExplanation(false);
+    }
+  };
 
   const generateMitigation = async () => {
     setIsGeneratingMitigation(true);
@@ -524,13 +574,17 @@ const RiskPredictionView = () => {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="factors">Risk Factors</TabsTrigger>
+                <TabsTrigger value="factors">Factors</TabsTrigger>
                 <TabsTrigger value="trend">Trend</TabsTrigger>
+                <TabsTrigger value="explainability" className="gap-1">
+                  <Brain className="h-3 w-3" />
+                  Why
+                </TabsTrigger>
                 <TabsTrigger value="mitigation" className="gap-1">
                   <Shield className="h-3 w-3" />
-                  Mitigation
+                  Actions
                 </TabsTrigger>
               </TabsList>
 
@@ -706,6 +760,44 @@ const RiskPredictionView = () => {
                     }
                   </p>
                 </div>
+              </TabsContent>
+
+              <TabsContent value="explainability" className="mt-4 space-y-4">
+                {selectedProject.explanation ? (
+                  <AIExplainability explanation={selectedProject.explanation} />
+                ) : (
+                  <Card className="border-dashed border-primary/30 bg-primary/5">
+                    <CardContent className="p-6">
+                      <div className="flex flex-col items-center text-center">
+                        <div className="p-4 rounded-full bg-primary/10 mb-4">
+                          <Brain className="h-8 w-8 text-primary" />
+                        </div>
+                        <h3 className="text-lg font-semibold mb-2">AI Explainability</h3>
+                        <p className="text-sm text-muted-foreground max-w-md mb-4">
+                          Understand how the AI analyzed risk factors and arrived at these predictions. 
+                          See the reasoning, data sources, and confidence factors.
+                        </p>
+                        <Button
+                          onClick={() => generateExplanation(selectedProject)}
+                          disabled={isLoadingExplanation}
+                          className="gap-2"
+                        >
+                          {isLoadingExplanation ? (
+                            <>
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                              Generating...
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles className="h-4 w-4" />
+                              Generate Explanation
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
               </TabsContent>
 
               <TabsContent value="mitigation" className="mt-4 space-y-4">
