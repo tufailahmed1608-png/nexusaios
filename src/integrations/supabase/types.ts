@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_output_audit_logs: {
+        Row: {
+          created_at: string
+          id: string
+          new_status: string
+          notes: string | null
+          previous_status: string | null
+          report_name: string
+          report_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          new_status: string
+          notes?: string | null
+          previous_status?: string | null
+          report_name: string
+          report_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          new_status?: string
+          notes?: string | null
+          previous_status?: string | null
+          report_name?: string
+          report_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       company_branding: {
         Row: {
           accent_color: string
