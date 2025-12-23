@@ -1,0 +1,376 @@
+name: Deploy to PRODUCTION
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag to deploy (e.g., v1.0.0)'
+        required: true
+        type: string
+
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '8'
+  AZURE_REGION: swedencentral
+  ENVIRONMENT: prod
+
+jobs:
+  validate:
+    name: Validate Release
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Determine version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" == "release" ]; then
+            echo "version=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.version.outputs.version }}
+
+      - name: Validate version tag
+        run: |
+          if [[ ! "${{ steps.version.outputs.version }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid version format. Expected: v*.*.* (e.g., v1.0.0)"
+            exit 1
+          fi
+
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    needs: [validate]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.validate.outputs.version }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build application
+        run: pnpm build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL_PROD }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY_PROD }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-prod-${{ needs.validate.outputs.version }}
+          path: dist/
+          retention-days: 30
+
+  approval:
+    name: Production Approval
+    runs-on: ubuntu-latest
+    needs: [build]
+    environment: production
+    steps:
+      - name: Approval checkpoint
+        run: |
+          echo "🚀 Production deployment approved"
+          echo "Version: ${{ needs.validate.outputs.version }}"
+          echo "Approved by: ${{ github.actor }}"
+
+  backup-database:
+    name: Backup Production Database
+    runs-on: ubuntu-latest
+    needs: [approval]
+    steps:
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Create full database backup
+        run: |
+          echo "Creating production backup..."
+          az postgres flexible-server backup create \
+            --resource-group rg-nexus-prod \
+            --name nexus-prod-db \
+            --backup-name pre-release-${{ needs.validate.outputs.version }}-${{ github.run_number }}
+
+      - name: Verify backup
+        run: |
+          az postgres flexible-server backup list \
+            --resource-group rg-nexus-prod \
+            --name nexus-prod-db \
+            --query "[?starts_with(name, 'pre-release-${{ needs.validate.outputs.version }}')]"
+
+  deploy-infrastructure:
+    name: Deploy Infrastructure
+    runs-on: ubuntu-latest
+    needs: [approval, backup-database]
+    outputs:
+      static-web-app-name: ${{ steps.deploy.outputs.staticWebAppName }}
+      function-app-name: ${{ steps.deploy.outputs.functionAppName }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.validate.outputs.version }}
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy Bicep template
+        id: deploy
+        uses: azure/arm-deploy@v2
+        with:
+          scope: subscription
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          region: ${{ env.AZURE_REGION }}
+          template: ./infrastructure/azure/main.bicep
+          parameters: ./infrastructure/azure/parameters/prod.bicepparam administratorLoginPassword=${{ secrets.DB_PASSWORD_PROD }}
+          deploymentName: nexus-prod-${{ needs.validate.outputs.version }}-${{ github.run_number }}
+          failOnStdErr: false
+
+  run-migrations:
+    name: Run Database Migrations
+    runs-on: ubuntu-latest
+    needs: [deploy-infrastructure]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.validate.outputs.version }}
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Run migrations with transaction
+        env:
+          PGPASSWORD: ${{ secrets.DB_PASSWORD_PROD }}
+        run: |
+          echo "Running migrations in transaction..."
+          psql -h ${{ secrets.DB_HOST_PROD }} \
+               -U ${{ secrets.DB_USER_PROD }} \
+               -d nexus_prod \
+               -v ON_ERROR_STOP=1 \
+               -c "BEGIN;" \
+               $(for f in infrastructure/azure/database/migrations/*.sql; do echo "-f $f"; done) \
+               -c "COMMIT;"
+
+  deploy-functions-slot:
+    name: Deploy Functions to Staging Slot
+    runs-on: ubuntu-latest
+    needs: [run-migrations]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.validate.outputs.version }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy to staging slot
+        uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ secrets.FUNCTION_APP_NAME_PROD }}
+          package: ./infrastructure/azure/functions
+          slot-name: staging
+
+  deploy-frontend-slot:
+    name: Deploy Frontend to Staging
+    runs-on: ubuntu-latest
+    needs: [run-migrations]
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-prod-${{ needs.validate.outputs.version }}
+          path: dist/
+
+      - name: Deploy to staging environment
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_PROD }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: upload
+          app_location: dist
+          skip_app_build: true
+          skip_api_build: true
+          deployment_environment: staging
+
+  health-check-staging:
+    name: Health Check Staging
+    runs-on: ubuntu-latest
+    needs: [deploy-frontend-slot, deploy-functions-slot]
+    steps:
+      - name: Wait for deployment
+        run: sleep 30
+
+      - name: Health check staging frontend
+        run: |
+          for i in {1..10}; do
+            response=$(curl -s -o /dev/null -w "%{http_code}" ${{ secrets.APP_URL_PROD_STAGING }})
+            if [ "$response" == "200" ]; then
+              echo "Frontend health check passed!"
+              exit 0
+            fi
+            echo "Attempt $i: Got $response, retrying..."
+            sleep 10
+          done
+          echo "Frontend health check failed after 10 attempts"
+          exit 1
+
+      - name: Health check staging API
+        run: |
+          for i in {1..10}; do
+            response=$(curl -s -o /dev/null -w "%{http_code}" ${{ secrets.API_URL_PROD }}/health)
+            if [ "$response" == "200" ]; then
+              echo "API health check passed!"
+              exit 0
+            fi
+            echo "Attempt $i: Got $response, retrying..."
+            sleep 10
+          done
+          echo "API health check failed after 10 attempts"
+          exit 1
+
+  swap-slots:
+    name: Swap to Production
+    runs-on: ubuntu-latest
+    needs: [health-check-staging]
+    steps:
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Swap Function App slots
+        run: |
+          az functionapp deployment slot swap \
+            --resource-group rg-nexus-prod \
+            --name ${{ secrets.FUNCTION_APP_NAME_PROD }} \
+            --slot staging \
+            --target-slot production
+
+      - name: Promote Static Web App staging
+        run: |
+          echo "Promoting staging environment to production..."
+          # Azure Static Web Apps automatically promotes staging after successful deployment
+
+  post-deploy-validation:
+    name: Post-Deploy Validation
+    runs-on: ubuntu-latest
+    needs: [swap-slots]
+    steps:
+      - name: Production health check
+        run: |
+          echo "Validating production deployment..."
+          for i in {1..5}; do
+            response=$(curl -s -o /dev/null -w "%{http_code}" ${{ secrets.APP_URL_PROD }})
+            if [ "$response" == "200" ]; then
+              echo "✅ Production is healthy!"
+              exit 0
+            fi
+            echo "Attempt $i: Got $response, waiting..."
+            sleep 15
+          done
+          echo "❌ Production health check failed!"
+          exit 1
+
+  notify-success:
+    name: Notify Success
+    runs-on: ubuntu-latest
+    needs: [post-deploy-validation, validate]
+    if: success()
+    steps:
+      - name: Send success notification
+        uses: slackapi/slack-github-action@v1.26.0
+        if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
+        with:
+          payload: |
+            {
+              "text": "🚀 PRODUCTION Deployment Succeeded!",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Nexus OS Production Release* 🎉\n*Version:* `${{ needs.validate.outputs.version }}`\n*Status:* ✅ Successfully deployed\n*Deployed by:* ${{ github.actor }}\n<${{ secrets.APP_URL_PROD }}|View Application>"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+  rollback-on-failure:
+    name: Automatic Rollback
+    runs-on: ubuntu-latest
+    needs: [post-deploy-validation, validate]
+    if: failure()
+    steps:
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Rollback Function App
+        run: |
+          echo "⚠️ Rolling back Function App..."
+          az functionapp deployment slot swap \
+            --resource-group rg-nexus-prod \
+            --name ${{ secrets.FUNCTION_APP_NAME_PROD }} \
+            --slot staging \
+            --target-slot production
+
+      - name: Send failure notification
+        uses: slackapi/slack-github-action@v1.26.0
+        if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
+        with:
+          payload: |
+            {
+              "text": "🚨 PRODUCTION Deployment FAILED - Rolled Back!",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Nexus OS Production FAILED* ❌\n*Version:* `${{ needs.validate.outputs.version }}`\n*Status:* 🔄 Automatically rolled back\n*Action required:* Check logs and investigate\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Workflow Logs>"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK

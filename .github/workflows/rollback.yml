@@ -1,0 +1,252 @@
+name: Emergency Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to rollback'
+        required: true
+        type: choice
+        options:
+          - staging
+          - prod
+      rollback_type:
+        description: 'Type of rollback'
+        required: true
+        type: choice
+        options:
+          - frontend
+          - functions
+          - database
+          - all
+      backup_name:
+        description: 'Database backup name (required for database rollback)'
+        required: false
+        type: string
+      confirm:
+        description: 'Type "ROLLBACK" to confirm'
+        required: true
+        type: string
+
+concurrency:
+  group: rollback-${{ github.event.inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Validate Rollback Request
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate confirmation
+        run: |
+          if [ "${{ github.event.inputs.confirm }}" != "ROLLBACK" ]; then
+            echo "❌ Rollback not confirmed. You must type 'ROLLBACK' to proceed."
+            exit 1
+          fi
+          echo "✅ Rollback confirmed"
+
+      - name: Validate database backup
+        if: github.event.inputs.rollback_type == 'database' || github.event.inputs.rollback_type == 'all'
+        run: |
+          if [ -z "${{ github.event.inputs.backup_name }}" ]; then
+            echo "❌ Database backup name is required for database rollback"
+            exit 1
+          fi
+
+  approval:
+    name: Emergency Approval
+    runs-on: ubuntu-latest
+    needs: [validate]
+    environment: ${{ github.event.inputs.environment == 'prod' && 'production-emergency' || 'staging' }}
+    steps:
+      - name: Approval checkpoint
+        run: |
+          echo "⚠️ Emergency rollback approved for ${{ github.event.inputs.environment }}"
+          echo "Rollback type: ${{ github.event.inputs.rollback_type }}"
+          echo "Approved by: ${{ github.actor }}"
+
+  notify-start:
+    name: Notify Rollback Start
+    runs-on: ubuntu-latest
+    needs: [approval]
+    steps:
+      - name: Send alert
+        uses: slackapi/slack-github-action@v1.26.0
+        if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
+        with:
+          payload: |
+            {
+              "text": "🚨 EMERGENCY ROLLBACK STARTED",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*🚨 Emergency Rollback Started*\n*Environment:* ${{ github.event.inputs.environment }}\n*Type:* ${{ github.event.inputs.rollback_type }}\n*Initiated by:* ${{ github.actor }}"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+  rollback-functions:
+    name: Rollback Azure Functions
+    runs-on: ubuntu-latest
+    needs: [approval]
+    if: github.event.inputs.rollback_type == 'functions' || github.event.inputs.rollback_type == 'all'
+    steps:
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Get function app name
+        id: config
+        run: |
+          if [ "${{ github.event.inputs.environment }}" == "prod" ]; then
+            echo "function_app=${{ secrets.FUNCTION_APP_NAME_PROD }}" >> $GITHUB_OUTPUT
+            echo "resource_group=rg-nexus-prod" >> $GITHUB_OUTPUT
+          else
+            echo "function_app=${{ secrets.FUNCTION_APP_NAME_STAGING }}" >> $GITHUB_OUTPUT
+            echo "resource_group=rg-nexus-staging" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Swap back to previous version
+        run: |
+          echo "🔄 Swapping Function App slots..."
+          az functionapp deployment slot swap \
+            --resource-group ${{ steps.config.outputs.resource_group }} \
+            --name ${{ steps.config.outputs.function_app }} \
+            --slot staging \
+            --target-slot production
+          
+          echo "✅ Function App rolled back"
+
+  rollback-frontend:
+    name: Rollback Frontend
+    runs-on: ubuntu-latest
+    needs: [approval]
+    if: github.event.inputs.rollback_type == 'frontend' || github.event.inputs.rollback_type == 'all'
+    steps:
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: List previous deployments
+        id: list
+        run: |
+          # Get the previous successful deployment
+          echo "📋 Listing previous deployments..."
+          # Note: Azure Static Web Apps doesn't have direct CLI rollback
+          # This would typically involve redeploying a previous artifact
+          echo "⚠️ Frontend rollback requires redeployment of previous artifact"
+          echo "Please trigger a manual deployment with the previous version tag"
+
+  rollback-database:
+    name: Rollback Database
+    runs-on: ubuntu-latest
+    needs: [approval]
+    if: github.event.inputs.rollback_type == 'database' || github.event.inputs.rollback_type == 'all'
+    steps:
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Get database config
+        id: config
+        run: |
+          if [ "${{ github.event.inputs.environment }}" == "prod" ]; then
+            echo "resource_group=rg-nexus-prod" >> $GITHUB_OUTPUT
+            echo "server_name=nexus-prod-db" >> $GITHUB_OUTPUT
+          else
+            echo "resource_group=rg-nexus-staging" >> $GITHUB_OUTPUT
+            echo "server_name=nexus-staging-db" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Restore from backup
+        run: |
+          echo "🔄 Restoring database from backup: ${{ github.event.inputs.backup_name }}"
+          
+          # Point-in-time restore
+          az postgres flexible-server restore \
+            --resource-group ${{ steps.config.outputs.resource_group }} \
+            --name ${{ steps.config.outputs.server_name }}-restored \
+            --source-server ${{ steps.config.outputs.server_name }} \
+            --restore-time ${{ github.event.inputs.backup_name }}
+          
+          echo "✅ Database restored to: ${{ steps.config.outputs.server_name }}-restored"
+          echo "⚠️ Manual DNS/connection string update may be required"
+
+  health-check:
+    name: Post-Rollback Health Check
+    runs-on: ubuntu-latest
+    needs: [rollback-functions, rollback-frontend, rollback-database]
+    if: always() && (needs.rollback-functions.result == 'success' || needs.rollback-frontend.result == 'success' || needs.rollback-database.result == 'success')
+    steps:
+      - name: Get app URL
+        id: url
+        run: |
+          if [ "${{ github.event.inputs.environment }}" == "prod" ]; then
+            echo "app_url=${{ secrets.APP_URL_PROD }}" >> $GITHUB_OUTPUT
+          else
+            echo "app_url=${{ secrets.APP_URL_STAGING }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Health check
+        run: |
+          echo "🏥 Running post-rollback health check..."
+          
+          for i in {1..10}; do
+            response=$(curl -s -o /dev/null -w "%{http_code}" ${{ steps.url.outputs.app_url }})
+            if [ "$response" == "200" ]; then
+              echo "✅ Application is healthy after rollback!"
+              exit 0
+            fi
+            echo "Attempt $i: Got $response, waiting..."
+            sleep 15
+          done
+          
+          echo "⚠️ Health check did not pass after rollback"
+          exit 1
+
+  notify-complete:
+    name: Notify Rollback Complete
+    runs-on: ubuntu-latest
+    needs: [health-check, rollback-functions, rollback-frontend, rollback-database]
+    if: always()
+    steps:
+      - name: Determine overall status
+        id: status
+        run: |
+          if [ "${{ needs.health-check.result }}" == "success" ]; then
+            echo "status=✅ Success" >> $GITHUB_OUTPUT
+            echo "emoji=✅" >> $GITHUB_OUTPUT
+          else
+            echo "status=⚠️ Completed with issues" >> $GITHUB_OUTPUT
+            echo "emoji=⚠️" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Send notification
+        uses: slackapi/slack-github-action@v1.26.0
+        if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
+        with:
+          payload: |
+            {
+              "text": "${{ steps.status.outputs.emoji }} Emergency Rollback Complete",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Emergency Rollback Complete*\n*Environment:* ${{ github.event.inputs.environment }}\n*Type:* ${{ github.event.inputs.rollback_type }}\n*Status:* ${{ steps.status.outputs.status }}\n*Functions:* ${{ needs.rollback-functions.result || 'skipped' }}\n*Frontend:* ${{ needs.rollback-frontend.result || 'skipped' }}\n*Database:* ${{ needs.rollback-database.result || 'skipped' }}\n*Health Check:* ${{ needs.health-check.result }}"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
