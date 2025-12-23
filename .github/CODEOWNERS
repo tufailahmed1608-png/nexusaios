@@ -1,0 +1,25 @@
+# Nexus OS Code Owners
+# These owners will be requested for review when someone opens a pull request
+
+# Default owners for everything
+* @nexus-team
+
+# Infrastructure changes require DevOps review
+/infrastructure/ @devops-team @nexus-team
+
+# Database migrations require DBA review
+/infrastructure/azure/database/ @dba-team @devops-team
+
+# CI/CD workflows require DevOps review
+/.github/workflows/ @devops-team
+
+# Security-sensitive files
+/supabase/functions/ @security-team @nexus-team
+
+# Frontend components
+/src/components/ @frontend-team
+/src/pages/ @frontend-team
+
+# Configuration files
+/*.config.* @nexus-team
+/tsconfig*.json @nexus-team

@@ -1,0 +1,211 @@
+name: Infrastructure
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'infrastructure/**'
+      - '.github/workflows/infrastructure.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'infrastructure/**'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      action:
+        description: 'Action to perform'
+        required: true
+        default: 'what-if'
+        type: choice
+        options:
+          - what-if
+          - deploy
+
+concurrency:
+  group: infrastructure-${{ github.event.inputs.environment || 'validate' }}
+  cancel-in-progress: false
+
+env:
+  AZURE_REGION: swedencentral
+
+jobs:
+  validate:
+    name: Validate Templates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Lint Bicep files
+        run: |
+          az bicep build --file infrastructure/azure/main.bicep
+          echo "✅ Bicep syntax validation passed"
+
+      - name: Validate DEV template
+        uses: azure/arm-deploy@v2
+        with:
+          scope: subscription
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          region: ${{ env.AZURE_REGION }}
+          template: ./infrastructure/azure/main.bicep
+          parameters: ./infrastructure/azure/parameters/dev.bicepparam
+          deploymentMode: Validate
+          failOnStdErr: false
+
+  what-if-dev:
+    name: What-If DEV
+    runs-on: ubuntu-latest
+    needs: [validate]
+    if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: What-If analysis
+        run: |
+          az deployment sub what-if \
+            --location ${{ env.AZURE_REGION }} \
+            --template-file infrastructure/azure/main.bicep \
+            --parameters infrastructure/azure/parameters/dev.bicepparam
+
+  what-if-staging:
+    name: What-If STAGING
+    runs-on: ubuntu-latest
+    needs: [validate]
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: What-If analysis
+        run: |
+          az deployment sub what-if \
+            --location ${{ env.AZURE_REGION }} \
+            --template-file infrastructure/azure/main.bicep \
+            --parameters infrastructure/azure/parameters/staging.bicepparam \
+            --parameters administratorLoginPassword=${{ secrets.DB_PASSWORD_STAGING }}
+
+  what-if-prod:
+    name: What-If PRODUCTION
+    runs-on: ubuntu-latest
+    needs: [validate]
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod'
+    environment: production-preview
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: What-If analysis
+        run: |
+          az deployment sub what-if \
+            --location ${{ env.AZURE_REGION }} \
+            --template-file infrastructure/azure/main.bicep \
+            --parameters infrastructure/azure/parameters/prod.bicepparam \
+            --parameters administratorLoginPassword=${{ secrets.DB_PASSWORD_PROD }}
+
+  deploy-dev:
+    name: Deploy DEV Infrastructure
+    runs-on: ubuntu-latest
+    needs: [what-if-dev]
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'deploy' && github.event.inputs.environment == 'dev'
+    environment: dev
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy infrastructure
+        uses: azure/arm-deploy@v2
+        with:
+          scope: subscription
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          region: ${{ env.AZURE_REGION }}
+          template: ./infrastructure/azure/main.bicep
+          parameters: ./infrastructure/azure/parameters/dev.bicepparam
+          deploymentName: infra-dev-${{ github.run_number }}
+          failOnStdErr: false
+
+  deploy-staging:
+    name: Deploy STAGING Infrastructure
+    runs-on: ubuntu-latest
+    needs: [what-if-staging]
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'deploy' && github.event.inputs.environment == 'staging'
+    environment: staging
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy infrastructure
+        uses: azure/arm-deploy@v2
+        with:
+          scope: subscription
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          region: ${{ env.AZURE_REGION }}
+          template: ./infrastructure/azure/main.bicep
+          parameters: ./infrastructure/azure/parameters/staging.bicepparam administratorLoginPassword=${{ secrets.DB_PASSWORD_STAGING }}
+          deploymentName: infra-staging-${{ github.run_number }}
+          failOnStdErr: false
+
+  deploy-prod:
+    name: Deploy PRODUCTION Infrastructure
+    runs-on: ubuntu-latest
+    needs: [what-if-prod]
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'deploy' && github.event.inputs.environment == 'prod'
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy infrastructure
+        uses: azure/arm-deploy@v2
+        with:
+          scope: subscription
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          region: ${{ env.AZURE_REGION }}
+          template: ./infrastructure/azure/main.bicep
+          parameters: ./infrastructure/azure/parameters/prod.bicepparam administratorLoginPassword=${{ secrets.DB_PASSWORD_PROD }}
+          deploymentName: infra-prod-${{ github.run_number }}
+          failOnStdErr: false

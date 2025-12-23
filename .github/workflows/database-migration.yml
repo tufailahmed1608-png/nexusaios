@@ -1,0 +1,267 @@
+name: Database Migration
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      migration_files:
+        description: 'Specific migration file(s) to run (comma-separated, e.g., "005,006") or "all"'
+        required: false
+        default: 'all'
+      dry_run:
+        description: 'Dry run (show SQL without executing)'
+        required: false
+        default: 'true'
+        type: boolean
+      create_backup:
+        description: 'Create backup before migration'
+        required: false
+        default: 'true'
+        type: boolean
+
+concurrency:
+  group: db-migration-${{ github.event.inputs.environment }}
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    name: Prepare Migration
+    runs-on: ubuntu-latest
+    outputs:
+      migrations: ${{ steps.list.outputs.migrations }}
+      db_host: ${{ steps.config.outputs.db_host }}
+      db_name: ${{ steps.config.outputs.db_name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: List migrations to run
+        id: list
+        run: |
+          if [ "${{ github.event.inputs.migration_files }}" == "all" ]; then
+            migrations=$(ls infrastructure/azure/database/migrations/*.sql | xargs -n1 basename | sort | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          else
+            IFS=',' read -ra NUMS <<< "${{ github.event.inputs.migration_files }}"
+            migrations="["
+            for num in "${NUMS[@]}"; do
+              file=$(ls infrastructure/azure/database/migrations/${num}*.sql 2>/dev/null | head -1)
+              if [ -n "$file" ]; then
+                migrations="$migrations\"$(basename $file)\","
+              fi
+            done
+            migrations="${migrations%,}]"
+          fi
+          echo "migrations=$migrations" >> $GITHUB_OUTPUT
+          echo "Migrations to run: $migrations"
+
+      - name: Configure environment
+        id: config
+        run: |
+          case "${{ github.event.inputs.environment }}" in
+            dev)
+              echo "db_host=${{ secrets.DB_HOST_DEV }}" >> $GITHUB_OUTPUT
+              echo "db_name=nexus_dev" >> $GITHUB_OUTPUT
+              ;;
+            staging)
+              echo "db_host=${{ secrets.DB_HOST_STAGING }}" >> $GITHUB_OUTPUT
+              echo "db_name=nexus_staging" >> $GITHUB_OUTPUT
+              ;;
+            prod)
+              echo "db_host=${{ secrets.DB_HOST_PROD }}" >> $GITHUB_OUTPUT
+              echo "db_name=nexus_prod" >> $GITHUB_OUTPUT
+              ;;
+          esac
+
+  approval:
+    name: Migration Approval
+    runs-on: ubuntu-latest
+    needs: [prepare]
+    if: github.event.inputs.environment == 'prod' && github.event.inputs.dry_run == 'false'
+    environment: production-database
+    steps:
+      - name: Approval required
+        run: |
+          echo "⚠️ Production database migration approved"
+          echo "Migrations: ${{ needs.prepare.outputs.migrations }}"
+
+  backup:
+    name: Create Backup
+    runs-on: ubuntu-latest
+    needs: [prepare, approval]
+    if: always() && github.event.inputs.create_backup == 'true' && github.event.inputs.dry_run == 'false' && (needs.approval.result == 'success' || needs.approval.result == 'skipped')
+    steps:
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Create database backup
+        run: |
+          RESOURCE_GROUP="rg-nexus-${{ github.event.inputs.environment }}"
+          SERVER_NAME="nexus-${{ github.event.inputs.environment }}-db"
+          BACKUP_NAME="pre-migration-${{ github.run_number }}-$(date +%Y%m%d%H%M%S)"
+          
+          echo "Creating backup: $BACKUP_NAME"
+          az postgres flexible-server backup create \
+            --resource-group $RESOURCE_GROUP \
+            --name $SERVER_NAME \
+            --backup-name $BACKUP_NAME
+          
+          echo "✅ Backup created: $BACKUP_NAME"
+
+  dry-run:
+    name: Dry Run
+    runs-on: ubuntu-latest
+    needs: [prepare]
+    if: github.event.inputs.dry_run == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show migrations
+        run: |
+          echo "🔍 DRY RUN - The following SQL would be executed:"
+          echo "================================================"
+          
+          migrations='${{ needs.prepare.outputs.migrations }}'
+          for file in $(echo $migrations | jq -r '.[]'); do
+            echo ""
+            echo "📄 File: $file"
+            echo "----------------------------------------"
+            cat "infrastructure/azure/database/migrations/$file"
+            echo ""
+          done
+
+  migrate:
+    name: Run Migration
+    runs-on: ubuntu-latest
+    needs: [prepare, backup, approval]
+    if: always() && github.event.inputs.dry_run == 'false' && (needs.backup.result == 'success' || needs.backup.result == 'skipped') && (needs.approval.result == 'success' || needs.approval.result == 'skipped')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Set database password
+        id: password
+        run: |
+          case "${{ github.event.inputs.environment }}" in
+            dev)
+              echo "password=${{ secrets.DB_PASSWORD_DEV }}" >> $GITHUB_OUTPUT
+              echo "user=${{ secrets.DB_USER_DEV }}" >> $GITHUB_OUTPUT
+              ;;
+            staging)
+              echo "password=${{ secrets.DB_PASSWORD_STAGING }}" >> $GITHUB_OUTPUT
+              echo "user=${{ secrets.DB_USER_STAGING }}" >> $GITHUB_OUTPUT
+              ;;
+            prod)
+              echo "password=${{ secrets.DB_PASSWORD_PROD }}" >> $GITHUB_OUTPUT
+              echo "user=${{ secrets.DB_USER_PROD }}" >> $GITHUB_OUTPUT
+              ;;
+          esac
+
+      - name: Run migrations
+        env:
+          PGPASSWORD: ${{ steps.password.outputs.password }}
+        run: |
+          migrations='${{ needs.prepare.outputs.migrations }}'
+          
+          echo "🚀 Running migrations on ${{ github.event.inputs.environment }}..."
+          
+          for file in $(echo $migrations | jq -r '.[]'); do
+            echo ""
+            echo "📄 Executing: $file"
+            psql -h ${{ needs.prepare.outputs.db_host }} \
+                 -U ${{ steps.password.outputs.user }} \
+                 -d ${{ needs.prepare.outputs.db_name }} \
+                 -v ON_ERROR_STOP=1 \
+                 -f "infrastructure/azure/database/migrations/$file"
+            
+            if [ $? -eq 0 ]; then
+              echo "✅ $file completed successfully"
+            else
+              echo "❌ $file failed!"
+              exit 1
+            fi
+          done
+          
+          echo ""
+          echo "✅ All migrations completed successfully!"
+
+  verify:
+    name: Verify Migration
+    runs-on: ubuntu-latest
+    needs: [prepare, migrate]
+    if: github.event.inputs.dry_run == 'false'
+    steps:
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Set database password
+        id: password
+        run: |
+          case "${{ github.event.inputs.environment }}" in
+            dev)
+              echo "password=${{ secrets.DB_PASSWORD_DEV }}" >> $GITHUB_OUTPUT
+              echo "user=${{ secrets.DB_USER_DEV }}" >> $GITHUB_OUTPUT
+              ;;
+            staging)
+              echo "password=${{ secrets.DB_PASSWORD_STAGING }}" >> $GITHUB_OUTPUT
+              echo "user=${{ secrets.DB_USER_STAGING }}" >> $GITHUB_OUTPUT
+              ;;
+            prod)
+              echo "password=${{ secrets.DB_PASSWORD_PROD }}" >> $GITHUB_OUTPUT
+              echo "user=${{ secrets.DB_USER_PROD }}" >> $GITHUB_OUTPUT
+              ;;
+          esac
+
+      - name: Verify tables
+        env:
+          PGPASSWORD: ${{ steps.password.outputs.password }}
+        run: |
+          echo "📊 Verifying database state..."
+          
+          psql -h ${{ needs.prepare.outputs.db_host }} \
+               -U ${{ steps.password.outputs.user }} \
+               -d ${{ needs.prepare.outputs.db_name }} \
+               -c "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name;"
+
+  notify:
+    name: Notify
+    runs-on: ubuntu-latest
+    needs: [migrate, verify]
+    if: always()
+    steps:
+      - name: Send notification
+        uses: slackapi/slack-github-action@v1.26.0
+        if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
+        with:
+          payload: |
+            {
+              "text": "Database Migration ${{ needs.migrate.result == 'success' && '✅ Succeeded' || '❌ Failed' }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Database Migration - ${{ github.event.inputs.environment }}*\n*Status:* ${{ needs.migrate.result == 'success' && '✅ Success' || '❌ Failed' }}\n*Triggered by:* ${{ github.actor }}\n*Dry Run:* ${{ github.event.inputs.dry_run }}"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
