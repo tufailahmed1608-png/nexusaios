@@ -24,9 +24,7 @@ param keyVaultName string
 @description('Log Analytics Workspace ID')
 param logAnalyticsWorkspaceId string
 
-@description('PostgreSQL connection string')
-@secure()
-param postgresConnectionString string
+// Note: PostgreSQL connection string is retrieved from Key Vault via app settings
 
 @description('Resource tags')
 param tags object
