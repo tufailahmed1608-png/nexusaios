@@ -32,6 +32,7 @@ var storageAccountNameBase = 'st${replace(projectName, '-', '')}${uniqueSuffix}'
 var storageAccountName = take(storageAccountNameBase, 24)
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
+  #disable-next-line BCP334
   name: storageAccountName
   location: location
   tags: tags
