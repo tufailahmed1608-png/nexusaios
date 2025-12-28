@@ -162,4 +162,4 @@ resource connectionStringSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' =
 output serverName string = postgresServer.name
 output serverFqdn string = postgresServer.properties.fullyQualifiedDomainName
 output databaseName string = database.name
-output connectionString string = 'postgresql://${adminLogin}@${postgresServer.properties.fullyQualifiedDomainName}:5432/${database.name}?sslmode=require'
+// Note: Full connection string with credentials is stored in Key Vault as 'postgres-connection-string' - do not output secrets directly

@@ -71,4 +71,4 @@ output id string = staticWebApp.id
 output name string = staticWebApp.name
 output hostname string = staticWebApp.properties.defaultHostname
 output url string = 'https://${staticWebApp.properties.defaultHostname}'
-output apiKey string = staticWebApp.listSecrets().properties.apiKey
+// Note: API key should be retrieved via Azure CLI or stored in Key Vault - do not output secrets directly

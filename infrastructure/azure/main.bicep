@@ -116,7 +116,6 @@ module functions 'modules/functions.bicep' = {
     storageAccountName: storage.outputs.storageAccountName
     keyVaultName: coreInfrastructure.outputs.keyVaultName
     logAnalyticsWorkspaceId: coreInfrastructure.outputs.logAnalyticsWorkspaceId
-    postgresConnectionString: database.outputs.connectionString
     tags: tags
   }
 }

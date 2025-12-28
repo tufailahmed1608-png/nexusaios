@@ -25,8 +25,12 @@ param tags object
 // Storage Account
 // ============================================================================
 
+// Storage account name must be 3-24 chars, lowercase alphanumeric
+var storageAccountNameRaw = 'st${replace(projectName, '-', '')}${uniqueSuffix}'
+var storageAccountNameSafe = length(storageAccountNameRaw) < 3 ? 'st${uniqueSuffix}pad' : storageAccountNameRaw
+
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
-  name: 'st${replace(projectName, '-', '')}${uniqueSuffix}'
+  name: substring(storageAccountNameSafe, 0, min(length(storageAccountNameSafe), 24))
   location: location
   tags: tags
   sku: {
@@ -150,4 +154,4 @@ resource storageKeySecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
 output storageAccountName string = storageAccount.name
 output storageAccountId string = storageAccount.id
 output blobEndpoint string = storageAccount.properties.primaryEndpoints.blob
-output primaryKey string = storageAccount.listKeys().keys[0].value
+// Note: Primary key is stored in Key Vault as 'storage-account-key' - do not output secrets directly
