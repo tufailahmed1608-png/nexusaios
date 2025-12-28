@@ -26,11 +26,13 @@ param tags object
 // ============================================================================
 
 // Storage account name must be 3-24 chars, lowercase alphanumeric
-var storageAccountNameRaw = 'st${replace(projectName, '-', '')}${uniqueSuffix}'
-var storageAccountNameSafe = length(storageAccountNameRaw) < 3 ? 'st${uniqueSuffix}pad' : storageAccountNameRaw
+// 'st' prefix (2 chars) + uniqueSuffix (13 chars from uniqueString) ensures minimum 15 chars
+var storageAccountNameBase = 'st${replace(projectName, '-', '')}${uniqueSuffix}'
+#disable-next-line BCP334
+var storageAccountName = take(storageAccountNameBase, 24)
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
-  name: substring(storageAccountNameSafe, 0, min(length(storageAccountNameSafe), 24))
+  name: storageAccountName
   location: location
   tags: tags
   sku: {
