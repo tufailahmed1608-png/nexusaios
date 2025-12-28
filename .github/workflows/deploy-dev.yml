@@ -77,15 +77,20 @@ jobs:
 
       - name: Deploy Bicep template
         id: deploy
-        uses: azure/arm-deploy@v2
-        with:
-          scope: subscription
-          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          region: ${{ env.AZURE_REGION }}
-          template: ./infrastructure/azure/main.bicep
-          parameters: ./infrastructure/azure/parameters/dev.bicepparam
-          deploymentName: nexus-dev-${{ github.run_number }}
-          failOnStdErr: false
+        run: |
+          set -euo pipefail
+          outputs=$(az deployment sub create \
+            --location "${{ env.AZURE_REGION }}" \
+            --template-file infrastructure/azure/main.bicep \
+            --parameters infrastructure/azure/parameters/dev.bicepparam \
+            --parameters postgresAdminLogin="${{ secrets.DB_USER_DEV }}" \
+            --parameters postgresAdminPassword="${{ secrets.DB_PASSWORD_DEV }}" \
+            --name "nexus-dev-${{ github.run_number }}" \
+            --query properties.outputs -o json)
+
+          echo "staticWebAppName=$(echo "$outputs" | jq -r '.staticWebAppName.value // empty')" >> $GITHUB_OUTPUT
+          echo "functionAppName=$(echo "$outputs" | jq -r '.functionAppName.value // empty')" >> $GITHUB_OUTPUT
+          echo "databaseServer=$(echo "$outputs" | jq -r '.databaseServer.value // empty')" >> $GITHUB_OUTPUT
 
   run-migrations:
     name: Run Database Migrations

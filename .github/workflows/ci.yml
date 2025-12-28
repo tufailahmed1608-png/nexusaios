@@ -170,12 +170,11 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Validate Bicep templates
-        uses: azure/arm-deploy@v2
-        with:
-          scope: subscription
-          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          region: swedencentral
-          template: ./infrastructure/azure/main.bicep
-          parameters: ./infrastructure/azure/parameters/dev.bicepparam
-          deploymentMode: Validate
-          failOnStdErr: false
+        run: |
+          az bicep build --file infrastructure/azure/main.bicep
+          az deployment sub validate \
+            --location swedencentral \
+            --template-file infrastructure/azure/main.bicep \
+            --parameters infrastructure/azure/parameters/dev.bicepparam \
+            --parameters postgresAdminLogin="${{ secrets.DB_USER_DEV }}" \
+            --parameters postgresAdminPassword="${{ secrets.DB_PASSWORD_DEV }}"

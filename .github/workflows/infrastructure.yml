@@ -56,15 +56,13 @@ jobs:
           echo "✅ Bicep syntax validation passed"
 
       - name: Validate DEV template
-        uses: azure/arm-deploy@v2
-        with:
-          scope: subscription
-          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          region: ${{ env.AZURE_REGION }}
-          template: ./infrastructure/azure/main.bicep
-          parameters: ./infrastructure/azure/parameters/dev.bicepparam
-          deploymentMode: Validate
-          failOnStdErr: false
+        run: |
+          az deployment sub validate \
+            --location ${{ env.AZURE_REGION }} \
+            --template-file infrastructure/azure/main.bicep \
+            --parameters infrastructure/azure/parameters/dev.bicepparam \
+            --parameters postgresAdminLogin="${{ secrets.DB_USER_DEV }}" \
+            --parameters postgresAdminPassword="${{ secrets.DB_PASSWORD_DEV }}"
 
   what-if-dev:
     name: What-If DEV
@@ -107,7 +105,8 @@ jobs:
             --location ${{ env.AZURE_REGION }} \
             --template-file infrastructure/azure/main.bicep \
             --parameters infrastructure/azure/parameters/staging.bicepparam \
-            --parameters administratorLoginPassword=${{ secrets.DB_PASSWORD_STAGING }}
+            --parameters postgresAdminLogin="${{ secrets.DB_USER_STAGING }}" \
+            --parameters postgresAdminPassword="${{ secrets.DB_PASSWORD_STAGING }}"
 
   what-if-prod:
     name: What-If PRODUCTION
@@ -130,7 +129,8 @@ jobs:
             --location ${{ env.AZURE_REGION }} \
             --template-file infrastructure/azure/main.bicep \
             --parameters infrastructure/azure/parameters/prod.bicepparam \
-            --parameters administratorLoginPassword=${{ secrets.DB_PASSWORD_PROD }}
+            --parameters postgresAdminLogin="${{ secrets.DB_USER_PROD }}" \
+            --parameters postgresAdminPassword="${{ secrets.DB_PASSWORD_PROD }}"
 
   deploy-dev:
     name: Deploy DEV Infrastructure
@@ -148,15 +148,14 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Deploy infrastructure
-        uses: azure/arm-deploy@v2
-        with:
-          scope: subscription
-          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          region: ${{ env.AZURE_REGION }}
-          template: ./infrastructure/azure/main.bicep
-          parameters: ./infrastructure/azure/parameters/dev.bicepparam
-          deploymentName: infra-dev-${{ github.run_number }}
-          failOnStdErr: false
+        run: |
+          az deployment sub create \
+            --location ${{ env.AZURE_REGION }} \
+            --template-file infrastructure/azure/main.bicep \
+            --parameters infrastructure/azure/parameters/dev.bicepparam \
+            --parameters postgresAdminLogin="${{ secrets.DB_USER_DEV }}" \
+            --parameters postgresAdminPassword="${{ secrets.DB_PASSWORD_DEV }}" \
+            --name "infra-dev-${{ github.run_number }}"
 
   deploy-staging:
     name: Deploy STAGING Infrastructure
@@ -174,15 +173,14 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Deploy infrastructure
-        uses: azure/arm-deploy@v2
-        with:
-          scope: subscription
-          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          region: ${{ env.AZURE_REGION }}
-          template: ./infrastructure/azure/main.bicep
-          parameters: ./infrastructure/azure/parameters/staging.bicepparam administratorLoginPassword=${{ secrets.DB_PASSWORD_STAGING }}
-          deploymentName: infra-staging-${{ github.run_number }}
-          failOnStdErr: false
+        run: |
+          az deployment sub create \
+            --location ${{ env.AZURE_REGION }} \
+            --template-file infrastructure/azure/main.bicep \
+            --parameters infrastructure/azure/parameters/staging.bicepparam \
+            --parameters postgresAdminLogin="${{ secrets.DB_USER_STAGING }}" \
+            --parameters postgresAdminPassword="${{ secrets.DB_PASSWORD_STAGING }}" \
+            --name "infra-staging-${{ github.run_number }}"
 
   deploy-prod:
     name: Deploy PRODUCTION Infrastructure
@@ -200,12 +198,11 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Deploy infrastructure
-        uses: azure/arm-deploy@v2
-        with:
-          scope: subscription
-          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          region: ${{ env.AZURE_REGION }}
-          template: ./infrastructure/azure/main.bicep
-          parameters: ./infrastructure/azure/parameters/prod.bicepparam administratorLoginPassword=${{ secrets.DB_PASSWORD_PROD }}
-          deploymentName: infra-prod-${{ github.run_number }}
-          failOnStdErr: false
+        run: |
+          az deployment sub create \
+            --location ${{ env.AZURE_REGION }} \
+            --template-file infrastructure/azure/main.bicep \
+            --parameters infrastructure/azure/parameters/prod.bicepparam \
+            --parameters postgresAdminLogin="${{ secrets.DB_USER_PROD }}" \
+            --parameters postgresAdminPassword="${{ secrets.DB_PASSWORD_PROD }}" \
+            --name "infra-prod-${{ github.run_number }}"
