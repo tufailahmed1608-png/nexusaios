@@ -1,17 +1,36 @@
-import { kpis } from '@/data/mockData';
+import { useDashboardData } from '@/hooks/useSyncedData';
 import KPICard from './KPICard';
 import PortfolioChart from './PortfolioChart';
 import BudgetChart from './BudgetChart';
 import ProjectList from './ProjectList';
 import VelocityChart from './VelocityChart';
+import { Badge } from '@/components/ui/badge';
+import { RefreshCw } from 'lucide-react';
 
 const Dashboard = () => {
+  const { kpis, hasSyncedData, isLoading } = useDashboardData();
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="nexus-fade-in">
-        <h2 className="text-2xl font-bold text-foreground">Executive Dashboard</h2>
-        <p className="text-muted-foreground">Real-time overview of your project portfolio</p>
+        <div className="flex items-center gap-3">
+          <h2 className="text-2xl font-bold text-foreground">Executive Dashboard</h2>
+          {hasSyncedData && (
+            <Badge variant="secondary" className="gap-1">
+              <RefreshCw className="h-3 w-3" />
+              Live Data
+            </Badge>
+          )}
+          {isLoading && (
+            <RefreshCw className="h-4 w-4 animate-spin text-muted-foreground" />
+          )}
+        </div>
+        <p className="text-muted-foreground">
+          {hasSyncedData 
+            ? 'Real-time data synced from Microsoft Project' 
+            : 'Real-time overview of your project portfolio'}
+        </p>
       </div>
 
       {/* KPI Grid */}
