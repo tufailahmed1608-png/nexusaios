@@ -298,6 +298,45 @@ export type Database = {
         }
         Relationships: []
       }
+      kpis_sync: {
+        Row: {
+          change: number | null
+          created_at: string
+          icon: string | null
+          id: string
+          raw_data: Json | null
+          source: string
+          title: string
+          trend: string | null
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          change?: number | null
+          created_at?: string
+          icon?: string | null
+          id?: string
+          raw_data?: Json | null
+          source?: string
+          title: string
+          trend?: string | null
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          change?: number | null
+          created_at?: string
+          icon?: string | null
+          id?: string
+          raw_data?: Json | null
+          source?: string
+          title?: string
+          trend?: string | null
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -322,6 +361,69 @@ export type Database = {
           id?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      projects_sync: {
+        Row: {
+          budget: number | null
+          category: string | null
+          created_at: string
+          description: string | null
+          end_date: string | null
+          external_id: string
+          health: string
+          id: string
+          milestones_data: Json | null
+          name: string
+          priority: string | null
+          progress: number | null
+          raw_data: Json | null
+          source: string
+          spent: number | null
+          start_date: string | null
+          team_data: Json | null
+          updated_at: string
+        }
+        Insert: {
+          budget?: number | null
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          external_id: string
+          health?: string
+          id?: string
+          milestones_data?: Json | null
+          name: string
+          priority?: string | null
+          progress?: number | null
+          raw_data?: Json | null
+          source?: string
+          spent?: number | null
+          start_date?: string | null
+          team_data?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          budget?: number | null
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          external_id?: string
+          health?: string
+          id?: string
+          milestones_data?: Json | null
+          name?: string
+          priority?: string | null
+          progress?: number | null
+          raw_data?: Json | null
+          source?: string
+          spent?: number | null
+          start_date?: string | null
+          team_data?: Json | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -391,6 +493,57 @@ export type Database = {
           status?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      tasks_sync: {
+        Row: {
+          assignee: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          external_id: string
+          id: string
+          priority: string | null
+          project_external_id: string | null
+          raw_data: Json | null
+          source: string
+          status: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assignee?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          external_id: string
+          id?: string
+          priority?: string | null
+          project_external_id?: string | null
+          raw_data?: Json | null
+          source?: string
+          status?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assignee?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          external_id?: string
+          id?: string
+          priority?: string | null
+          project_external_id?: string | null
+          raw_data?: Json | null
+          source?: string
+          status?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
