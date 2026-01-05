@@ -32,7 +32,7 @@ import {
 } from 'lucide-react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
-import nexusLogo from '@/assets/nexus-logo.png';
+import masiraLogo from '@/assets/masira-logo.ico';
 import type { AppRole } from '@/lib/permissions';
 
 interface SidebarProps {
@@ -104,7 +104,7 @@ const SidebarContent = ({
       {/* Logo */}
       <div className="h-16 flex items-center px-6 border-b border-border">
         <div className="flex items-center gap-3">
-          <img src={nexusLogo} alt="Masira Logo" className="w-10 h-10 rounded-xl object-cover" />
+          <img src={masiraLogo} alt="Masira Logo" className="w-10 h-10 rounded-xl object-cover" />
           {!isCollapsed && (
             <div className="nexus-fade-in">
               <h1 className="font-semibold text-foreground">Masira</h1>
