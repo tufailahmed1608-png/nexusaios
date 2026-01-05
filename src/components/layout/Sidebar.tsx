@@ -104,10 +104,10 @@ const SidebarContent = ({
       {/* Logo */}
       <div className="h-16 flex items-center px-6 border-b border-border">
         <div className="flex items-center gap-3">
-          <img src={nexusLogo} alt="Nexus Logo" className="w-10 h-10 rounded-xl object-cover" />
+          <img src={nexusLogo} alt="Masira Logo" className="w-10 h-10 rounded-xl object-cover" />
           {!isCollapsed && (
             <div className="nexus-fade-in">
-              <h1 className="font-semibold text-foreground">Nexus</h1>
+              <h1 className="font-semibold text-foreground">Masira</h1>
               <p className="text-xs text-muted-foreground">Project OS</p>
             </div>
           )}
