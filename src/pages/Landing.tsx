@@ -32,42 +32,42 @@ import {
 const comparisonData = [
   {
     category: 'Primary Purpose',
-    nexus: 'Intelligence layer for decision support',
+    masira: 'Intelligence layer for decision support',
     traditional: 'Task & project execution tracking',
   },
   {
     category: 'Relationship to Tools',
-    nexus: 'Observes existing systems (Jira, M365, etc.)',
+    masira: 'Observes existing systems (Jira, M365, etc.)',
     traditional: 'Replaces or competes with other tools',
   },
   {
     category: 'AI Role',
-    nexus: 'Assists analysis, humans decide',
+    masira: 'Assists analysis, humans decide',
     traditional: 'Automation focus, limited intelligence',
   },
   {
     category: 'Target Users',
-    nexus: 'PMO, Executives, Program Managers',
+    masira: 'PMO, Executives, Program Managers',
     traditional: 'Project Managers, Team Members',
   },
   {
     category: 'Meeting Intelligence',
-    nexus: 'Auto MoM, action extraction, decisions',
+    masira: 'Auto MoM, action extraction, decisions',
     traditional: 'Manual notes or basic transcription',
   },
   {
     category: 'Reporting',
-    nexus: 'AI-generated executive summaries',
+    masira: 'AI-generated executive summaries',
     traditional: 'Manual report creation',
   },
   {
     category: 'Decision Tracking',
-    nexus: 'Structured log with audit trail',
+    masira: 'Structured log with audit trail',
     traditional: 'Scattered in emails/docs',
   },
   {
     category: 'Governance',
-    nexus: 'Human-in-the-loop enforcement',
+    masira: 'Human-in-the-loop enforcement',
     traditional: 'Process-dependent',
   },
 ];
@@ -199,7 +199,7 @@ const Landing = () => {
               <Sparkles className="w-5 h-5 text-primary-foreground" />
             </div>
             <div>
-              <span className="font-bold text-foreground text-lg">Nexus</span>
+              <span className="font-bold text-foreground text-lg">Masira</span>
               <span className="text-muted-foreground text-sm ml-1">Project OS</span>
             </div>
           </div>
@@ -249,7 +249,7 @@ const Landing = () => {
           </h1>
           
           <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-6 nexus-fade-in" style={{ animationDelay: '0.2s' }}>
-            Nexus observes your existing delivery systems and converts meetings and delivery signals 
+            Masira observes your existing delivery systems and converts meetings and delivery signals 
             into structured intelligence. Supporting decision-making, not replacing your tools.
           </p>
 
@@ -286,7 +286,7 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              How Nexus Works
+              How Masira Works
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Observe → Analyze → Decide. Intelligence layer, not a replacement.
@@ -326,7 +326,7 @@ const Landing = () => {
               Primary Value Proposition
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              These features define Nexus. Meeting intelligence, executive reporting, 
+              These features define Masira. Meeting intelligence, executive reporting, 
               decision tracking, and governance enforcement.
             </p>
           </div>
@@ -361,7 +361,7 @@ const Landing = () => {
                 <span className="nexus-gradient-text">AI-Powered Intelligence</span>
               </h2>
               <p className="text-lg text-muted-foreground mb-8">
-                Nexus enforces human-in-the-loop governance. AI assists analysis, 
+                Masira enforces human-in-the-loop governance. AI assists analysis, 
                 humans approve and decide. Every AI output follows a controlled lifecycle.
               </p>
               <div className="space-y-4">
@@ -421,10 +421,10 @@ const Landing = () => {
               Positioning
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Nexus vs Traditional PM Tools
+              Masira vs Traditional PM Tools
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Nexus is not another PM tool. It's an intelligence layer that works with your existing tools.
+              Masira is not another PM tool. It's an intelligence layer that works with your existing tools.
             </p>
           </div>
 
@@ -436,7 +436,7 @@ const Landing = () => {
               </div>
               <div className="p-4 font-semibold text-primary text-sm border-r border-border flex items-center gap-2">
                 <Sparkles className="w-4 h-4" />
-                Nexus Project OS
+                Masira Project OS
               </div>
               <div className="p-4 font-semibold text-muted-foreground text-sm">
                 Traditional PM Tools
@@ -454,7 +454,7 @@ const Landing = () => {
                 </div>
                 <div className="p-4 text-sm text-foreground border-r border-border flex items-start gap-2">
                   <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                  <span>{row.nexus}</span>
+                  <span>{row.masira}</span>
                 </div>
                 <div className="p-4 text-sm text-muted-foreground flex items-start gap-2">
                   <X className="w-4 h-4 text-muted-foreground/50 flex-shrink-0 mt-0.5" />
@@ -466,16 +466,16 @@ const Landing = () => {
 
           {/* Bottom Note */}
           <p className="text-center text-sm text-muted-foreground mt-6">
-            Nexus complements Jira, M365, Asana, Monday.com—it doesn't replace them.
+            Masira complements Jira, M365, Asana, Monday.com—it doesn't replace them.
           </p>
         </div>
       </section>
 
-      {/* What Nexus Is NOT */}
+      {/* What Masira Is NOT */}
       <section className="py-20 px-6 bg-muted/30">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-            What Nexus Does <span className="text-muted-foreground">NOT</span> Do
+            What Masira Does <span className="text-muted-foreground">NOT</span> Do
           </h2>
           <div className="grid md:grid-cols-2 gap-4 mt-10">
             {[
@@ -503,13 +503,13 @@ const Landing = () => {
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
               <Zap className="w-4 h-4" />
-              Try Nexus
+              Try Masira
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               Request Demo Access
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Experience Nexus from any perspective. Select a role to see how PMOs, executives, 
+              Experience Masira from any perspective. Select a role to see how PMOs, executives, 
               and project managers benefit from the intelligence layer.
             </p>
           </div>
@@ -627,10 +627,10 @@ const Landing = () => {
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
               <Sparkles className="w-4 h-4 text-primary-foreground" />
             </div>
-            <span className="font-semibold text-foreground">Nexus Project OS</span>
+            <span className="font-semibold text-foreground">Masira Project OS</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            © 2025 Nexus Project OS. Intelligence, not execution.
+            © 2025 Masira Project OS. Intelligence, not execution.
           </p>
         </div>
       </footer>

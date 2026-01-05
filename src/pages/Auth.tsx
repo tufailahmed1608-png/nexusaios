@@ -90,9 +90,9 @@ const Auth = () => {
       <Card className="w-full max-w-md border-border/50 shadow-xl">
         <CardHeader className="text-center space-y-2">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <img src={nexusLogo} alt="Nexus Logo" className="h-12 w-12 rounded-xl" />
+            <img src={nexusLogo} alt="Masira Logo" className="h-12 w-12 rounded-xl" />
           </div>
-          <CardTitle className="text-2xl font-bold">Welcome to Nexus</CardTitle>
+          <CardTitle className="text-2xl font-bold">Welcome to Masira</CardTitle>
           <CardDescription>
             AI-first Project Management Operating System
           </CardDescription>
