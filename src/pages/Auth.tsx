@@ -11,7 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { z } from 'zod';
-import nexusLogo from '@/assets/nexus-logo.png';
+import masiraLogo from '@/assets/masira-logo.ico';
 
 const authSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -90,7 +90,7 @@ const Auth = () => {
       <Card className="w-full max-w-md border-border/50 shadow-xl">
         <CardHeader className="text-center space-y-2">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <img src={nexusLogo} alt="Masira Logo" className="h-12 w-12 rounded-xl" />
+            <img src={masiraLogo} alt="Masira Logo" className="h-12 w-12 rounded-xl" />
           </div>
           <CardTitle className="text-2xl font-bold">Welcome to Masira</CardTitle>
           <CardDescription>
