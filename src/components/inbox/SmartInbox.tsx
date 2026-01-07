@@ -150,13 +150,13 @@ const SmartInbox = () => {
   const getPriorityColor = (priority: Email['priority']) => {
     switch (priority) {
       case 'critical':
-        return 'nexus-badge-danger';
+        return 'masira-badge-danger';
       case 'high':
-        return 'nexus-badge-warning';
+        return 'masira-badge-warning';
       case 'medium':
         return 'bg-primary/10 text-primary';
       default:
-        return 'nexus-badge-neutral';
+        return 'masira-badge-neutral';
     }
   };
 
@@ -176,7 +176,7 @@ const SmartInbox = () => {
   if (!settings.smartInboxEnabled) {
     return (
       <div className="space-y-6">
-        <div className="nexus-fade-in">
+        <div className="masira-fade-in">
           <h2 className="text-2xl font-bold text-foreground">Communication Signals</h2>
           <p className="text-muted-foreground">Feature disabled by Tenant Administrator</p>
         </div>
@@ -193,7 +193,7 @@ const SmartInbox = () => {
 
   return (
     <div className="space-y-6">
-      <div className="nexus-fade-in">
+      <div className="masira-fade-in">
         <h2 className="text-2xl font-bold text-foreground">Communication Signals</h2>
         <p className="text-muted-foreground">Aggregate communication intelligence from connected systems</p>
       </div>
@@ -222,7 +222,7 @@ const SmartInbox = () => {
 
       {/* Aggregate Signal Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="nexus-card p-4">
+        <div className="masira-card p-4">
           <div className="flex items-center gap-2 mb-2">
             <Activity className="w-4 h-4 text-primary" />
             <span className="text-xs font-medium text-muted-foreground">Total Signals</span>
@@ -230,7 +230,7 @@ const SmartInbox = () => {
           <div className="text-2xl font-bold text-foreground">{aggregateSignals.total}</div>
           <p className="text-xs text-muted-foreground">Communications analyzed</p>
         </div>
-        <div className="nexus-card p-4">
+        <div className="masira-card p-4">
           <div className="flex items-center gap-2 mb-2">
             {aggregateSignals.trend === 'positive' ? (
               <TrendingUp className="w-4 h-4 text-success" />
@@ -244,7 +244,7 @@ const SmartInbox = () => {
           <div className="text-2xl font-bold text-foreground capitalize">{aggregateSignals.trend}</div>
           <p className="text-xs text-muted-foreground">Aggregate sentiment trend</p>
         </div>
-        <div className="nexus-card p-4">
+        <div className="masira-card p-4">
           <div className="flex items-center gap-2 mb-2">
             <AlertTriangle className="w-4 h-4 text-warning" />
             <span className="text-xs font-medium text-muted-foreground">Priority Alerts</span>
@@ -252,7 +252,7 @@ const SmartInbox = () => {
           <div className="text-2xl font-bold text-foreground">{aggregateSignals.priorityAlerts}</div>
           <p className="text-xs text-muted-foreground">High/Critical items</p>
         </div>
-        <div className="nexus-card p-4">
+        <div className="masira-card p-4">
           <div className="flex items-center gap-2 mb-2">
             <Sparkles className="w-4 h-4 text-primary" />
             <span className="text-xs font-medium text-muted-foreground">Sentiment Mix</span>
@@ -279,11 +279,11 @@ const SmartInbox = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-420px)]">
         {/* Email List */}
-        <div className="nexus-card overflow-hidden flex flex-col">
+        <div className="masira-card overflow-hidden flex flex-col">
           <div className="p-4 border-b border-border">
             <h3 className="font-semibold text-foreground">Signal Queue</h3>
           </div>
-          <div className="flex-1 overflow-y-auto nexus-scrollbar">
+          <div className="flex-1 overflow-y-auto masira-scrollbar">
             {emails.map((email) => (
               <button
                 key={email.id}
@@ -314,7 +314,7 @@ const SmartInbox = () => {
                       <span className={cn('font-medium text-foreground', !email.isRead && 'font-semibold')}>
                         {email.from}
                       </span>
-                      <span className={cn('nexus-badge text-[10px]', getPriorityColor(email.priority))}>
+                      <span className={cn('masira-badge text-[10px]', getPriorityColor(email.priority))}>
                         {email.priority}
                       </span>
                     </div>
@@ -333,7 +333,7 @@ const SmartInbox = () => {
         </div>
 
         {/* Email Content + AI Analysis */}
-        <div className="nexus-card overflow-hidden flex flex-col">
+        <div className="masira-card overflow-hidden flex flex-col">
           {selectedEmail ? (
             <>
               <div className="p-4 border-b border-border">
@@ -365,7 +365,7 @@ const SmartInbox = () => {
                   </Button>
                 </div>
               </div>
-              <div className="flex-1 overflow-y-auto nexus-scrollbar">
+              <div className="flex-1 overflow-y-auto masira-scrollbar">
                 {/* Email Body */}
                 <div className="p-4">
                   <pre className="whitespace-pre-wrap font-sans text-sm text-foreground leading-relaxed">
@@ -381,7 +381,7 @@ const SmartInbox = () => {
                       <AlertTriangle className="w-4 h-4 text-warning" />
                       <span className="text-xs font-medium text-muted-foreground">Classification</span>
                     </div>
-                    <span className={cn('nexus-badge text-xs', getPriorityColor(selectedEmail.priority))}>
+                    <span className={cn('masira-badge text-xs', getPriorityColor(selectedEmail.priority))}>
                       {selectedEmail.priority} priority
                     </span>
                     <span className="text-xs text-muted-foreground">

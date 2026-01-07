@@ -39,11 +39,11 @@ const TaskCard = ({ task }: { task: Task }) => {
         <h4 className="font-medium text-foreground text-sm leading-tight">{task.title}</h4>
         <span
           className={cn(
-            'nexus-badge text-[10px] flex-shrink-0',
-            task.priority === 'critical' && 'nexus-badge-danger',
-            task.priority === 'high' && 'nexus-badge-warning',
+            'masira-badge text-[10px] flex-shrink-0',
+            task.priority === 'critical' && 'masira-badge-danger',
+            task.priority === 'high' && 'masira-badge-warning',
             task.priority === 'medium' && 'bg-primary/10 text-primary',
-            task.priority === 'low' && 'nexus-badge-neutral'
+            task.priority === 'low' && 'masira-badge-neutral'
           )}
         >
           {task.priority}
@@ -87,7 +87,7 @@ const TaskBoard = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between nexus-fade-in">
+      <div className="flex items-center justify-between masira-fade-in">
         <div>
           <h2 className="text-2xl font-bold text-foreground">Task Board</h2>
           <p className="text-muted-foreground">Manage and track all your tasks</p>
@@ -109,7 +109,7 @@ const TaskBoard = () => {
               </span>
             </div>
 
-            <div className="flex-1 p-3 rounded-xl bg-secondary/20 overflow-y-auto nexus-scrollbar space-y-3">
+            <div className="flex-1 p-3 rounded-xl bg-secondary/20 overflow-y-auto masira-scrollbar space-y-3">
               {getTasksByStatus(column.id as Task['status']).map((task) => (
                 <TaskCard key={task.id} task={task} />
               ))}

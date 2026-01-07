@@ -68,18 +68,18 @@ const MeetingHub = () => {
 
   return (
     <div className="space-y-6">
-      <div className="nexus-fade-in">
+      <div className="masira-fade-in">
         <h2 className="text-2xl font-bold text-foreground">Meeting Hub</h2>
         <p className="text-muted-foreground">AI-powered meeting analysis and minutes generation</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-220px)]">
         {/* Meeting List */}
-        <div className="nexus-card overflow-hidden flex flex-col">
+        <div className="masira-card overflow-hidden flex flex-col">
           <div className="p-4 border-b border-border">
             <h3 className="font-semibold text-foreground">Meetings</h3>
           </div>
-          <div className="flex-1 overflow-y-auto nexus-scrollbar">
+          <div className="flex-1 overflow-y-auto masira-scrollbar">
             {meetings.map((meeting) => (
               <button
                 key={meeting.id}
@@ -97,10 +97,10 @@ const MeetingHub = () => {
                   <h4 className="font-medium text-foreground">{meeting.title}</h4>
                   <span
                     className={cn(
-                      'nexus-badge text-[10px]',
-                      meeting.status === 'completed' && 'nexus-badge-success',
+                      'masira-badge text-[10px]',
+                      meeting.status === 'completed' && 'masira-badge-success',
                       meeting.status === 'scheduled' && 'bg-primary/10 text-primary',
-                      meeting.status === 'cancelled' && 'nexus-badge-danger'
+                      meeting.status === 'cancelled' && 'masira-badge-danger'
                     )}
                   >
                     {meeting.status}
@@ -146,7 +146,7 @@ const MeetingHub = () => {
         </div>
 
         {/* Transcript */}
-        <div className="nexus-card overflow-hidden flex flex-col">
+        <div className="masira-card overflow-hidden flex flex-col">
           {selectedMeeting ? (
             <>
               <div className="p-4 border-b border-border">
@@ -167,7 +167,7 @@ const MeetingHub = () => {
                   </span>
                 </div>
               </div>
-              <div className="flex-1 overflow-y-auto p-4 nexus-scrollbar">
+              <div className="flex-1 overflow-y-auto p-4 masira-scrollbar">
                 {selectedMeeting.transcript ? (
                   <pre className="whitespace-pre-wrap font-sans text-sm text-foreground leading-relaxed">
                     {selectedMeeting.transcript}
@@ -179,7 +179,7 @@ const MeetingHub = () => {
                     <p className="text-sm">Upload or paste transcript to analyze</p>
                     <Textarea
                       placeholder="Paste meeting transcript here..."
-                      className="mt-4 h-32 nexus-input"
+                      className="mt-4 h-32 masira-input"
                     />
                   </div>
                 )}
@@ -205,11 +205,11 @@ const MeetingHub = () => {
         </div>
 
         {/* AI Analysis */}
-        <div className="space-y-4 overflow-y-auto nexus-scrollbar">
+        <div className="space-y-4 overflow-y-auto masira-scrollbar">
           {analysisResult ? (
             <>
               {/* Summary */}
-              <div className="nexus-card nexus-slide-up">
+              <div className="masira-card masira-slide-up">
                 <div className="flex items-center gap-2 mb-4">
                   <Target className="w-5 h-5 text-primary" />
                   <h3 className="font-semibold text-foreground">Summary</h3>
@@ -220,7 +220,7 @@ const MeetingHub = () => {
               </div>
 
               {/* Decisions */}
-              <div className="nexus-card nexus-slide-up" style={{ animationDelay: '100ms' }}>
+              <div className="masira-card masira-slide-up" style={{ animationDelay: '100ms' }}>
                 <div className="flex items-center gap-2 mb-4">
                   <AlertCircle className="w-5 h-5 text-warning" />
                   <h3 className="font-semibold text-foreground">Key Decisions</h3>
@@ -241,7 +241,7 @@ const MeetingHub = () => {
               </div>
 
               {/* Action Items */}
-              <div className="nexus-card nexus-slide-up" style={{ animationDelay: '200ms' }}>
+              <div className="masira-card masira-slide-up" style={{ animationDelay: '200ms' }}>
                 <div className="flex items-center gap-2 mb-4">
                   <CheckSquare className="w-5 h-5 text-success" />
                   <h3 className="font-semibold text-foreground">Action Items</h3>
@@ -267,7 +267,7 @@ const MeetingHub = () => {
 
               {/* Smart Task Suggestions */}
               {selectedMeeting?.transcript && (
-                <div className="nexus-slide-up" style={{ animationDelay: '300ms' }}>
+                <div className="masira-slide-up" style={{ animationDelay: '300ms' }}>
                   <SmartTaskSuggestions
                     content={selectedMeeting.transcript}
                     contentType="meeting"
@@ -280,7 +280,7 @@ const MeetingHub = () => {
               )}
             </>
           ) : (
-            <div className="nexus-card h-full flex items-center justify-center">
+            <div className="masira-card h-full flex items-center justify-center">
               <div className="text-center text-muted-foreground">
                 <Sparkles className="w-12 h-12 mx-auto mb-4 opacity-50" />
                 <p>AI analysis will appear here</p>

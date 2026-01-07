@@ -7,7 +7,7 @@ const PortfolioChart = () => {
   const total = portfolioHealthData.reduce((sum, item) => sum + item.value, 0);
 
   return (
-    <div className="nexus-card nexus-slide-up" style={{ animationDelay: '400ms' }}>
+    <div className="masira-card masira-slide-up" style={{ animationDelay: '400ms' }}>
       <h3 className="font-semibold text-foreground mb-4">Portfolio Health</h3>
       
       <div className="h-48 md:h-64">

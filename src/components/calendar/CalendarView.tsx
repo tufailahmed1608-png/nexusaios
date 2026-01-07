@@ -213,7 +213,7 @@ const CalendarView = () => {
   };
 
   return (
-    <div className="space-y-6 nexus-fade-in">
+    <div className="space-y-6 masira-fade-in">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -301,7 +301,7 @@ const CalendarView = () => {
       </div>
 
       {/* Calendar Navigation */}
-      <div className="nexus-card">
+      <div className="masira-card">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
             <h2 className="text-xl font-semibold text-foreground">
@@ -418,7 +418,7 @@ const CalendarView = () => {
 
       {/* Upcoming Events Sidebar */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 nexus-card">
+        <div className="lg:col-span-2 masira-card">
           <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
             <CalendarIcon className="w-5 h-5 text-primary" />
             Today's Schedule
@@ -482,7 +482,7 @@ const CalendarView = () => {
           </div>
         </div>
 
-        <div className="nexus-card">
+        <div className="masira-card">
           <h3 className="font-semibold text-foreground mb-4">Upcoming This Week</h3>
           <div className="space-y-2">
             {calendarEvents

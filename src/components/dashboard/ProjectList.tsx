@@ -50,7 +50,7 @@ const ProjectList = () => {
   const { role } = useUserRole();
 
   return (
-    <div className="nexus-card nexus-slide-up" style={{ animationDelay: '600ms' }}>
+    <div className="masira-card masira-slide-up" style={{ animationDelay: '600ms' }}>
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold text-foreground">Active Projects</h3>
         <button className="text-sm text-primary hover:underline">View all</button>
@@ -75,10 +75,10 @@ const ProjectList = () => {
               <h4 className="font-medium text-foreground text-sm md:text-base">{project.name}</h4>
               <span
                 className={cn(
-                  'nexus-badge text-xs whitespace-nowrap',
-                  project.health === 'on-track' && 'nexus-badge-success',
-                  project.health === 'at-risk' && 'nexus-badge-warning',
-                  project.health === 'critical' && 'nexus-badge-danger'
+                  'masira-badge text-xs whitespace-nowrap',
+                  project.health === 'on-track' && 'masira-badge-success',
+                  project.health === 'at-risk' && 'masira-badge-warning',
+                  project.health === 'critical' && 'masira-badge-danger'
                 )}
               >
                 {project.health === 'on-track' ? 'On Track' : project.health === 'at-risk' ? 'At Risk' : 'Critical'}

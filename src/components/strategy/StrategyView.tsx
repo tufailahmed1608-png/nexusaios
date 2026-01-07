@@ -27,7 +27,7 @@ const StrategyView = () => {
   const pillarsCritical = strategicPillars.filter(p => p.status === 'critical').length;
 
   return (
-    <div className="space-y-6 nexus-fade-in">
+    <div className="space-y-6 masira-fade-in">
       {/* Strategy KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StrategyKPICard
@@ -65,7 +65,7 @@ const StrategyView = () => {
       {/* Main Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* ROI by Project */}
-        <div className="nexus-card">
+        <div className="masira-card">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-lg font-semibold text-foreground">ROI by Project</h3>
@@ -104,7 +104,7 @@ const StrategyView = () => {
         </div>
 
         {/* Budget Forecast */}
-        <div className="nexus-card">
+        <div className="masira-card">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-lg font-semibold text-foreground">Budget Forecast</h3>
@@ -136,7 +136,7 @@ const StrategyView = () => {
       </div>
 
       {/* Strategic Pillars */}
-      <div className="nexus-card">
+      <div className="masira-card">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h3 className="text-lg font-semibold text-foreground">Strategic Pillar Alignment</h3>
@@ -165,7 +165,7 @@ const StrategyView = () => {
       </div>
 
       {/* Quarterly Performance */}
-      <div className="nexus-card">
+      <div className="masira-card">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-lg font-semibold text-foreground">Quarterly Performance</h3>
@@ -219,7 +219,7 @@ interface StrategyKPICardProps {
 
 const StrategyKPICard = ({ title, value, subtitle, icon: Icon, trend, change }: StrategyKPICardProps) => {
   return (
-    <div className="nexus-card nexus-card-hover">
+    <div className="masira-card masira-card-hover">
       <div className="flex items-start justify-between">
         <div className="p-2 rounded-lg bg-primary/10">
           <Icon className="w-5 h-5 text-primary" />
@@ -260,10 +260,10 @@ const PillarCard = ({ pillar }: PillarCardProps) => {
           <div className="flex items-center gap-2">
             <h4 className="font-medium text-foreground">{pillar.name}</h4>
             <span className={cn(
-              'nexus-badge',
-              pillar.status === 'on-track' && 'nexus-badge-success',
-              pillar.status === 'at-risk' && 'nexus-badge-warning',
-              pillar.status === 'critical' && 'nexus-badge-danger'
+              'masira-badge',
+              pillar.status === 'on-track' && 'masira-badge-success',
+              pillar.status === 'at-risk' && 'masira-badge-warning',
+              pillar.status === 'critical' && 'masira-badge-danger'
             )}>
               {pillar.status.replace('-', ' ')}
             </span>

@@ -55,22 +55,22 @@ export default {
   				DEFAULT: 'hsl(var(--card))',
   				foreground: 'hsl(var(--card-foreground))'
   			},
-  			nexus: {
-  				sidebar: 'hsl(var(--nexus-sidebar))',
-  				'sidebar-foreground': 'hsl(var(--nexus-sidebar-foreground))',
-  				'sidebar-hover': 'hsl(var(--nexus-sidebar-hover))',
-  				'sidebar-active': 'hsl(var(--nexus-sidebar-active))',
-  				'kpi-positive': 'hsl(var(--nexus-kpi-positive))',
-  				'kpi-negative': 'hsl(var(--nexus-kpi-negative))',
-  				'kpi-neutral': 'hsl(var(--nexus-kpi-neutral))',
-  				'sentiment-positive': 'hsl(var(--nexus-sentiment-positive))',
-  				'sentiment-neutral': 'hsl(var(--nexus-sentiment-neutral))',
-  				'sentiment-negative': 'hsl(var(--nexus-sentiment-negative))',
-  				'priority-critical': 'hsl(var(--nexus-priority-critical))',
-  				'priority-high': 'hsl(var(--nexus-priority-high))',
-  				'priority-medium': 'hsl(var(--nexus-priority-medium))',
-  				'priority-low': 'hsl(var(--nexus-priority-low))'
-  			}
+			masira: {
+				sidebar: 'hsl(var(--masira-sidebar))',
+				'sidebar-foreground': 'hsl(var(--masira-sidebar-foreground))',
+				'sidebar-hover': 'hsl(var(--masira-sidebar-hover))',
+				'sidebar-active': 'hsl(var(--masira-sidebar-active))',
+				'kpi-positive': 'hsl(var(--masira-kpi-positive))',
+				'kpi-negative': 'hsl(var(--masira-kpi-negative))',
+				'kpi-neutral': 'hsl(var(--masira-kpi-neutral))',
+				'sentiment-positive': 'hsl(var(--masira-sentiment-positive))',
+				'sentiment-neutral': 'hsl(var(--masira-sentiment-neutral))',
+				'sentiment-negative': 'hsl(var(--masira-sentiment-negative))',
+				'priority-critical': 'hsl(var(--masira-priority-critical))',
+				'priority-high': 'hsl(var(--masira-priority-high))',
+				'priority-medium': 'hsl(var(--masira-priority-medium))',
+				'priority-low': 'hsl(var(--masira-priority-low))'
+			}
   		},
   		borderRadius: {
   			lg: 'var(--radius)',

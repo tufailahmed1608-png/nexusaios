@@ -13,7 +13,7 @@ const Dashboard = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="nexus-fade-in">
+      <div className="masira-fade-in">
         <div className="flex items-center gap-3">
           <h2 className="text-2xl font-bold text-foreground">Executive Dashboard</h2>
           {hasSyncedData && (

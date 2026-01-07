@@ -47,7 +47,7 @@ const KPICard = ({ kpi, index }: KPICardProps) => {
 
   return (
     <div
-      className="nexus-kpi-card nexus-card-hover nexus-slide-up relative group"
+      className="masira-kpi-card masira-card-hover masira-slide-up relative group"
       style={{ animationDelay: `${index * 100}ms` }}
     >
       {/* Why am I seeing this? tooltip */}

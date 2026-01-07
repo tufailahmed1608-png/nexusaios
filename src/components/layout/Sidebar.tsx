@@ -106,7 +106,7 @@ const SidebarContent = ({
         <div className="flex items-center gap-3">
           <img src={masiraLogo} alt="Masira Logo" className="w-10 h-10 rounded-xl object-cover" />
           {!isCollapsed && (
-            <div className="nexus-fade-in">
+            <div className="masira-fade-in">
               <h1 className="font-semibold text-foreground">Masira</h1>
               <p className="text-xs text-muted-foreground">Project OS</p>
             </div>
@@ -128,7 +128,7 @@ const SidebarContent = ({
       )}
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-1 overflow-y-auto nexus-scrollbar">
+      <nav className="flex-1 p-4 space-y-1 overflow-y-auto masira-scrollbar">
         {filteredMenuItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeView === item.id;
@@ -138,8 +138,8 @@ const SidebarContent = ({
               key={item.id}
               onClick={() => handleViewChange(item.id)}
               className={cn(
-                'nexus-sidebar-item w-full',
-                isActive && 'nexus-sidebar-item-active'
+                'masira-sidebar-item w-full',
+                isActive && 'masira-sidebar-item-active'
               )}
             >
               <Icon className="w-5 h-5 flex-shrink-0" />
@@ -165,7 +165,7 @@ const SidebarContent = ({
         {isAdmin && (
           <button
             onClick={() => handleNavigate('/admin/analytics')}
-            className="nexus-sidebar-item w-full text-primary"
+            className="masira-sidebar-item w-full text-primary"
           >
             <Shield className="w-5 h-5 flex-shrink-0" />
             {!isCollapsed && (
@@ -179,8 +179,8 @@ const SidebarContent = ({
         <button
           onClick={() => handleNavigate('/settings')}
           className={cn(
-            'nexus-sidebar-item w-full',
-            activeView === 'settings' && 'nexus-sidebar-item-active'
+            'masira-sidebar-item w-full',
+            activeView === 'settings' && 'masira-sidebar-item-active'
           )}
         >
           <Settings className="w-5 h-5 flex-shrink-0" />
@@ -193,7 +193,7 @@ const SidebarContent = ({
 
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="nexus-sidebar-item w-full justify-center hidden md:flex"
+          className="masira-sidebar-item w-full justify-center hidden md:flex"
         >
           {isCollapsed ? (
             isRTL ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />
