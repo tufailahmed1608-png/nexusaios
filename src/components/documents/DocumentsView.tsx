@@ -352,7 +352,7 @@ const DocumentsView = () => {
 
   return (
     <div className="space-y-6">
-      <div className="nexus-fade-in">
+      <div className="masira-fade-in">
         <h2 className="text-2xl font-bold text-foreground">Documents</h2>
         <p className="text-muted-foreground">Project files synced with Google Drive & OneDrive</p>
       </div>
@@ -371,7 +371,7 @@ const DocumentsView = () => {
 
         <TabsContent value="documents" className="space-y-6 mt-6">
           {/* Sync Status Bar */}
-          <div className="nexus-card p-4 flex items-center justify-between">
+          <div className="masira-card p-4 flex items-center justify-between">
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg bg-[#4285F4]/10 flex items-center justify-center">
@@ -457,7 +457,7 @@ const DocumentsView = () => {
               {filteredDocuments.map((doc, index) => (
                 <div
                   key={doc.id}
-                  className="nexus-card p-4 hover:border-primary/30 transition-all cursor-pointer nexus-slide-up group"
+                  className="masira-card p-4 hover:border-primary/30 transition-all cursor-pointer masira-slide-up group"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <div className="flex items-start justify-between mb-3">

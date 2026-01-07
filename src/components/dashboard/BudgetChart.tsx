@@ -11,7 +11,7 @@ import { budgetData } from '@/data/mockData';
 
 const BudgetChart = () => {
   return (
-    <div className="nexus-card nexus-slide-up" style={{ animationDelay: '500ms' }}>
+    <div className="masira-card masira-slide-up" style={{ animationDelay: '500ms' }}>
       <h3 className="font-semibold text-foreground mb-4">Budget vs Actuals</h3>
       
       <div className="h-48 md:h-64">

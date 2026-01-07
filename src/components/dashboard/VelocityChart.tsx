@@ -11,7 +11,7 @@ import { velocityData } from '@/data/mockData';
 
 const VelocityChart = () => {
   return (
-    <div className="nexus-card nexus-slide-up" style={{ animationDelay: '700ms' }}>
+    <div className="masira-card masira-slide-up" style={{ animationDelay: '700ms' }}>
       <h3 className="font-semibold text-foreground mb-4">Team Velocity</h3>
       
       <div className="h-48 md:h-64">

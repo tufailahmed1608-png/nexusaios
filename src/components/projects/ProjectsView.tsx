@@ -50,7 +50,7 @@ const ProjectsView = () => {
   const avgProgress = Math.round(projects.reduce((sum, p) => sum + p.progress, 0) / projects.length);
 
   return (
-    <div className="space-y-6 nexus-fade-in">
+    <div className="space-y-6 masira-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -145,7 +145,7 @@ interface StatCardProps {
 }
 
 const StatCard = ({ icon: Icon, label, value, subtitle }: StatCardProps) => (
-  <div className="nexus-card">
+  <div className="masira-card">
     <div className="flex items-center gap-3">
       <div className="p-2 rounded-lg bg-primary/10">
         <Icon className="w-5 h-5 text-primary" />
@@ -170,7 +170,7 @@ const ProjectCard = ({ project, onSelect }: ProjectCardProps) => {
 
   return (
     <div
-      className="nexus-card nexus-card-hover cursor-pointer"
+      className="masira-card masira-card-hover cursor-pointer"
       onClick={onSelect}
     >
       {/* Header */}
@@ -179,10 +179,10 @@ const ProjectCard = ({ project, onSelect }: ProjectCardProps) => {
           <div className="flex items-center gap-2 mb-1">
             <h3 className="font-semibold text-foreground">{project.name}</h3>
             <span className={cn(
-              'nexus-badge',
-              project.health === 'on-track' && 'nexus-badge-success',
-              project.health === 'at-risk' && 'nexus-badge-warning',
-              project.health === 'critical' && 'nexus-badge-danger'
+              'masira-badge',
+              project.health === 'on-track' && 'masira-badge-success',
+              project.health === 'at-risk' && 'masira-badge-warning',
+              project.health === 'critical' && 'masira-badge-danger'
             )}>
               {project.health.replace('-', ' ')}
             </span>
@@ -324,10 +324,10 @@ const GanttChart = ({ projects }: GanttChartProps) => {
   };
 
   return (
-    <div className="nexus-card overflow-hidden">
+    <div className="masira-card overflow-hidden">
       <h3 className="text-lg font-semibold text-foreground mb-4">Project Timeline</h3>
       
-      <div className="overflow-x-auto nexus-scrollbar">
+      <div className="overflow-x-auto masira-scrollbar">
         <div className="min-w-[800px]">
           {/* Timeline Header */}
           <div className="flex border-b border-border mb-2">
@@ -473,7 +473,7 @@ const ProjectDetailModal = ({ project, onClose }: ProjectDetailModalProps) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-card border border-border rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto nexus-scrollbar">
+      <div className="relative bg-card border border-border rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto masira-scrollbar">
         {/* Header */}
         <div className="sticky top-0 bg-card border-b border-border p-6">
           <div className="flex items-start justify-between">
@@ -481,14 +481,14 @@ const ProjectDetailModal = ({ project, onClose }: ProjectDetailModalProps) => {
               <div className="flex items-center gap-2 mb-1">
                 <h2 className="text-xl font-bold text-foreground">{project.name}</h2>
                 <span className={cn(
-                  'nexus-badge',
-                  project.health === 'on-track' && 'nexus-badge-success',
-                  project.health === 'at-risk' && 'nexus-badge-warning',
-                  project.health === 'critical' && 'nexus-badge-danger'
+                  'masira-badge',
+                  project.health === 'on-track' && 'masira-badge-success',
+                  project.health === 'at-risk' && 'masira-badge-warning',
+                  project.health === 'critical' && 'masira-badge-danger'
                 )}>
                   {project.health.replace('-', ' ')}
                 </span>
-                <span className="nexus-badge nexus-badge-neutral">{project.category}</span>
+                <span className="masira-badge masira-badge-neutral">{project.category}</span>
               </div>
               <p className="text-muted-foreground">{project.description}</p>
             </div>

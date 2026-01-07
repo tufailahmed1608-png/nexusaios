@@ -76,26 +76,26 @@
     --radius: 1.25rem;
 
     /* Masira specific tokens */
-    --nexus-sidebar: 180 20% 10%;
-    --nexus-sidebar-foreground: 180 20% 98%;
-    --nexus-sidebar-hover: 180 15% 17%;
-    --nexus-sidebar-active: 174 84% 40%;
+    --masira-sidebar: 180 20% 10%;
+    --masira-sidebar-foreground: 180 20% 98%;
+    --masira-sidebar-hover: 180 15% 17%;
+    --masira-sidebar-active: 174 84% 40%;
 
-    --nexus-kpi-positive: 160 84% 39%;
-    --nexus-kpi-negative: 346 77% 50%;
-    --nexus-kpi-neutral: 215 16% 47%;
+    --masira-kpi-positive: 160 84% 39%;
+    --masira-kpi-negative: 346 77% 50%;
+    --masira-kpi-neutral: 215 16% 47%;
 
-    --nexus-sentiment-positive: 160 84% 39%;
-    --nexus-sentiment-neutral: 38 92% 50%;
-    --nexus-sentiment-negative: 346 77% 50%;
+    --masira-sentiment-positive: 160 84% 39%;
+    --masira-sentiment-neutral: 38 92% 50%;
+    --masira-sentiment-negative: 346 77% 50%;
 
-    --nexus-priority-critical: 346 77% 50%;
-    --nexus-priority-high: 38 92% 50%;
-    --nexus-priority-medium: 174 84% 40%;
-    --nexus-priority-low: 215 16% 47%;
+    --masira-priority-critical: 346 77% 50%;
+    --masira-priority-high: 38 92% 50%;
+    --masira-priority-medium: 174 84% 40%;
+    --masira-priority-low: 215 16% 47%;
 
-    --nexus-glass: 0 0% 100% / 0.8;
-    --nexus-glass-border: 0 0% 100% / 0.2;
+    --masira-glass: 0 0% 100% / 0.8;
+    --masira-glass-border: 0 0% 100% / 0.2;
     --chart-1: 234 89% 73%;
     --chart-2: 255 91% 76%;
     --chart-3: 270 95% 75%;
@@ -159,13 +159,13 @@
     --input: 0 0% 32%;
     --ring: 234 89% 73%;
 
-    --nexus-sidebar: 180 20% 5%;
-    --nexus-sidebar-foreground: 180 20% 98%;
-    --nexus-sidebar-hover: 180 15% 12%;
-    --nexus-sidebar-active: 174 84% 40%;
+    --masira-sidebar: 180 20% 5%;
+    --masira-sidebar-foreground: 180 20% 98%;
+    --masira-sidebar-hover: 180 15% 12%;
+    --masira-sidebar-active: 174 84% 40%;
 
-    --nexus-glass: 180 15% 12% / 0.8;
-    --nexus-glass-border: 180 20% 98% / 0.1;
+    --masira-glass: 180 15% 12% / 0.8;
+    --masira-glass-border: 180 20% 98% / 0.1;
     --chart-1: 229 93% 81%;
     --chart-2: 252 94% 85%;
     --chart-3: 269 97% 85%;
@@ -203,103 +203,103 @@
 }
 
 @layer components {
-  .nexus-card {
+  .masira-card {
     @apply bg-card rounded-xl border border-border p-5 shadow-sm transition-all duration-200;
   }
 
-  .nexus-card-hover {
+  .masira-card-hover {
     @apply hover:shadow-md hover:border-primary/20;
   }
 
-  .nexus-glass {
-    @apply backdrop-blur-xl bg-[hsl(var(--nexus-glass))] border border-[hsl(var(--nexus-glass-border))];
+  .masira-glass {
+    @apply backdrop-blur-xl bg-[hsl(var(--masira-glass))] border border-[hsl(var(--masira-glass-border))];
   }
 
-  .nexus-gradient-text {
+  .masira-gradient-text {
     @apply bg-gradient-to-r from-primary via-teal-400 to-cyan-500 bg-clip-text text-transparent;
   }
 
-  .nexus-kpi-card {
-    @apply nexus-card relative overflow-hidden;
+  .masira-kpi-card {
+    @apply masira-card relative overflow-hidden;
   }
 
-  .nexus-kpi-card::before {
+  .masira-kpi-card::before {
     content: '';
     @apply absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none;
   }
 
-  .nexus-sidebar-item {
+  .masira-sidebar-item {
     @apply flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200;
     @apply text-muted-foreground hover:text-foreground hover:bg-secondary;
   }
 
-  .nexus-sidebar-item-active {
+  .masira-sidebar-item-active {
     @apply bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground;
   }
 
-  .nexus-badge {
+  .masira-badge {
     @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
   }
 
-  .nexus-badge-success {
+  .masira-badge-success {
     @apply bg-[hsl(var(--success))]/10 text-[hsl(var(--success))];
   }
 
-  .nexus-badge-warning {
+  .masira-badge-warning {
     @apply bg-[hsl(var(--warning))]/10 text-[hsl(var(--warning))];
   }
 
-  .nexus-badge-danger {
+  .masira-badge-danger {
     @apply bg-[hsl(var(--destructive))]/10 text-destructive;
   }
 
-  .nexus-badge-neutral {
+  .masira-badge-neutral {
     @apply bg-muted text-muted-foreground;
   }
 
-  .nexus-sentiment-bar {
+  .masira-sentiment-bar {
     @apply h-2 rounded-full overflow-hidden bg-muted;
   }
 
-  .nexus-input {
+  .masira-input {
     @apply bg-secondary/50 border-border focus:border-primary focus:ring-1 focus:ring-primary/20;
   }
 }
 
 @layer utilities {
-  .nexus-scrollbar {
+  .masira-scrollbar {
     scrollbar-width: thin;
     scrollbar-color: hsl(var(--muted)) transparent;
   }
 
-  .nexus-scrollbar::-webkit-scrollbar {
+  .masira-scrollbar::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
 
-  .nexus-scrollbar::-webkit-scrollbar-track {
+  .masira-scrollbar::-webkit-scrollbar-track {
     background: transparent;
   }
 
-  .nexus-scrollbar::-webkit-scrollbar-thumb {
+  .masira-scrollbar::-webkit-scrollbar-thumb {
     background: hsl(var(--muted));
     border-radius: 3px;
   }
 
-  .nexus-scrollbar::-webkit-scrollbar-thumb:hover {
+  .masira-scrollbar::-webkit-scrollbar-thumb:hover {
     background: hsl(var(--muted-foreground));
   }
 
-  .nexus-fade-in {
-    animation: nexusFadeIn 0.3s ease-out;
+  .masira-fade-in {
+    animation: masiraFadeIn 0.3s ease-out;
   }
 
-  .nexus-slide-up {
-    animation: nexusSlideUp 0.4s ease-out;
+  .masira-slide-up {
+    animation: masiraSlideUp 0.4s ease-out;
   }
 
-  .nexus-pulse-glow {
-    animation: nexusPulseGlow 2s ease-in-out infinite;
+  .masira-pulse-glow {
+    animation: masiraPulseGlow 2s ease-in-out infinite;
   }
 
   /* Hero animated gradient background */
@@ -387,17 +387,17 @@
     mask-image: radial-gradient(ellipse at center, black 20%, transparent 70%);
   }
 
-  @keyframes nexusFadeIn {
+  @keyframes masiraFadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
   }
 
-  @keyframes nexusSlideUp {
+  @keyframes masiraSlideUp {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
   }
 
-  @keyframes nexusPulseGlow {
+  @keyframes masiraPulseGlow {
     0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.4); }
     50% { box-shadow: 0 0 20px 4px hsl(var(--primary) / 0.2); }
   }
