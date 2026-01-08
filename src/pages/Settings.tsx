@@ -22,7 +22,9 @@ import {
   ExternalLink,
   BookOpen,
   Presentation,
-  Shield
+  Shield,
+  Download,
+  FileText
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useUserRole } from '@/hooks/useUserRole';
@@ -574,6 +576,41 @@ const Settings = () => {
                   <Button variant="outline" className="gap-2" onClick={() => navigate('/docs')}>
                     <ExternalLink className="h-4 w-4" />
                     Open
+                  </Button>
+                </div>
+
+                <div className="flex items-center justify-between p-4 border border-border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                      <FileText className="h-5 w-5 text-violet-500" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Project Blueprint</p>
+                      <p className="text-sm text-muted-foreground">Complete technical blueprint for replication</p>
+                    </div>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    className="gap-2" 
+                    onClick={async () => {
+                      try {
+                        const response = await fetch('/docs/Masira-Project-Blueprint.md');
+                        const content = await response.text();
+                        const blob = new Blob([content], { type: 'text/markdown' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'Masira-Project-Blueprint.md';
+                        a.click();
+                        URL.revokeObjectURL(url);
+                        toast({ title: 'Download Started', description: 'Blueprint file is downloading.' });
+                      } catch (error) {
+                        toast({ title: 'Download Failed', description: 'Could not download the blueprint file.', variant: 'destructive' });
+                      }
+                    }}
+                  >
+                    <Download className="h-4 w-4" />
+                    Download
                   </Button>
                 </div>
               </CardContent>
