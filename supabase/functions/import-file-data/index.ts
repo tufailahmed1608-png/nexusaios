@@ -30,14 +30,63 @@ interface ImportRequest {
 function autoDetectMappings(headers: string[]): { dataType: 'projects' | 'tasks' | 'kpis'; mappings: Record<string, string> } {
   const headerLower = headers.map(h => h.toLowerCase().trim());
   
-  // Check for project-like headers
-  const projectIndicators = ['project', 'budget', 'progress', 'health', 'start date', 'end date', 'portfolio'];
-  const taskIndicators = ['task', 'assignee', 'due date', 'status', 'priority', 'todo', 'done'];
-  const kpiIndicators = ['kpi', 'metric', 'value', 'target', 'trend', 'indicator'];
+  // Check for project-like headers - weighted scoring for better detection
+  const projectIndicators = [
+    { term: 'project name', weight: 3 },
+    { term: 'project', weight: 2 },
+    { term: 'budget', weight: 2 },
+    { term: 'progress', weight: 2 },
+    { term: 'health', weight: 2 },
+    { term: 'rag', weight: 2 },
+    { term: 'start date', weight: 1 },
+    { term: 'end date', weight: 1 },
+    { term: 'portfolio', weight: 2 },
+    { term: 'milestone', weight: 1 },
+    { term: 'sponsor', weight: 1 },
+  ];
   
-  const projectScore = projectIndicators.filter(i => headerLower.some(h => h.includes(i))).length;
-  const taskScore = taskIndicators.filter(i => headerLower.some(h => h.includes(i))).length;
-  const kpiScore = kpiIndicators.filter(i => headerLower.some(h => h.includes(i))).length;
+  const taskIndicators = [
+    { term: 'task name', weight: 3 },
+    { term: 'task', weight: 2 },
+    { term: 'assignee', weight: 2 },
+    { term: 'assigned to', weight: 2 },
+    { term: 'due date', weight: 1 },
+    { term: 'status', weight: 1 },
+    { term: 'priority', weight: 1 },
+    { term: 'todo', weight: 2 },
+    { term: 'done', weight: 1 },
+    { term: 'work item', weight: 2 },
+    { term: 'issue', weight: 1 },
+  ];
+  
+  const kpiIndicators = [
+    { term: 'kpi', weight: 3 },
+    { term: 'metric', weight: 2 },
+    { term: 'indicator', weight: 2 },
+    { term: 'target', weight: 1 },
+    { term: 'trend', weight: 1 },
+    { term: 'baseline', weight: 1 },
+    { term: 'actual vs', weight: 2 },
+  ];
+  
+  // Calculate weighted scores
+  let projectScore = 0;
+  let taskScore = 0;
+  let kpiScore = 0;
+  
+  projectIndicators.forEach(({ term, weight }) => {
+    if (headerLower.some(h => h.includes(term))) projectScore += weight;
+  });
+  
+  taskIndicators.forEach(({ term, weight }) => {
+    if (headerLower.some(h => h.includes(term))) taskScore += weight;
+  });
+  
+  kpiIndicators.forEach(({ term, weight }) => {
+    if (headerLower.some(h => h.includes(term))) kpiScore += weight;
+  });
+  
+  console.log(`Detection scores - Projects: ${projectScore}, Tasks: ${taskScore}, KPIs: ${kpiScore}`);
   
   let dataType: 'projects' | 'tasks' | 'kpis' = 'projects';
   if (taskScore > projectScore && taskScore > kpiScore) dataType = 'tasks';
