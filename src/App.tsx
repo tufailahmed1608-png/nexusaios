@@ -21,6 +21,7 @@ import PitchDeck from "./pages/PitchDeck";
 import FeaturesShowcase from "./pages/FeaturesShowcase";
 import ProductDemo from "./pages/ProductDemo";
 import AdminAnalytics from "./pages/AdminAnalytics";
+import Integrations from "./pages/Integrations";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 
@@ -87,6 +88,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <AdminAnalytics />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/integrations"
+                element={
+                  <ProtectedRoute>
+                    <Integrations />
                   </ProtectedRoute>
                 }
               />

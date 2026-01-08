@@ -298,6 +298,131 @@ export type Database = {
         }
         Relationships: []
       }
+      file_imports: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          file_name: string
+          file_type: string
+          file_url: string | null
+          id: string
+          mapping_config: Json | null
+          parsed_data: Json | null
+          records_imported: number | null
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          file_name: string
+          file_type: string
+          file_url?: string | null
+          id?: string
+          mapping_config?: Json | null
+          parsed_data?: Json | null
+          records_imported?: number | null
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          file_name?: string
+          file_type?: string
+          file_url?: string | null
+          id?: string
+          mapping_config?: Json | null
+          parsed_data?: Json | null
+          records_imported?: number | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      integration_configs: {
+        Row: {
+          config: Json
+          created_at: string | null
+          id: string
+          integration_type: string
+          is_active: boolean | null
+          last_sync_at: string | null
+          name: string
+          sync_frequency: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          config?: Json
+          created_at?: string | null
+          id?: string
+          integration_type: string
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          name: string
+          sync_frequency?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string | null
+          id?: string
+          integration_type?: string
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          name?: string
+          sync_frequency?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      integration_sync_logs: {
+        Row: {
+          completed_at: string | null
+          error_message: string | null
+          id: string
+          integration_id: string | null
+          records_synced: number | null
+          started_at: string | null
+          status: string | null
+          sync_details: Json | null
+        }
+        Insert: {
+          completed_at?: string | null
+          error_message?: string | null
+          id?: string
+          integration_id?: string | null
+          records_synced?: number | null
+          started_at?: string | null
+          status?: string | null
+          sync_details?: Json | null
+        }
+        Update: {
+          completed_at?: string | null
+          error_message?: string | null
+          id?: string
+          integration_id?: string | null
+          records_synced?: number | null
+          started_at?: string | null
+          status?: string | null
+          sync_details?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_sync_logs_integration_id_fkey"
+            columns: ["integration_id"]
+            isOneToOne: false
+            referencedRelation: "integration_configs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kpis_sync: {
         Row: {
           change: number | null
