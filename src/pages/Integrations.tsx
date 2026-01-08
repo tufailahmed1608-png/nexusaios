@@ -1,6 +1,4 @@
-import { useState } from 'react';
-import Sidebar from '@/components/layout/Sidebar';
-import Header from '@/components/layout/Header';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -12,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import type { Json } from '@/integrations/supabase/types';
 import { 
   Plus, 
   RefreshCw, 
@@ -23,10 +22,12 @@ import {
   CheckCircle2,
   XCircle,
   Clock,
-  Settings,
+  Settings as SettingsIcon,
   Trash2,
   Play,
-  ExternalLink
+  ArrowLeft,
+  Moon,
+  Sun
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -75,13 +76,17 @@ interface FileImport {
 }
 
 export default function Integrations() {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'));
   const [selectedTab, setSelectedTab] = useState('connections');
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [newIntegrationType, setNewIntegrationType] = useState<IntegrationType | ''>('');
   const [configForm, setConfigForm] = useState<Record<string, string>>({});
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', isDark);
+  }, [isDark]);
 
   // Fetch integrations
   const { data: integrations = [], isLoading: loadingIntegrations } = useQuery({
@@ -136,7 +141,7 @@ export default function Integrations() {
           user_id: user.id,
           integration_type: integration.integration_type,
           name: integration.name,
-          config: integration.config
+          config: integration.config as Json
         }])
         .select()
         .single();
@@ -343,21 +348,28 @@ export default function Integrations() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex">
-      <Sidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} />
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="h-16 bg-card border-b border-border flex items-center justify-between px-6">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" onClick={() => window.history.back()}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <h1 className="text-xl font-semibold">Data Integrations</h1>
+        </div>
+        <Button variant="ghost" size="icon" onClick={() => setIsDark(!isDark)}>
+          {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+        </Button>
+      </header>
       
-      <div className="flex-1 flex flex-col">
-        <Header />
-        
-        <main className="flex-1 p-6">
-          <div className="max-w-7xl mx-auto space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold">Data Integrations</h1>
-                <p className="text-muted-foreground mt-1">
-                  Connect external data sources and import files
-                </p>
-              </div>
+      <main className="flex-1 p-6">
+        <div className="max-w-7xl mx-auto space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-muted-foreground">
+                Connect external data sources and import files
+              </p>
+            </div>
               <div className="flex gap-2">
                 <label htmlFor="file-upload">
                   <Button variant="outline" asChild>
@@ -510,7 +522,7 @@ export default function Integrations() {
                                 Sync Now
                               </Button>
                               <Button size="sm" variant="outline">
-                                <Settings className="h-3 w-3" />
+                                <SettingsIcon className="h-3 w-3" />
                               </Button>
                               <Button 
                                 size="sm" 
@@ -654,6 +666,5 @@ export default function Integrations() {
           </div>
         </main>
       </div>
-    </div>
   );
 }
