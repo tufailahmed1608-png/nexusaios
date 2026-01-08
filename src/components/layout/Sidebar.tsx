@@ -29,6 +29,7 @@ import {
   User,
   Gavel,
   Sparkles,
+  Plug,
 } from 'lucide-react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
@@ -162,6 +163,18 @@ const SidebarContent = ({
 
       {/* Settings & Admin */}
       <div className="p-4 border-t border-border space-y-1">
+        <button
+          onClick={() => handleNavigate('/integrations')}
+          className="masira-sidebar-item w-full"
+        >
+          <Plug className="w-5 h-5 flex-shrink-0" />
+          {!isCollapsed && (
+            <span className={cn('flex-1', isRTL ? 'text-right' : 'text-left')}>
+              {t('integrations')}
+            </span>
+          )}
+        </button>
+
         {isAdmin && (
           <button
             onClick={() => handleNavigate('/admin/analytics')}
