@@ -23,3 +23,18 @@ verify_jwt = true
 
 [functions.sync-project-data]
 verify_jwt = false
+
+[functions.parse-file]
+verify_jwt = true
+
+[functions.jira-connector]
+verify_jwt = true
+
+[functions.azuredevops-connector]
+verify_jwt = true
+
+[functions.microsoft-graph-connector]
+verify_jwt = true
+
+[functions.servicenow-connector]
+verify_jwt = true
