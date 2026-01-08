@@ -286,18 +286,18 @@ export default function Integrations() {
     }
   };
 
-  const getConfigFields = (type: IntegrationType): { key: string; label: string; type: string; placeholder: string }[] => {
+  const getConfigFields = (type: IntegrationType): { key: string; label: string; type: string; placeholder: string; helpText?: string }[] => {
     switch (type) {
       case 'jira':
         return [
           { key: 'domain', label: 'Jira Domain', type: 'text', placeholder: 'your-company (without .atlassian.net)' },
           { key: 'email', label: 'Email', type: 'email', placeholder: 'your@email.com' },
-          { key: 'apiToken', label: 'API Token', type: 'password', placeholder: 'Your Jira API token' }
+          { key: 'apiToken', label: 'API Token', type: 'password', placeholder: 'Your Jira API token', helpText: 'Generate at id.atlassian.com → Security → API tokens' }
         ];
       case 'azure_devops':
         return [
           { key: 'organization', label: 'Organization', type: 'text', placeholder: 'your-org' },
-          { key: 'pat', label: 'Personal Access Token', type: 'password', placeholder: 'Your PAT' },
+          { key: 'pat', label: 'Personal Access Token', type: 'password', placeholder: 'Your PAT', helpText: 'Generate at dev.azure.com → User Settings → Personal Access Tokens' },
           { key: 'project', label: 'Project (optional)', type: 'text', placeholder: 'Specific project name' }
         ];
       case 'servicenow':
@@ -311,16 +311,23 @@ export default function Integrations() {
       case 'outlook':
       case 'planner':
         return [
-          { key: 'accessToken', label: 'Access Token', type: 'password', placeholder: 'Microsoft Graph access token' },
+          { key: 'accessToken', label: 'Access Token', type: 'password', placeholder: 'Microsoft Graph access token', helpText: 'Requires Azure AD app registration. Use Graph Explorer to get a test token.' },
           { key: 'siteId', label: 'SharePoint Site ID (optional)', type: 'text', placeholder: 'For SharePoint list sync' }
         ];
       case 'microsoft_project':
         return [
-          { key: 'webhookUrl', label: 'Webhook URL', type: 'text', placeholder: 'Power Automate webhook URL' }
+          { key: 'webhookUrl', label: 'Webhook URL', type: 'text', placeholder: 'Power Automate webhook URL', helpText: 'See Power Automate template in Settings → Resources' }
         ];
       default:
         return [];
     }
+  };
+
+  const getMicrosoftOAuthNote = (type: IntegrationType): string | null => {
+    if (['sharepoint', 'teams', 'outlook', 'planner'].includes(type)) {
+      return 'Microsoft 365 integrations require OAuth authentication via Azure AD. You can get a temporary access token from Graph Explorer (developer.microsoft.com/graph/graph-explorer) for testing.';
+    }
+    return null;
   };
 
   const handleAddIntegration = () => {
@@ -431,6 +438,12 @@ export default function Integrations() {
                             />
                           </div>
 
+                          {getMicrosoftOAuthNote(newIntegrationType) && (
+                            <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg text-sm text-amber-700 dark:text-amber-400">
+                              ⚠️ {getMicrosoftOAuthNote(newIntegrationType)}
+                            </div>
+                          )}
+
                           {getConfigFields(newIntegrationType).map((field) => (
                             <div key={field.key}>
                               <Label>{field.label}</Label>
@@ -440,6 +453,9 @@ export default function Integrations() {
                                 value={configForm[field.key] || ''}
                                 onChange={(e) => setConfigForm({ ...configForm, [field.key]: e.target.value })}
                               />
+                              {field.helpText && (
+                                <p className="text-xs text-muted-foreground mt-1">{field.helpText}</p>
+                              )}
                             </div>
                           ))}
 
