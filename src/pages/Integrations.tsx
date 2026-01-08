@@ -275,10 +275,33 @@ export default function Integrations() {
 
       if (parseError) throw parseError;
 
+      // Now import the parsed data into dashboard tables
+      toast({ title: 'File parsed', description: 'Importing data to dashboard...' });
+
+      const { data: importResult, error: importError } = await supabase.functions.invoke('import-file-data', {
+        body: {
+          fileImportId: importRecord.id,
+          dataType: 'auto', // Auto-detect projects/tasks/kpis
+          parsedData: parseResult?.data
+        }
+      });
+
+      if (importError) {
+        console.error('Import error:', importError);
+        toast({ title: 'Import warning', description: 'File parsed but import had issues', variant: 'destructive' });
+      }
+
       queryClient.invalidateQueries({ queryKey: ['file-imports'] });
+      queryClient.invalidateQueries({ queryKey: ['synced-projects'] });
+      queryClient.invalidateQueries({ queryKey: ['synced-tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['synced-kpis'] });
+      
+      const imported = importResult?.data?.imported || 0;
+      const dataType = importResult?.data?.dataType || 'records';
+      
       toast({ 
-        title: 'File uploaded', 
-        description: `Parsed ${parseResult?.data?.totalRows || 0} rows from ${file.name}` 
+        title: 'Import complete', 
+        description: `Imported ${imported} ${dataType} from ${file.name}` 
       });
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to upload file';

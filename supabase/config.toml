@@ -38,3 +38,6 @@ verify_jwt = true
 
 [functions.servicenow-connector]
 verify_jwt = true
+
+[functions.import-file-data]
+verify_jwt = true
