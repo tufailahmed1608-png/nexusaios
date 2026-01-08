@@ -116,16 +116,39 @@ serve(async (req) => {
   }
 });
 
-async function parseCSV(fileUrl: string, authHeader: string): Promise<ParseResult> {
-  const response = await fetch(fileUrl, {
-    headers: { Authorization: authHeader }
-  });
-  
-  if (!response.ok) {
-    throw new Error(`Failed to fetch file: ${response.statusText}`);
+async function parseCSV(fileUrl: string, _authHeader: string): Promise<ParseResult> {
+  // Use service role to fetch from storage - user JWT doesn't work for storage downloads
+  const serviceClient = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+  );
+
+  let text: string;
+
+  // Extract bucket and path from URL
+  const urlMatch = fileUrl.match(/\/storage\/v1\/object\/public\/([^/]+)\/(.+)$/);
+  if (!urlMatch) {
+    // Fallback to direct fetch for external URLs
+    const response = await fetch(fileUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch file: ${response.statusText}`);
+    }
+    text = await response.text();
+  } else {
+    const [, bucket, path] = urlMatch;
+    const decodedPath = decodeURIComponent(path);
+    
+    console.log(`Downloading from bucket: ${bucket}, path: ${decodedPath}`);
+    
+    const { data, error } = await serviceClient.storage.from(bucket).download(decodedPath);
+    
+    if (error) {
+      throw new Error(`Failed to download file: ${error.message}`);
+    }
+    
+    text = await data.text();
   }
   
-  const text = await response.text();
   const lines = text.split(/\r?\n/).filter(line => line.trim());
   
   if (lines.length === 0) {
