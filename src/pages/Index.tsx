@@ -21,6 +21,7 @@ import DecisionLog from '@/components/decisions/DecisionLog';
 import AIControlsView from '@/components/ai/AIControlsView';
 import { KnowledgeBase } from '@/components/knowledge/KnowledgeBase';
 import { BrandingView } from '@/components/branding/BrandingView';
+import { SignalEngineView } from '@/components/signals/SignalEngineView';
 import { ProtectedFeature } from '@/components/auth/ProtectedFeature';
 import AIChatButton from '@/components/chat/AIChatButton';
 import { useLanguage } from '@/hooks/useLanguage';
@@ -75,6 +76,12 @@ const Index = () => {
         return (
           <ProtectedFeature feature="projects">
             <ProjectsView />
+          </ProtectedFeature>
+        );
+      case 'signals':
+        return (
+          <ProtectedFeature feature="signals">
+            <SignalEngineView />
           </ProtectedFeature>
         );
       case 'documents':

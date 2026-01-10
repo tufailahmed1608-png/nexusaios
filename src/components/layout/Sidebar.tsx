@@ -30,6 +30,7 @@ import {
   Gavel,
   Sparkles,
   Plug,
+  Radio,
 } from 'lucide-react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
@@ -50,6 +51,7 @@ const menuItems = [
   { id: 'calendar', labelKey: 'calendar', icon: CalendarDays },
   { id: 'meetings', labelKey: 'meetings', icon: Video },
   { id: 'projects', labelKey: 'projects', icon: FolderKanban },
+  { id: 'signals', labelKey: 'signals', icon: Radio },
   { id: 'documents', labelKey: 'documents', icon: FileText },
   { id: 'knowledge', labelKey: 'knowledge', icon: BookOpen },
   { id: 'branding', labelKey: 'branding', icon: Palette },

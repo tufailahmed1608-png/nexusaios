@@ -64,6 +64,9 @@ export const FEATURE_PERMISSIONS: Record<string, AppRole[]> = {
   
   // Projects - Hidden for: Executive
   projects: ['project_manager', 'senior_project_manager', 'program_manager', 'pmo', 'admin'],
+
+  // Signal Engine - PMO, Program Manager, Admin for enterprise signal monitoring
+  signals: ['program_manager', 'pmo', 'admin'],
   
   // Team - Hidden for: Executive
   team: ['project_manager', 'senior_project_manager', 'program_manager', 'pmo', 'admin'],
