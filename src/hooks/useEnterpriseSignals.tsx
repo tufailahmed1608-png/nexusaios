@@ -56,8 +56,8 @@ export function useEnterpriseSignals() {
     },
   });
 
-  // Calculate stats from signals
-  const stats: SignalStats | null = signalsQuery.data ? {
+  // Calculate stats from signals (never null to keep widgets safe)
+  const stats: SignalStats = signalsQuery.data ? {
     total: signalsQuery.data.length,
     byCategory: {
       project: signalsQuery.data.filter(s => s.signal_category === 'project').length,
@@ -71,7 +71,12 @@ export function useEnterpriseSignals() {
       critical: signalsQuery.data.filter(s => s.severity === 'critical').length,
     },
     unresolved: signalsQuery.data.filter(s => !s.is_resolved).length,
-  } : null;
+  } : {
+    total: 0,
+    byCategory: { project: 0, communication: 0, governance: 0 },
+    bySeverity: { low: 0, medium: 0, high: 0, critical: 0 },
+    unresolved: 0,
+  };
 
   // Generate signals mutation
   const generateMutation = useMutation({
