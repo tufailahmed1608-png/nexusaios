@@ -4,13 +4,18 @@ import PortfolioChart from './PortfolioChart';
 import BudgetChart from './BudgetChart';
 import ProjectList from './ProjectList';
 import VelocityChart from './VelocityChart';
+import { SignalWidget } from '@/components/signals/SignalWidget';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Database, FileSpreadsheet } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-const Dashboard = () => {
+interface DashboardProps {
+  onNavigateToSignals?: () => void;
+}
+
+const Dashboard = ({ onNavigateToSignals }: DashboardProps) => {
   const queryClient = useQueryClient();
   const { 
     kpis, 
@@ -107,9 +112,10 @@ const Dashboard = () => {
       </div>
 
       {/* Bottom Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <ProjectList />
         <VelocityChart />
+        <SignalWidget onViewAll={onNavigateToSignals} />
       </div>
     </div>
   );
