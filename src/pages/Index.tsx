@@ -59,8 +59,11 @@ const Index = () => {
     switch (activeView) {
       case 'dashboard':
         // Show Executive Dashboard for executive role
-        return isExecutive ? <ExecutiveDashboard /> : <Dashboard />;
-      case 'inbox':
+        return isExecutive ? (
+          <ExecutiveDashboard />
+        ) : (
+          <Dashboard onNavigateToSignals={() => setActiveView('signals')} />
+        );
         return <SmartInbox />;
       case 'tasks':
         return <TaskBoard />;

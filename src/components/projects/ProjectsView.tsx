@@ -13,9 +13,12 @@ import {
   CheckCircle2,
   Circle,
   MoreHorizontal,
+  Radio,
 } from 'lucide-react';
 import { projects, Project, Milestone } from '@/data/mockData';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { ProjectSignalsBadge } from '@/components/signals/ProjectSignalsBadge';
+import { useEnterpriseSignals } from '@/hooks/useEnterpriseSignals';
 
 // Import project team member avatars
 import alexKimAvatar from '@/assets/inbox/alex-kim.png';
@@ -176,7 +179,7 @@ const ProjectCard = ({ project, onSelect }: ProjectCardProps) => {
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
             <h3 className="font-semibold text-foreground">{project.name}</h3>
             <span className={cn(
               'masira-badge',
@@ -186,6 +189,7 @@ const ProjectCard = ({ project, onSelect }: ProjectCardProps) => {
             )}>
               {project.health.replace('-', ' ')}
             </span>
+            <ProjectSignalsBadge projectName={project.name} compact />
           </div>
           <p className="text-sm text-muted-foreground line-clamp-1">{project.description}</p>
         </div>
