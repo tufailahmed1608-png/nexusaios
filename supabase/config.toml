@@ -41,3 +41,6 @@ verify_jwt = true
 
 [functions.import-file-data]
 verify_jwt = true
+
+[functions.generate-signals]
+verify_jwt = true

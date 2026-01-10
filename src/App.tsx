@@ -22,6 +22,7 @@ import FeaturesShowcase from "./pages/FeaturesShowcase";
 import ProductDemo from "./pages/ProductDemo";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import Integrations from "./pages/Integrations";
+import SignalEnginePage from "./pages/SignalEngine";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 
@@ -96,6 +97,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <Integrations />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/signals"
+                element={
+                  <ProtectedRoute>
+                    <SignalEnginePage />
                   </ProtectedRoute>
                 }
               />

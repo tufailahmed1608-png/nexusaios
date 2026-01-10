@@ -298,6 +298,60 @@ export type Database = {
         }
         Relationships: []
       }
+      enterprise_signals: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_resolved: boolean | null
+          metadata: Json | null
+          project_name: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: Database["public"]["Enums"]["signal_severity"]
+          signal_category: Database["public"]["Enums"]["signal_category"]
+          signal_type: string
+          source: string
+          stakeholder: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_resolved?: boolean | null
+          metadata?: Json | null
+          project_name?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: Database["public"]["Enums"]["signal_severity"]
+          signal_category: Database["public"]["Enums"]["signal_category"]
+          signal_type: string
+          source?: string
+          stakeholder?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_resolved?: boolean | null
+          metadata?: Json | null
+          project_name?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: Database["public"]["Enums"]["signal_severity"]
+          signal_category?: Database["public"]["Enums"]["signal_category"]
+          signal_type?: string
+          source?: string
+          stakeholder?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       file_imports: {
         Row: {
           created_at: string | null
@@ -776,6 +830,8 @@ export type Database = {
         | "pmo"
         | "executive"
         | "tenant_admin"
+      signal_category: "project" | "communication" | "governance"
+      signal_severity: "low" | "medium" | "high" | "critical"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -913,6 +969,8 @@ export const Constants = {
         "executive",
         "tenant_admin",
       ],
+      signal_category: ["project", "communication", "governance"],
+      signal_severity: ["low", "medium", "high", "critical"],
     },
   },
 } as const
