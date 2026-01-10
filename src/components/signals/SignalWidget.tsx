@@ -44,18 +44,18 @@ export function SignalWidget({
   const { signals, stats, isLoading, resolve, isResolving } = useEnterpriseSignals();
 
   // Filter signals by project if specified, exclude resolved
-  const filteredSignals = signals
+  const filteredSignals = (signals || [])
     .filter(s => !s.is_resolved)
     .filter(s => !projectName || s.project_name === projectName)
     .slice(0, maxItems);
 
   const unresolvedCount = projectName 
-    ? signals.filter(s => !s.is_resolved && s.project_name === projectName).length
-    : stats.unresolved;
+    ? (signals || []).filter(s => !s.is_resolved && s.project_name === projectName).length
+    : stats?.unresolved ?? 0;
 
   const criticalCount = projectName
-    ? signals.filter(s => s.severity === 'critical' && !s.is_resolved && s.project_name === projectName).length
-    : stats.bySeverity.critical;
+    ? (signals || []).filter(s => s.severity === 'critical' && !s.is_resolved && s.project_name === projectName).length
+    : stats?.bySeverity?.critical ?? 0;
 
   if (isLoading) {
     return (
