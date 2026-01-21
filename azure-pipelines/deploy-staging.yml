@@ -1,0 +1,268 @@
+# azure-pipelines/deploy-staging.yml
+# Staging Environment Deployment Pipeline
+
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  - group: nexus-staging-secrets
+  - name: nodeVersion
+    value: '20.x'
+  - name: pnpmVersion
+    value: '8'
+  - name: environment
+    value: 'staging'
+  - name: azureRegion
+    value: 'swedencentral'
+
+stages:
+  - stage: Build
+    displayName: 'Build Application'
+    jobs:
+      - job: Build
+        displayName: 'Build'
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '$(nodeVersion)'
+            displayName: 'Install Node.js'
+
+          - script: npm install -g pnpm@$(pnpmVersion)
+            displayName: 'Install pnpm'
+
+          - task: Cache@2
+            inputs:
+              key: 'pnpm | "$(Agent.OS)" | pnpm-lock.yaml'
+              restoreKeys: |
+                pnpm | "$(Agent.OS)"
+              path: $(Pipeline.Workspace)/.pnpm-store
+            displayName: 'Cache pnpm store'
+
+          - script: |
+              pnpm config set store-dir $(Pipeline.Workspace)/.pnpm-store
+              pnpm install --no-frozen-lockfile
+            displayName: 'Install dependencies'
+
+          - script: pnpm build
+            displayName: 'Build application'
+            env:
+              VITE_SUPABASE_URL: $(VITE_SUPABASE_URL)
+              VITE_SUPABASE_PUBLISHABLE_KEY: $(VITE_SUPABASE_PUBLISHABLE_KEY)
+
+          - publish: dist
+            artifact: webapp
+            displayName: 'Publish webapp artifact'
+
+  - stage: Approval
+    displayName: 'Staging Approval'
+    dependsOn: Build
+    jobs:
+      - deployment: ApproveStaging
+        displayName: 'Approve Staging Deployment'
+        environment: 'staging'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - script: echo "Staging deployment approved"
+                  displayName: 'Approval confirmed'
+
+  - stage: Backup_Database
+    displayName: 'Backup Database'
+    dependsOn: Approval
+    condition: succeeded()
+    jobs:
+      - job: BackupDB
+        displayName: 'Create Database Backup'
+        steps:
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: 'azure-subscription-staging'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                echo "Creating database backup..."
+                az postgres flexible-server backup create \
+                  --resource-group rg-nexus-$(environment) \
+                  --name nexus-$(environment)-db \
+                  --backup-name pre-deploy-$(Build.BuildId) \
+                  || echo "Backup creation skipped or failed - continuing deployment"
+            displayName: 'Backup PostgreSQL'
+
+  - stage: Deploy_Infrastructure
+    displayName: 'Deploy Infrastructure'
+    dependsOn: Backup_Database
+    condition: succeeded()
+    jobs:
+      - job: DeployBicep
+        displayName: 'Deploy Bicep Templates'
+        steps:
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: 'azure-subscription-staging'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                echo "Deploying infrastructure to $(environment)..."
+                az deployment sub create \
+                  --location $(azureRegion) \
+                  --template-file infrastructure/azure/main.bicep \
+                  --parameters infrastructure/azure/parameters/staging.bicepparam \
+                  --parameters postgresAdminLogin="$(DB_USER)" \
+                  --parameters postgresAdminPassword="$(DB_PASSWORD)" \
+                  --name "nexus-$(environment)-$(Build.BuildId)"
+            displayName: 'Deploy Bicep'
+
+  - stage: Deploy_Database
+    displayName: 'Run Database Migrations'
+    dependsOn: Deploy_Infrastructure
+    condition: succeeded()
+    jobs:
+      - job: Migrate
+        displayName: 'Run Migrations'
+        steps:
+          - script: |
+              sudo apt-get update
+              sudo apt-get install -y postgresql-client
+            displayName: 'Install PostgreSQL client'
+
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: 'azure-subscription-staging'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                echo "Running database migrations..."
+                for migration in infrastructure/azure/database/migrations/*.sql; do
+                  if [ -f "$migration" ]; then
+                    echo "Executing: $migration"
+                    PGPASSWORD="$(DB_PASSWORD)" psql \
+                      -h "$(DB_HOST)" \
+                      -U "$(DB_USER)" \
+                      -d nexus_$(environment) \
+                      -f "$migration" \
+                      --single-transaction
+                  fi
+                done
+                echo "Migrations completed."
+            displayName: 'Execute migrations'
+
+  - stage: Deploy_Frontend
+    displayName: 'Deploy Frontend'
+    dependsOn: Deploy_Database
+    condition: succeeded()
+    jobs:
+      - job: DeploySWA
+        displayName: 'Deploy to Static Web App'
+        steps:
+          - download: current
+            artifact: webapp
+            displayName: 'Download webapp artifact'
+
+          - task: AzureStaticWebApp@0
+            inputs:
+              app_location: '$(Pipeline.Workspace)/webapp'
+              skip_app_build: true
+              azure_static_web_apps_api_token: $(AZURE_SWA_TOKEN)
+            displayName: 'Deploy to Azure Static Web Apps'
+
+  - stage: Deploy_Functions
+    displayName: 'Deploy Azure Functions'
+    dependsOn: Deploy_Database
+    condition: succeeded()
+    jobs:
+      - job: DeployFunctions
+        displayName: 'Deploy Functions'
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '$(nodeVersion)'
+            displayName: 'Install Node.js'
+
+          - task: AzureFunctionApp@2
+            inputs:
+              connectedServiceNameARM: 'azure-subscription-staging'
+              appType: 'functionApp'
+              appName: 'nexus-$(environment)-func'
+              package: '$(System.DefaultWorkingDirectory)/supabase/functions'
+              runtimeStack: 'NODE|20'
+            displayName: 'Deploy Azure Functions'
+
+  - stage: E2E_Tests
+    displayName: 'E2E Tests'
+    dependsOn:
+      - Deploy_Frontend
+      - Deploy_Functions
+    condition: succeeded()
+    jobs:
+      - job: PlaywrightTests
+        displayName: 'Run Playwright Tests'
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '$(nodeVersion)'
+            displayName: 'Install Node.js'
+
+          - script: npm install -g pnpm@$(pnpmVersion)
+            displayName: 'Install pnpm'
+
+          - script: |
+              pnpm install --no-frozen-lockfile
+              pnpm exec playwright install --with-deps chromium
+            displayName: 'Install dependencies'
+
+          - script: |
+              pnpm exec playwright test --project=chromium
+            displayName: 'Run E2E tests'
+            env:
+              BASE_URL: https://nexus-$(environment).azurestaticapps.net
+
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '**/test-results/*.xml'
+            condition: always()
+            displayName: 'Publish test results'
+
+          - publish: playwright-report
+            artifact: playwright-report
+            condition: always()
+            displayName: 'Publish Playwright report'
+
+  - stage: Notify
+    displayName: 'Notify'
+    dependsOn: E2E_Tests
+    condition: always()
+    jobs:
+      - job: SlackNotify
+        displayName: 'Send Notification'
+        steps:
+          - script: |
+              if [ "$(Agent.JobStatus)" = "Succeeded" ]; then
+                STATUS="✅ Success"
+                COLOR="good"
+              else
+                STATUS="❌ Failed"
+                COLOR="danger"
+              fi
+              
+              curl -X POST "$(SLACK_WEBHOOK_URL)" \
+                -H "Content-Type: application/json" \
+                -d "{
+                  \"attachments\": [{
+                    \"color\": \"$COLOR\",
+                    \"title\": \"Nexus OS - Staging Deployment\",
+                    \"text\": \"$STATUS\",
+                    \"fields\": [
+                      {\"title\": \"Environment\", \"value\": \"$(environment)\", \"short\": true},
+                      {\"title\": \"Build\", \"value\": \"$(Build.BuildId)\", \"short\": true}
+                    ]
+                  }]
+                }"
+            displayName: 'Send Slack notification'
+            condition: and(always(), ne(variables['SLACK_WEBHOOK_URL'], ''))

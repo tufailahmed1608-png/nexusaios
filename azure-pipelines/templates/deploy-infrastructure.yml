@@ -1,0 +1,54 @@
+# azure-pipelines/templates/deploy-infrastructure.yml
+# Reusable infrastructure deployment template
+
+parameters:
+  - name: environment
+    type: string
+  - name: azureSubscription
+    type: string
+  - name: azureRegion
+    type: string
+    default: 'swedencentral'
+  - name: parameterFile
+    type: string
+
+steps:
+  - task: AzureCLI@2
+    inputs:
+      azureSubscription: '${{ parameters.azureSubscription }}'
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        echo "============================================"
+        echo "Deploying infrastructure to ${{ parameters.environment }}"
+        echo "Region: ${{ parameters.azureRegion }}"
+        echo "Parameter file: ${{ parameters.parameterFile }}"
+        echo "============================================"
+        
+        # Validate template first
+        echo "Validating Bicep template..."
+        az deployment sub validate \
+          --location ${{ parameters.azureRegion }} \
+          --template-file infrastructure/azure/main.bicep \
+          --parameters ${{ parameters.parameterFile }} \
+          --parameters postgresAdminLogin="$(DB_USER)" \
+          --parameters postgresAdminPassword="$(DB_PASSWORD)"
+        
+        if [ $? -ne 0 ]; then
+          echo "##[error]Template validation failed!"
+          exit 1
+        fi
+        
+        echo "Validation passed. Deploying..."
+        
+        # Deploy infrastructure
+        az deployment sub create \
+          --location ${{ parameters.azureRegion }} \
+          --template-file infrastructure/azure/main.bicep \
+          --parameters ${{ parameters.parameterFile }} \
+          --parameters postgresAdminLogin="$(DB_USER)" \
+          --parameters postgresAdminPassword="$(DB_PASSWORD)" \
+          --name "nexus-${{ parameters.environment }}-$(Build.BuildId)"
+        
+        echo "Infrastructure deployment completed!"
+    displayName: 'Deploy Bicep to ${{ parameters.environment }}'
