@@ -1,0 +1,57 @@
+# azure-pipelines/templates/build.yml
+# Reusable build template
+
+parameters:
+  - name: nodeVersion
+    type: string
+    default: '20.x'
+  - name: pnpmVersion
+    type: string
+    default: '8'
+  - name: publishArtifact
+    type: boolean
+    default: true
+  - name: artifactName
+    type: string
+    default: 'webapp'
+
+steps:
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '${{ parameters.nodeVersion }}'
+    displayName: 'Install Node.js ${{ parameters.nodeVersion }}'
+
+  - script: npm install -g pnpm@${{ parameters.pnpmVersion }}
+    displayName: 'Install pnpm ${{ parameters.pnpmVersion }}'
+
+  - task: Cache@2
+    inputs:
+      key: 'pnpm | "$(Agent.OS)" | pnpm-lock.yaml'
+      restoreKeys: |
+        pnpm | "$(Agent.OS)"
+      path: $(Pipeline.Workspace)/.pnpm-store
+    displayName: 'Cache pnpm store'
+
+  - script: |
+      pnpm config set store-dir $(Pipeline.Workspace)/.pnpm-store
+      pnpm install --no-frozen-lockfile
+    displayName: 'Install dependencies'
+
+  - script: pnpm lint
+    displayName: 'Run linting'
+    continueOnError: false
+
+  - script: pnpm tsc --noEmit
+    displayName: 'TypeScript check'
+    continueOnError: false
+
+  - script: pnpm build
+    displayName: 'Build application'
+    env:
+      VITE_SUPABASE_URL: $(VITE_SUPABASE_URL)
+      VITE_SUPABASE_PUBLISHABLE_KEY: $(VITE_SUPABASE_PUBLISHABLE_KEY)
+
+  - ${{ if eq(parameters.publishArtifact, true) }}:
+    - publish: dist
+      artifact: ${{ parameters.artifactName }}
+      displayName: 'Publish ${{ parameters.artifactName }} artifact'

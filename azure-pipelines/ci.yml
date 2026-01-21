@@ -1,0 +1,146 @@
+# azure-pipelines/ci.yml
+# Continuous Integration Pipeline for Nexus OS
+# Runs on all PRs and pushes to main/develop branches
+
+trigger:
+  branches:
+    include:
+      - main
+      - develop
+  paths:
+    exclude:
+      - '*.md'
+      - 'docs/**'
+      - 'public/docs/**'
+
+pr:
+  branches:
+    include:
+      - main
+      - develop
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  nodeVersion: '20.x'
+  pnpmVersion: '8'
+
+stages:
+  - stage: CI
+    displayName: 'Build & Validate'
+    jobs:
+      - job: Lint
+        displayName: 'Lint & Format'
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '$(nodeVersion)'
+            displayName: 'Install Node.js'
+
+          - script: npm install -g pnpm@$(pnpmVersion)
+            displayName: 'Install pnpm'
+
+          - task: Cache@2
+            inputs:
+              key: 'pnpm | "$(Agent.OS)" | pnpm-lock.yaml'
+              restoreKeys: |
+                pnpm | "$(Agent.OS)"
+              path: $(Pipeline.Workspace)/.pnpm-store
+            displayName: 'Cache pnpm store'
+
+          - script: pnpm config set store-dir $(Pipeline.Workspace)/.pnpm-store
+            displayName: 'Configure pnpm store'
+
+          - script: pnpm install --frozen-lockfile
+            displayName: 'Install dependencies'
+
+          - script: pnpm lint
+            displayName: 'Run ESLint'
+
+      - job: TypeCheck
+        displayName: 'Type Check'
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '$(nodeVersion)'
+            displayName: 'Install Node.js'
+
+          - script: npm install -g pnpm@$(pnpmVersion)
+            displayName: 'Install pnpm'
+
+          - task: Cache@2
+            inputs:
+              key: 'pnpm | "$(Agent.OS)" | pnpm-lock.yaml'
+              restoreKeys: |
+                pnpm | "$(Agent.OS)"
+              path: $(Pipeline.Workspace)/.pnpm-store
+            displayName: 'Cache pnpm store'
+
+          - script: pnpm config set store-dir $(Pipeline.Workspace)/.pnpm-store
+            displayName: 'Configure pnpm store'
+
+          - script: pnpm install --no-frozen-lockfile
+            displayName: 'Install dependencies'
+
+          - script: pnpm tsc --noEmit
+            displayName: 'TypeScript check'
+
+      - job: SecurityScan
+        displayName: 'Security Scan'
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '$(nodeVersion)'
+            displayName: 'Install Node.js'
+
+          - script: npm install -g pnpm@$(pnpmVersion)
+            displayName: 'Install pnpm'
+
+          - script: pnpm install --no-frozen-lockfile
+            displayName: 'Install dependencies'
+
+          - script: pnpm audit --audit-level=high || true
+            displayName: 'npm audit'
+            continueOnError: true
+
+      - job: Build
+        displayName: 'Build Application'
+        dependsOn:
+          - Lint
+          - TypeCheck
+        condition: succeeded()
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '$(nodeVersion)'
+            displayName: 'Install Node.js'
+
+          - script: npm install -g pnpm@$(pnpmVersion)
+            displayName: 'Install pnpm'
+
+          - task: Cache@2
+            inputs:
+              key: 'pnpm | "$(Agent.OS)" | pnpm-lock.yaml'
+              restoreKeys: |
+                pnpm | "$(Agent.OS)"
+              path: $(Pipeline.Workspace)/.pnpm-store
+            displayName: 'Cache pnpm store'
+
+          - script: pnpm config set store-dir $(Pipeline.Workspace)/.pnpm-store
+            displayName: 'Configure pnpm store'
+
+          - script: pnpm install --no-frozen-lockfile
+            displayName: 'Install dependencies'
+
+          - script: pnpm build
+            displayName: 'Build'
+            env:
+              VITE_SUPABASE_URL: $(VITE_SUPABASE_URL)
+              VITE_SUPABASE_PUBLISHABLE_KEY: $(VITE_SUPABASE_PUBLISHABLE_KEY)
+
+          - task: PublishBuildArtifacts@1
+            inputs:
+              pathToPublish: 'dist'
+              artifactName: 'webapp-$(Build.BuildId)'
+            displayName: 'Publish build artifacts'

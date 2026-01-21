@@ -1,0 +1,460 @@
+# azure-pipelines/deploy-prod.yml
+# Production Environment Deployment Pipeline
+# Blue-Green deployment with manual approval and auto-rollback
+
+trigger: none  # Manual trigger only for production
+
+pr: none
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  - group: nexus-prod-secrets
+  - name: nodeVersion
+    value: '20.x'
+  - name: pnpmVersion
+    value: '8'
+  - name: environment
+    value: 'prod'
+  - name: azureRegion
+    value: 'swedencentral'
+
+parameters:
+  - name: version
+    displayName: 'Version to deploy (e.g., v1.0.0)'
+    type: string
+    default: ''
+
+stages:
+  - stage: Validate
+    displayName: 'Validate Version'
+    jobs:
+      - job: ValidateVersion
+        displayName: 'Validate Version Format'
+        steps:
+          - script: |
+              VERSION="${{ parameters.version }}"
+              if [ -z "$VERSION" ]; then
+                VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+              fi
+              
+              if [ -z "$VERSION" ]; then
+                echo "##[error]No version specified and no tags found"
+                exit 1
+              fi
+              
+              if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+                echo "##[error]Invalid version format: $VERSION. Expected: v*.*.* (e.g., v1.0.0)"
+                exit 1
+              fi
+              
+              echo "##vso[task.setvariable variable=deployVersion;isOutput=true]$VERSION"
+              echo "Deploying version: $VERSION"
+            name: validateVersion
+            displayName: 'Validate version format'
+
+  - stage: Build
+    displayName: 'Build Application'
+    dependsOn: Validate
+    variables:
+      deployVersion: $[ stageDependencies.Validate.ValidateVersion.outputs['validateVersion.deployVersion'] ]
+    jobs:
+      - job: Build
+        displayName: 'Build'
+        steps:
+          - checkout: self
+            fetchDepth: 0
+
+          - script: |
+              git checkout $(deployVersion)
+            displayName: 'Checkout version tag'
+            condition: ne(variables['deployVersion'], '')
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '$(nodeVersion)'
+            displayName: 'Install Node.js'
+
+          - script: npm install -g pnpm@$(pnpmVersion)
+            displayName: 'Install pnpm'
+
+          - task: Cache@2
+            inputs:
+              key: 'pnpm | "$(Agent.OS)" | pnpm-lock.yaml'
+              restoreKeys: |
+                pnpm | "$(Agent.OS)"
+              path: $(Pipeline.Workspace)/.pnpm-store
+            displayName: 'Cache pnpm store'
+
+          - script: |
+              pnpm config set store-dir $(Pipeline.Workspace)/.pnpm-store
+              pnpm install --no-frozen-lockfile
+            displayName: 'Install dependencies'
+
+          - script: pnpm build
+            displayName: 'Build application'
+            env:
+              VITE_SUPABASE_URL: $(VITE_SUPABASE_URL)
+              VITE_SUPABASE_PUBLISHABLE_KEY: $(VITE_SUPABASE_PUBLISHABLE_KEY)
+
+          - publish: dist
+            artifact: webapp
+            displayName: 'Publish webapp artifact'
+
+  - stage: Approval
+    displayName: 'Production Approval'
+    dependsOn: Build
+    jobs:
+      - deployment: ApproveProduction
+        displayName: 'Approve Production Deployment'
+        environment: 'production'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - script: echo "Production deployment approved by $(Build.RequestedFor)"
+                  displayName: 'Approval confirmed'
+
+  - stage: Backup_Database
+    displayName: 'Backup Database'
+    dependsOn: Approval
+    condition: succeeded()
+    jobs:
+      - job: BackupDB
+        displayName: 'Create Database Backup'
+        steps:
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: 'azure-subscription-prod'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                echo "Creating pre-deployment database backup..."
+                az postgres flexible-server backup create \
+                  --resource-group rg-nexus-$(environment) \
+                  --name nexus-$(environment)-db \
+                  --backup-name pre-deploy-$(Build.BuildId)
+                echo "Backup created successfully"
+            displayName: 'Backup PostgreSQL'
+
+  - stage: Deploy_Infrastructure
+    displayName: 'Deploy Infrastructure'
+    dependsOn: Backup_Database
+    condition: succeeded()
+    jobs:
+      - job: DeployBicep
+        displayName: 'Deploy Bicep Templates'
+        steps:
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: 'azure-subscription-prod'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                echo "Deploying infrastructure to production..."
+                az deployment sub create \
+                  --location $(azureRegion) \
+                  --template-file infrastructure/azure/main.bicep \
+                  --parameters infrastructure/azure/parameters/prod.bicepparam \
+                  --parameters postgresAdminLogin="$(DB_USER)" \
+                  --parameters postgresAdminPassword="$(DB_PASSWORD)" \
+                  --name "nexus-$(environment)-$(Build.BuildId)"
+            displayName: 'Deploy Bicep'
+
+  - stage: Deploy_Database
+    displayName: 'Run Database Migrations'
+    dependsOn: Deploy_Infrastructure
+    condition: succeeded()
+    jobs:
+      - job: Migrate
+        displayName: 'Run Migrations'
+        steps:
+          - script: |
+              sudo apt-get update
+              sudo apt-get install -y postgresql-client
+            displayName: 'Install PostgreSQL client'
+
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: 'azure-subscription-prod'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                echo "Running database migrations in transaction..."
+                
+                # Combine all migrations into single transaction
+                echo "BEGIN;" > /tmp/combined_migration.sql
+                for migration in infrastructure/azure/database/migrations/*.sql; do
+                  if [ -f "$migration" ]; then
+                    echo "-- Migration: $migration" >> /tmp/combined_migration.sql
+                    cat "$migration" >> /tmp/combined_migration.sql
+                    echo "" >> /tmp/combined_migration.sql
+                  fi
+                done
+                echo "COMMIT;" >> /tmp/combined_migration.sql
+                
+                PGPASSWORD="$(DB_PASSWORD)" psql \
+                  -h "$(DB_HOST)" \
+                  -U "$(DB_USER)" \
+                  -d nexus_$(environment) \
+                  -f /tmp/combined_migration.sql
+                
+                echo "Migrations completed successfully"
+            displayName: 'Execute migrations'
+
+  - stage: Deploy_Functions_Slot
+    displayName: 'Deploy Functions (Staging Slot)'
+    dependsOn: Deploy_Database
+    condition: succeeded()
+    jobs:
+      - job: DeployFunctionsSlot
+        displayName: 'Deploy to Staging Slot'
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '$(nodeVersion)'
+            displayName: 'Install Node.js'
+
+          - task: AzureFunctionApp@2
+            inputs:
+              connectedServiceNameARM: 'azure-subscription-prod'
+              appType: 'functionApp'
+              appName: 'nexus-$(environment)-func'
+              deployToSlotOrASE: true
+              slotName: 'staging'
+              package: '$(System.DefaultWorkingDirectory)/supabase/functions'
+              runtimeStack: 'NODE|20'
+            displayName: 'Deploy to staging slot'
+
+  - stage: Deploy_Frontend_Slot
+    displayName: 'Deploy Frontend (Staging)'
+    dependsOn: Deploy_Database
+    condition: succeeded()
+    jobs:
+      - job: DeploySWASlot
+        displayName: 'Deploy to Staging Environment'
+        steps:
+          - download: current
+            artifact: webapp
+            displayName: 'Download webapp artifact'
+
+          - task: AzureStaticWebApp@0
+            inputs:
+              app_location: '$(Pipeline.Workspace)/webapp'
+              skip_app_build: true
+              azure_static_web_apps_api_token: $(AZURE_SWA_TOKEN_STAGING)
+              deployment_environment: 'staging'
+            displayName: 'Deploy to staging environment'
+
+  - stage: Health_Check_Staging
+    displayName: 'Health Check Staging'
+    dependsOn:
+      - Deploy_Functions_Slot
+      - Deploy_Frontend_Slot
+    condition: succeeded()
+    jobs:
+      - job: HealthCheck
+        displayName: 'Validate Staging Deployment'
+        steps:
+          - script: |
+              echo "Running staging health checks..."
+              MAX_RETRIES=10
+              RETRY_DELAY=15
+              
+              # Frontend health check
+              FRONTEND_URL="https://nexus-$(environment)-staging.azurestaticapps.net"
+              for i in $(seq 1 $MAX_RETRIES); do
+                STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$FRONTEND_URL")
+                if [ "$STATUS" = "200" ]; then
+                  echo "✅ Frontend staging is healthy"
+                  break
+                fi
+                echo "Attempt $i/$MAX_RETRIES: Frontend returned $STATUS"
+                if [ $i -eq $MAX_RETRIES ]; then
+                  echo "##[error]Frontend staging health check failed"
+                  exit 1
+                fi
+                sleep $RETRY_DELAY
+              done
+              
+              # API health check
+              API_URL="https://nexus-$(environment)-func-staging.azurewebsites.net/api/health"
+              for i in $(seq 1 $MAX_RETRIES); do
+                STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$API_URL")
+                if [ "$STATUS" = "200" ]; then
+                  echo "✅ API staging is healthy"
+                  break
+                fi
+                echo "Attempt $i/$MAX_RETRIES: API returned $STATUS"
+                if [ $i -eq $MAX_RETRIES ]; then
+                  echo "##[error]API staging health check failed"
+                  exit 1
+                fi
+                sleep $RETRY_DELAY
+              done
+              
+              echo "All staging health checks passed!"
+            displayName: 'Run health checks'
+
+  - stage: Swap_Slots
+    displayName: 'Swap to Production'
+    dependsOn: Health_Check_Staging
+    condition: succeeded()
+    jobs:
+      - job: SwapSlots
+        displayName: 'Swap Function App Slots'
+        steps:
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: 'azure-subscription-prod'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                echo "Swapping staging slot to production..."
+                az functionapp deployment slot swap \
+                  --resource-group rg-nexus-$(environment) \
+                  --name nexus-$(environment)-func \
+                  --slot staging \
+                  --target-slot production
+                echo "Slot swap completed!"
+            displayName: 'Swap slots'
+
+  - stage: Promote_Frontend
+    displayName: 'Promote Frontend to Production'
+    dependsOn: Swap_Slots
+    condition: succeeded()
+    jobs:
+      - job: PromoteFrontend
+        displayName: 'Promote to Production'
+        steps:
+          - download: current
+            artifact: webapp
+            displayName: 'Download webapp artifact'
+
+          - task: AzureStaticWebApp@0
+            inputs:
+              app_location: '$(Pipeline.Workspace)/webapp'
+              skip_app_build: true
+              azure_static_web_apps_api_token: $(AZURE_SWA_TOKEN)
+            displayName: 'Deploy to production'
+
+  - stage: Post_Deploy_Validation
+    displayName: 'Post-Deploy Validation'
+    dependsOn: Promote_Frontend
+    condition: succeeded()
+    jobs:
+      - job: ProductionHealthCheck
+        displayName: 'Production Health Check'
+        steps:
+          - script: |
+              echo "Running production health checks..."
+              MAX_RETRIES=5
+              RETRY_DELAY=10
+              
+              # Frontend health check
+              FRONTEND_URL="https://nexus-$(environment).azurestaticapps.net"
+              for i in $(seq 1 $MAX_RETRIES); do
+                STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$FRONTEND_URL")
+                if [ "$STATUS" = "200" ]; then
+                  echo "✅ Production frontend is healthy"
+                  break
+                fi
+                echo "Attempt $i/$MAX_RETRIES: Frontend returned $STATUS"
+                if [ $i -eq $MAX_RETRIES ]; then
+                  echo "##[error]Production frontend health check failed"
+                  exit 1
+                fi
+                sleep $RETRY_DELAY
+              done
+              
+              # API health check
+              API_URL="https://nexus-$(environment)-func.azurewebsites.net/api/health"
+              for i in $(seq 1 $MAX_RETRIES); do
+                STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$API_URL")
+                if [ "$STATUS" = "200" ]; then
+                  echo "✅ Production API is healthy"
+                  break
+                fi
+                echo "Attempt $i/$MAX_RETRIES: API returned $STATUS"
+                if [ $i -eq $MAX_RETRIES ]; then
+                  echo "##[error]Production API health check failed"
+                  exit 1
+                fi
+                sleep $RETRY_DELAY
+              done
+              
+              echo "🎉 Production deployment validated successfully!"
+            displayName: 'Validate production'
+
+  - stage: Notify_Success
+    displayName: 'Notify Success'
+    dependsOn: Post_Deploy_Validation
+    condition: succeeded()
+    jobs:
+      - job: NotifySuccess
+        displayName: 'Send Success Notification'
+        steps:
+          - script: |
+              curl -X POST "$(SLACK_WEBHOOK_URL)" \
+                -H "Content-Type: application/json" \
+                -d "{
+                  \"attachments\": [{
+                    \"color\": \"good\",
+                    \"title\": \"🚀 Nexus OS - Production Deployment Successful\",
+                    \"fields\": [
+                      {\"title\": \"Version\", \"value\": \"$(deployVersion)\", \"short\": true},
+                      {\"title\": \"Build\", \"value\": \"$(Build.BuildId)\", \"short\": true},
+                      {\"title\": \"Deployed By\", \"value\": \"$(Build.RequestedFor)\", \"short\": true},
+                      {\"title\": \"URL\", \"value\": \"https://nexus-prod.azurestaticapps.net\", \"short\": true}
+                    ]
+                  }]
+                }"
+            displayName: 'Send success notification'
+            condition: ne(variables['SLACK_WEBHOOK_URL'], '')
+
+  - stage: Rollback_On_Failure
+    displayName: 'Rollback on Failure'
+    dependsOn:
+      - Swap_Slots
+      - Promote_Frontend
+      - Post_Deploy_Validation
+    condition: failed()
+    jobs:
+      - job: Rollback
+        displayName: 'Execute Rollback'
+        steps:
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: 'azure-subscription-prod'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                echo "⚠️ Deployment failed! Initiating rollback..."
+                
+                # Swap back to previous version
+                az functionapp deployment slot swap \
+                  --resource-group rg-nexus-$(environment) \
+                  --name nexus-$(environment)-func \
+                  --slot staging \
+                  --target-slot production
+                
+                echo "Rollback completed!"
+            displayName: 'Rollback function app'
+
+          - script: |
+              curl -X POST "$(SLACK_WEBHOOK_URL)" \
+                -H "Content-Type: application/json" \
+                -d "{
+                  \"attachments\": [{
+                    \"color\": \"danger\",
+                    \"title\": \"⚠️ Nexus OS - Production Deployment Failed\",
+                    \"text\": \"Automatic rollback executed\",
+                    \"fields\": [
+                      {\"title\": \"Build\", \"value\": \"$(Build.BuildId)\", \"short\": true},
+                      {\"title\": \"Triggered By\", \"value\": \"$(Build.RequestedFor)\", \"short\": true}
+                    ]
+                  }]
+                }"
+            displayName: 'Send failure notification'
+            condition: ne(variables['SLACK_WEBHOOK_URL'], '')

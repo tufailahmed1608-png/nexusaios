@@ -1,0 +1,92 @@
+# azure-pipelines/templates/deploy-database.yml
+# Reusable database migration template
+
+parameters:
+  - name: environment
+    type: string
+  - name: azureSubscription
+    type: string
+  - name: databaseName
+    type: string
+    default: ''
+  - name: useTransaction
+    type: boolean
+    default: true
+
+steps:
+  - script: |
+      sudo apt-get update
+      sudo apt-get install -y postgresql-client
+    displayName: 'Install PostgreSQL client'
+
+  - task: AzureCLI@2
+    inputs:
+      azureSubscription: '${{ parameters.azureSubscription }}'
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        DB_NAME="${{ parameters.databaseName }}"
+        if [ -z "$DB_NAME" ]; then
+          DB_NAME="nexus_${{ parameters.environment }}"
+        fi
+        
+        echo "============================================"
+        echo "Running database migrations"
+        echo "Environment: ${{ parameters.environment }}"
+        echo "Database: $DB_NAME"
+        echo "Use transaction: ${{ parameters.useTransaction }}"
+        echo "============================================"
+        
+        MIGRATION_DIR="infrastructure/azure/database/migrations"
+        
+        if [ ! -d "$MIGRATION_DIR" ]; then
+          echo "No migrations directory found. Skipping."
+          exit 0
+        fi
+        
+        MIGRATION_COUNT=$(ls -1 $MIGRATION_DIR/*.sql 2>/dev/null | wc -l)
+        if [ "$MIGRATION_COUNT" -eq 0 ]; then
+          echo "No migration files found. Skipping."
+          exit 0
+        fi
+        
+        echo "Found $MIGRATION_COUNT migration file(s)"
+        
+        if [ "${{ parameters.useTransaction }}" = "true" ]; then
+          echo "Running migrations in single transaction..."
+          
+          # Combine all migrations
+          echo "BEGIN;" > /tmp/combined_migration.sql
+          for migration in $MIGRATION_DIR/*.sql; do
+            echo "-- ============================================" >> /tmp/combined_migration.sql
+            echo "-- Migration: $(basename $migration)" >> /tmp/combined_migration.sql
+            echo "-- ============================================" >> /tmp/combined_migration.sql
+            cat "$migration" >> /tmp/combined_migration.sql
+            echo "" >> /tmp/combined_migration.sql
+          done
+          echo "COMMIT;" >> /tmp/combined_migration.sql
+          
+          PGPASSWORD="$(DB_PASSWORD)" psql \
+            -h "$(DB_HOST)" \
+            -U "$(DB_USER)" \
+            -d "$DB_NAME" \
+            -f /tmp/combined_migration.sql
+        else
+          echo "Running migrations individually..."
+          for migration in $MIGRATION_DIR/*.sql; do
+            echo "Executing: $(basename $migration)"
+            PGPASSWORD="$(DB_PASSWORD)" psql \
+              -h "$(DB_HOST)" \
+              -U "$(DB_USER)" \
+              -d "$DB_NAME" \
+              -f "$migration"
+            
+            if [ $? -ne 0 ]; then
+              echo "##[error]Migration failed: $(basename $migration)"
+              exit 1
+            fi
+          done
+        fi
+        
+        echo "✅ All migrations completed successfully!"
+    displayName: 'Execute database migrations'
