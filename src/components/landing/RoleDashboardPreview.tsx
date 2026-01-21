@@ -65,7 +65,6 @@ const RoleDashboardPreview = ({ role }: RoleDashboardPreviewProps) => {
 
   return (
     <div 
-      key={role}
       className="relative rounded-xl border border-border/50 bg-card/30 backdrop-blur-sm overflow-hidden animate-fade-in"
     >
       {/* Watermark */}
