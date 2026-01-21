@@ -141,17 +141,28 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Verify webhook secret
+    // ============ SECURITY: Require webhook secret (fail-safe) ============
     const webhookSecret = Deno.env.get('SYNC_WEBHOOK_SECRET');
     const providedSecret = req.headers.get('x-webhook-secret');
 
-    if (webhookSecret && webhookSecret !== providedSecret) {
-      console.error('Invalid webhook secret provided');
+    // CRITICAL: If webhook secret is not configured, reject all requests (fail-safe)
+    if (!webhookSecret) {
+      console.error('SYNC_WEBHOOK_SECRET is not configured - rejecting request for security');
       return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
+        JSON.stringify({ error: 'Server configuration error: webhook secret not configured' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Validate the provided secret
+    if (!providedSecret || webhookSecret !== providedSecret) {
+      console.error('Invalid or missing webhook secret');
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized: Invalid webhook secret' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+    // ============ END SECURITY CHECK ============
 
     // Parse and validate request body
     let body: unknown;

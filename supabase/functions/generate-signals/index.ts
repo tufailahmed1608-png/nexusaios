@@ -296,6 +296,9 @@ function generateSignal(category: 'project' | 'communication' | 'governance'): {
   };
 }
 
+// Allowed roles for signal generation
+const ALLOWED_ROLES = ['admin', 'pmo', 'executive'];
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -303,8 +306,43 @@ serve(async (req) => {
 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // ============ SECURITY: Require authentication with proper role ============
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Missing authorization header' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid or expired token' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Check if user has an allowed role (admin, pmo, or executive)
+    const { data: roleData, error: roleError } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .single();
+
+    if (roleError || !roleData || !ALLOWED_ROLES.includes(roleData.role)) {
+      console.error(`Unauthorized signal generation attempt by user ${user.id} with role ${roleData?.role}`);
+      return new Response(
+        JSON.stringify({ error: 'Forbidden: Admin, PMO, or Executive role required' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    // ============ END SECURITY CHECK ============
 
     const { action, count = 5, category } = await req.json();
 
@@ -328,6 +366,8 @@ serve(async (req) => {
         throw new Error(`Failed to insert signals: ${error.message}`);
       }
 
+      console.log(`User ${user.id} (${roleData.role}) generated ${signals.length} signals`);
+
       return new Response(
         JSON.stringify({ 
           success: true, 
@@ -347,6 +387,8 @@ serve(async (req) => {
       if (error) {
         throw new Error(`Failed to clear signals: ${error.message}`);
       }
+
+      console.log(`User ${user.id} (${roleData.role}) cleared synthetic signals`);
 
       return new Response(
         JSON.stringify({ success: true, message: 'Cleared all synthetic signals' }),
