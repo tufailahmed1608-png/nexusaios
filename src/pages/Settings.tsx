@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -53,12 +53,14 @@ const Settings = () => {
   const [mcpServerUrl, setMcpServerUrl] = useState('');
   const [mcpApiKey, setMcpApiKey] = useState('');
 
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
+    if (!user) return;
+    
     try {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('user_id', user?.id)
+        .eq('user_id', user.id)
         .single();
 
       if (error && error.code !== 'PGRST116') {
@@ -75,13 +77,13 @@ const Settings = () => {
     } finally {
       setIsLoadingProfile(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     if (user) {
       fetchProfile();
     }
-  }, [user]);
+  }, [user, fetchProfile]);
 
 
   const handleUpdateProfile = async () => {

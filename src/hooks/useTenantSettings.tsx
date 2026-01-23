@@ -63,9 +63,10 @@ export function useTenantSettings() {
           pilotModeEnabled: settingsMap['pilot_mode_enabled'] ?? false,
         });
       }
-    } catch (err: any) {
-      console.error('Error fetching tenant settings:', err);
-      setError(err.message);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+      console.error('Error fetching tenant settings:', errorMessage);
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -85,9 +86,10 @@ export function useTenantSettings() {
 
       await fetchSettings();
       return true;
-    } catch (err: any) {
-      console.error('Error updating tenant setting:', err);
-      setError(err.message);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+      console.error('Error updating tenant setting:', errorMessage);
+      setError(errorMessage);
       return false;
     }
   };

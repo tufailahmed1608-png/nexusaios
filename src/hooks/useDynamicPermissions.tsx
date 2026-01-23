@@ -25,7 +25,7 @@ export const useDynamicPermissions = () => {
 
         if (data && data.length > 0) {
           const permMap: DynamicPermissions = {};
-          data.forEach((roleDef: any) => {
+          data.forEach((roleDef: { role: string; permissions: unknown }) => {
             if (Array.isArray(roleDef.permissions) && roleDef.permissions.length > 0) {
               permMap[roleDef.role] = roleDef.permissions;
             }
