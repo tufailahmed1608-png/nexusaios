@@ -9,6 +9,7 @@ import {
   type VisibilityReason 
 } from '@/components/ai/WhyAmISeeingThis';
 import { useUserRole } from '@/hooks/useUserRole';
+import type { AppRole } from '@/lib/permissions';
 
 const getProjectReasons = (
   project: typeof projects[0], 
@@ -18,7 +19,7 @@ const getProjectReasons = (
   
   // Role-based access
   if (role) {
-    reasons.push(createRoleBasedReason(role as any, 'project overview'));
+    reasons.push(createRoleBasedReason(role as AppRole, 'project overview'));
   }
   
   // If critical or at-risk, add filter reason

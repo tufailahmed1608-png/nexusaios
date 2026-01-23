@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -112,11 +112,7 @@ const DecisionLog = () => {
     due_date: '',
   });
 
-  useEffect(() => {
-    fetchDecisions();
-  }, [user]);
-
-  const fetchDecisions = async () => {
+  const fetchDecisions = useCallback(async () => {
     if (!user) return;
     
     try {
@@ -137,7 +133,11 @@ const DecisionLog = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, toast]);
+
+  useEffect(() => {
+    fetchDecisions();
+  }, [user, fetchDecisions]);
 
   const fetchAuditLogs = async (decisionId: string) => {
     try {

@@ -135,11 +135,11 @@ const SmartInbox = () => {
           description: 'Review and edit the suggested reply before sending.',
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error generating AI reply:', error);
       toast({
         title: 'Error',
-        description: error.message || 'Failed to generate AI reply. Please try again.',
+        description: error instanceof Error ? error.message : 'Failed to generate AI reply. Please try again.',
         variant: 'destructive',
       });
     } finally {
