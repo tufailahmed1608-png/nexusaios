@@ -20,7 +20,7 @@ pr:
       - develop
 
 pool:
-  vmImage: 'ubuntu-latest'
+  name: 'azurepipeline'
 
 variables:
   nodeVersion: '20.x'
