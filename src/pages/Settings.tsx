@@ -53,12 +53,6 @@ const Settings = () => {
   const [mcpServerUrl, setMcpServerUrl] = useState('');
   const [mcpApiKey, setMcpApiKey] = useState('');
 
-  useEffect(() => {
-    if (user) {
-      fetchProfile();
-    }
-  }, [user]);
-
   const fetchProfile = async () => {
     try {
       const { data, error } = await supabase
@@ -75,12 +69,20 @@ const Settings = () => {
         setDisplayName(data.display_name || '');
         setAvatarUrl(data.avatar_url || '');
       }
-    } catch (error: any) {
-      console.error('Error fetching profile:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error fetching profile:', errorMessage);
     } finally {
       setIsLoadingProfile(false);
     }
   };
+
+  useEffect(() => {
+    if (user) {
+      fetchProfile();
+    }
+  }, [user]);
+
 
   const handleUpdateProfile = async () => {
     if (!user) return;
@@ -101,10 +103,11 @@ const Settings = () => {
         title: 'Profile Updated',
         description: 'Your profile has been updated successfully.',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : 'An error occurred';
       toast({
         title: 'Error',
-        description: error.message,
+        description: errMsg,
         variant: 'destructive',
       });
     } finally {
@@ -145,10 +148,11 @@ const Settings = () => {
         title: 'Avatar Uploaded',
         description: 'Your avatar has been updated.',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : 'Upload failed';
       toast({
         title: 'Upload Failed',
-        description: error.message,
+        description: errMsg,
         variant: 'destructive',
       });
     } finally {
@@ -191,10 +195,11 @@ const Settings = () => {
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : 'An error occurred';
       toast({
         title: 'Error',
-        description: error.message,
+        description: errMsg,
         variant: 'destructive',
       });
     } finally {

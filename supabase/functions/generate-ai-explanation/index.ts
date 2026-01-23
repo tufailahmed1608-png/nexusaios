@@ -127,16 +127,31 @@ Confidence should be between 0 and 1. Weights should sum to approximately 1.`;
 
     let userPrompt: string;
 
+    interface ProjectData {
+      team?: { size?: number };
+      tasks?: { total?: number };
+      budget?: { allocated?: number };
+      risks?: unknown[];
+      aiMetrics?: Record<string, unknown>;
+    }
+
+    interface RiskFactor {
+      name: string;
+      score: number;
+      impact: string;
+    }
+
     if (type === 'report') {
+      const projectData = context.projectData as ProjectData | undefined;
       userPrompt = `Explain how this AI-generated report was created.
 
 Report Type: ${context.reportType || 'Unknown'}
 Project Data Analyzed:
-- Team Size: ${(context.projectData as any)?.team?.size || 'N/A'}
-- Tasks: ${(context.projectData as any)?.tasks?.total || 'N/A'} total
-- Budget: $${(context.projectData as any)?.budget?.allocated?.toLocaleString() || 'N/A'}
-- Risks Identified: ${(context.projectData as any)?.risks?.length || 0}
-- AI Metrics Available: ${Object.keys((context.projectData as any)?.aiMetrics || {}).length} data points
+- Team Size: ${projectData?.team?.size || 'N/A'}
+- Tasks: ${projectData?.tasks?.total || 'N/A'} total
+- Budget: $${projectData?.budget?.allocated?.toLocaleString() || 'N/A'}
+- Risks Identified: ${projectData?.risks?.length || 0}
+- AI Metrics Available: ${Object.keys(projectData?.aiMetrics || {}).length} data points
 
 ${outputContent ? `Report excerpt: ${outputContent.substring(0, 500)}...` : ''}
 
@@ -152,7 +167,7 @@ Trend: ${context.trend || 'N/A'}
 
 Risk Factors Analyzed:
 ${Array.isArray(context.riskFactors) 
-  ? (context.riskFactors as any[]).map(f => `- ${f.name}: ${f.score}/100 (${f.impact} impact)`).join('\n')
+  ? (context.riskFactors as RiskFactor[]).map(f => `- ${f.name}: ${f.score}/100 (${f.impact} impact)`).join('\n')
   : 'No factors provided'}
 
 Explain how the AI analyzed these risk factors, what patterns it identified, and how it arrived at the predictions.`;
