@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -120,7 +120,7 @@ serve(async (req) => {
           result = await syncWorkItems(adoBaseUrl, adoAuth, supabaseClient, config.project);
           recordsSynced = result.workItemsSynced;
           break;
-        case 'sync_all':
+        case 'sync_all': {
           const projectsResult = await syncProjects(adoBaseUrl, adoAuth, supabaseClient);
           const workItemsResult = await syncWorkItems(adoBaseUrl, adoAuth, supabaseClient);
           result = {
@@ -129,6 +129,7 @@ serve(async (req) => {
           };
           recordsSynced = projectsResult.projectsSynced + workItemsResult.workItemsSynced;
           break;
+        }
         default:
           throw new Error(`Unknown action: ${action}`);
       }
@@ -194,11 +195,11 @@ async function testConnection(baseUrl: string, auth: string): Promise<{ connecte
     throw new Error(`Azure DevOps connection failed: ${error}`);
   }
 
-  const data = await response.json();
+  await response.json();
   return { connected: true, organization: baseUrl.split('/').pop() };
 }
 
-async function syncProjects(baseUrl: string, auth: string, supabase: any): Promise<{ projectsSynced: number }> {
+async function syncProjects(baseUrl: string, auth: string, supabase: SupabaseClient): Promise<{ projectsSynced: number }> {
   const response = await fetch(`${baseUrl}/_apis/projects?api-version=7.0`, {
     headers: {
       'Authorization': `Basic ${auth}`,
@@ -244,7 +245,7 @@ async function syncProjects(baseUrl: string, auth: string, supabase: any): Promi
   return { projectsSynced: synced };
 }
 
-async function syncWorkItems(baseUrl: string, auth: string, supabase: any, projectName?: string): Promise<{ workItemsSynced: number }> {
+async function syncWorkItems(baseUrl: string, auth: string, supabase: SupabaseClient, projectName?: string): Promise<{ workItemsSynced: number }> {
   // First, get all projects if no specific project is provided
   let projects: string[] = [];
   

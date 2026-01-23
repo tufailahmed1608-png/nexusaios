@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -126,7 +126,7 @@ serve(async (req) => {
           result = await syncDemands(snowBaseUrl, snowAuth, supabaseClient);
           recordsSynced = result.demandsSynced;
           break;
-        case 'sync_all':
+        case 'sync_all': {
           const projectsResult = await syncProjects(snowBaseUrl, snowAuth, supabaseClient);
           const tasksResult = await syncTasks(snowBaseUrl, snowAuth, supabaseClient);
           const demandsResult = await syncDemands(snowBaseUrl, snowAuth, supabaseClient);
@@ -137,6 +137,7 @@ serve(async (req) => {
           };
           recordsSynced = projectsResult.projectsSynced + tasksResult.tasksSynced + demandsResult.demandsSynced;
           break;
+        }
         default:
           throw new Error(`Unknown action: ${action}`);
       }
@@ -205,7 +206,7 @@ async function testConnection(baseUrl: string, auth: string): Promise<{ connecte
   return { connected: true, instance: baseUrl.split('.')[0].replace('https://', '') };
 }
 
-async function syncProjects(baseUrl: string, auth: string, supabase: any): Promise<{ projectsSynced: number }> {
+async function syncProjects(baseUrl: string, auth: string, supabase: SupabaseClient): Promise<{ projectsSynced: number }> {
   // Try PPM Projects table first, fallback to Project table
   let response = await fetch(`${baseUrl}/table/pm_project?sysparm_limit=100`, {
     headers: {
@@ -276,7 +277,7 @@ async function syncProjects(baseUrl: string, auth: string, supabase: any): Promi
   return { projectsSynced: synced };
 }
 
-async function syncTasks(baseUrl: string, auth: string, supabase: any): Promise<{ tasksSynced: number }> {
+async function syncTasks(baseUrl: string, auth: string, supabase: SupabaseClient): Promise<{ tasksSynced: number }> {
   // Fetch project tasks
   const response = await fetch(`${baseUrl}/table/pm_project_task?sysparm_limit=200`, {
     headers: {
@@ -334,7 +335,7 @@ async function syncTasks(baseUrl: string, auth: string, supabase: any): Promise<
   return { tasksSynced: synced };
 }
 
-async function syncDemands(baseUrl: string, auth: string, supabase: any): Promise<{ demandsSynced: number }> {
+async function syncDemands(baseUrl: string, auth: string, supabase: SupabaseClient): Promise<{ demandsSynced: number }> {
   // Fetch demand management records
   const response = await fetch(`${baseUrl}/table/dmn_demand?sysparm_limit=100`, {
     headers: {

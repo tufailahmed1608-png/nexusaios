@@ -1,10 +1,15 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+interface SharePointConfig {
+  accessToken: string;
+  siteId?: string;
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -92,11 +97,11 @@ serve(async (req) => {
           recordsSynced = result.recordsSynced || 0;
           break;
         case 'teams':
-          result = await handleTeams(action, config.accessToken, graphBaseUrl, supabaseClient);
+          result = await handleTeams(action, config.accessToken, graphBaseUrl);
           recordsSynced = result.recordsSynced || 0;
           break;
         case 'outlook':
-          result = await handleOutlook(action, config.accessToken, graphBaseUrl, supabaseClient);
+          result = await handleOutlook(action, config.accessToken, graphBaseUrl);
           recordsSynced = result.recordsSynced || 0;
           break;
         case 'planner':
@@ -155,27 +160,29 @@ serve(async (req) => {
   }
 });
 
-async function handleSharePoint(action: string, accessToken: string, baseUrl: string, supabase: any, config: any) {
+async function handleSharePoint(action: string, accessToken: string, baseUrl: string, supabase: SupabaseClient, config: SharePointConfig) {
   const headers = {
     'Authorization': `Bearer ${accessToken}`,
     'Accept': 'application/json'
   };
 
   switch (action) {
-    case 'test':
+    case 'test': {
       const meResponse = await fetch(`${baseUrl}/me`, { headers });
       if (!meResponse.ok) throw new Error('SharePoint connection failed');
       const me = await meResponse.json();
       return { connected: true, user: me.displayName };
+    }
 
-    case 'sync_sites':
+    case 'sync_sites': {
       const sitesResponse = await fetch(`${baseUrl}/sites?search=*`, { headers });
       if (!sitesResponse.ok) throw new Error('Failed to fetch SharePoint sites');
       const sites = await sitesResponse.json();
       console.log(`Found ${sites.value?.length || 0} SharePoint sites`);
       return { recordsSynced: sites.value?.length || 0, sites: sites.value };
+    }
 
-    case 'sync_lists':
+    case 'sync_lists': {
       if (!config.siteId) throw new Error('Site ID required for list sync');
       const listsResponse = await fetch(`${baseUrl}/sites/${config.siteId}/lists`, { headers });
       if (!listsResponse.ok) throw new Error('Failed to fetch SharePoint lists');
@@ -212,33 +219,36 @@ async function handleSharePoint(action: string, accessToken: string, baseUrl: st
         }
       }
       return { recordsSynced: totalSynced };
+    }
 
     default:
       throw new Error(`Unknown SharePoint action: ${action}`);
   }
 }
 
-async function handleTeams(action: string, accessToken: string, baseUrl: string, supabase: any) {
+async function handleTeams(action: string, accessToken: string, baseUrl: string) {
   const headers = {
     'Authorization': `Bearer ${accessToken}`,
     'Accept': 'application/json'
   };
 
   switch (action) {
-    case 'test':
+    case 'test': {
       const meResponse = await fetch(`${baseUrl}/me`, { headers });
       if (!meResponse.ok) throw new Error('Teams connection failed');
       const me = await meResponse.json();
       return { connected: true, user: me.displayName };
+    }
 
-    case 'sync_teams':
+    case 'sync_teams': {
       const teamsResponse = await fetch(`${baseUrl}/me/joinedTeams`, { headers });
       if (!teamsResponse.ok) throw new Error('Failed to fetch Teams');
       const teams = await teamsResponse.json();
       console.log(`Found ${teams.value?.length || 0} Teams`);
       return { recordsSynced: teams.value?.length || 0, teams: teams.value };
+    }
 
-    case 'sync_channels':
+    case 'sync_channels': {
       const joinedTeamsResponse = await fetch(`${baseUrl}/me/joinedTeams`, { headers });
       if (!joinedTeamsResponse.ok) throw new Error('Failed to fetch Teams');
       const joinedTeams = await joinedTeamsResponse.json();
@@ -255,8 +265,9 @@ async function handleTeams(action: string, accessToken: string, baseUrl: string,
         }
       }
       return { recordsSynced: totalChannels };
+    }
 
-    case 'sync_meetings':
+    case 'sync_meetings': {
       const calendarResponse = await fetch(
         `${baseUrl}/me/calendar/events?$filter=isOnlineMeeting eq true&$top=50`,
         { headers }
@@ -265,26 +276,28 @@ async function handleTeams(action: string, accessToken: string, baseUrl: string,
       const meetings = await calendarResponse.json();
       console.log(`Found ${meetings.value?.length || 0} online meetings`);
       return { recordsSynced: meetings.value?.length || 0, meetings: meetings.value };
+    }
 
     default:
       throw new Error(`Unknown Teams action: ${action}`);
   }
 }
 
-async function handleOutlook(action: string, accessToken: string, baseUrl: string, supabase: any) {
+async function handleOutlook(action: string, accessToken: string, baseUrl: string) {
   const headers = {
     'Authorization': `Bearer ${accessToken}`,
     'Accept': 'application/json'
   };
 
   switch (action) {
-    case 'test':
+    case 'test': {
       const meResponse = await fetch(`${baseUrl}/me`, { headers });
       if (!meResponse.ok) throw new Error('Outlook connection failed');
       const me = await meResponse.json();
       return { connected: true, user: me.displayName, email: me.mail };
+    }
 
-    case 'sync_emails':
+    case 'sync_emails': {
       const emailsResponse = await fetch(
         `${baseUrl}/me/messages?$top=50&$orderby=receivedDateTime desc`,
         { headers }
@@ -293,8 +306,9 @@ async function handleOutlook(action: string, accessToken: string, baseUrl: strin
       const emails = await emailsResponse.json();
       console.log(`Found ${emails.value?.length || 0} recent emails`);
       return { recordsSynced: emails.value?.length || 0, emails: emails.value };
+    }
 
-    case 'sync_calendar':
+    case 'sync_calendar': {
       const now = new Date();
       const oneMonthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
       const oneMonthAhead = new Date(now.getFullYear(), now.getMonth() + 1, now.getDate());
@@ -307,26 +321,28 @@ async function handleOutlook(action: string, accessToken: string, baseUrl: strin
       const events = await calendarResponse.json();
       console.log(`Found ${events.value?.length || 0} calendar events`);
       return { recordsSynced: events.value?.length || 0, events: events.value };
+    }
 
     default:
       throw new Error(`Unknown Outlook action: ${action}`);
   }
 }
 
-async function handlePlanner(action: string, accessToken: string, baseUrl: string, supabase: any) {
+async function handlePlanner(action: string, accessToken: string, baseUrl: string, supabase: SupabaseClient) {
   const headers = {
     'Authorization': `Bearer ${accessToken}`,
     'Accept': 'application/json'
   };
 
   switch (action) {
-    case 'test':
+    case 'test': {
       const meResponse = await fetch(`${baseUrl}/me`, { headers });
       if (!meResponse.ok) throw new Error('Planner connection failed');
       const me = await meResponse.json();
       return { connected: true, user: me.displayName };
+    }
 
-    case 'sync_plans':
+    case 'sync_plans': {
       const plansResponse = await fetch(`${baseUrl}/me/planner/plans`, { headers });
       if (!plansResponse.ok) throw new Error('Failed to fetch Planner plans');
       const plans = await plansResponse.json();
@@ -350,8 +366,9 @@ async function handlePlanner(action: string, accessToken: string, baseUrl: strin
       }
       
       return { recordsSynced: totalSynced, plans: plans.value };
+    }
 
-    case 'sync_tasks':
+    case 'sync_tasks': {
       const myTasksResponse = await fetch(`${baseUrl}/me/planner/tasks`, { headers });
       if (!myTasksResponse.ok) throw new Error('Failed to fetch Planner tasks');
       const tasks = await myTasksResponse.json();
@@ -383,6 +400,7 @@ async function handlePlanner(action: string, accessToken: string, baseUrl: strin
       }
       
       return { recordsSynced: tasksSynced };
+    }
 
     default:
       throw new Error(`Unknown Planner action: ${action}`);

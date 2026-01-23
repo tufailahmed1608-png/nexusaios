@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -122,7 +122,7 @@ serve(async (req) => {
           result = await syncIssues(jiraBaseUrl, jiraAuth, supabaseClient, config.projectKey);
           recordsSynced = result.issuesSynced;
           break;
-        case 'sync_all':
+        case 'sync_all': {
           const projectsResult = await syncProjects(jiraBaseUrl, jiraAuth, supabaseClient);
           const issuesResult = await syncIssues(jiraBaseUrl, jiraAuth, supabaseClient);
           result = {
@@ -131,6 +131,7 @@ serve(async (req) => {
           };
           recordsSynced = projectsResult.projectsSynced + issuesResult.issuesSynced;
           break;
+        }
         default:
           throw new Error(`Unknown action: ${action}`);
       }
@@ -200,7 +201,7 @@ async function testConnection(baseUrl: string, auth: string): Promise<{ connecte
   return { connected: true, user: user.displayName };
 }
 
-async function syncProjects(baseUrl: string, auth: string, supabase: any): Promise<{ projectsSynced: number }> {
+async function syncProjects(baseUrl: string, auth: string, supabase: SupabaseClient): Promise<{ projectsSynced: number }> {
   const response = await fetch(`${baseUrl}/project?expand=description,lead`, {
     headers: {
       'Authorization': `Basic ${auth}`,
@@ -238,7 +239,7 @@ async function syncProjects(baseUrl: string, auth: string, supabase: any): Promi
   return { projectsSynced: synced };
 }
 
-async function syncIssues(baseUrl: string, auth: string, supabase: any, projectKey?: string): Promise<{ issuesSynced: number }> {
+async function syncIssues(baseUrl: string, auth: string, supabase: SupabaseClient, projectKey?: string): Promise<{ issuesSynced: number }> {
   const jql = projectKey ? `project = ${projectKey}` : 'order by created DESC';
   const response = await fetch(`${baseUrl}/search?jql=${encodeURIComponent(jql)}&maxResults=100`, {
     headers: {
