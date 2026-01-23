@@ -59,6 +59,12 @@ stages:
       - job: DeployBicep
         displayName: 'Deploy Bicep Templates'
         steps:
+          - script: |
+              echo "Installing Azure CLI..."
+              curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+              az --version
+            displayName: 'Install Azure CLI'
+
           - task: AzureCLI@2
             inputs:
               azureSubscription: 'azure-subscription-dev'
@@ -83,6 +89,11 @@ stages:
       - job: Migrate
         displayName: 'Run Migrations'
         steps:
+          - script: |
+              echo "Installing Azure CLI..."
+              curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+            displayName: 'Install Azure CLI'
+
           - script: |
               sudo apt-get update
               sudo apt-get install -y postgresql-client
