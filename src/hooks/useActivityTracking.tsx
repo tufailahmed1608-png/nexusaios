@@ -2,6 +2,7 @@ import { useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import type { Json } from '@/integrations/supabase/types';
 
 interface TrackActionOptions {
   actionType: string;
@@ -17,12 +18,12 @@ export const useActivityTracking = () => {
     if (!user) return;
 
     try {
-      await supabase.from('user_activities' as any).insert({
+      await supabase.from('user_activities').insert([{
         user_id: user.id,
         action_type: actionType,
-        action_details: actionDetails,
+        action_details: actionDetails as Json,
         page_path: pagePath || location.pathname,
-      } as any);
+      }]);
     } catch (error) {
       console.error('Failed to track activity:', error);
     }
@@ -46,12 +47,12 @@ export const trackUserAction = async (
   pagePath?: string
 ) => {
   try {
-    await supabase.from('user_activities' as any).insert({
+    await supabase.from('user_activities').insert([{
       user_id: userId,
       action_type: actionType,
-      action_details: actionDetails,
+      action_details: actionDetails as Json,
       page_path: pagePath || window.location.pathname,
-    } as any);
+    }]);
   } catch (error) {
     console.error('Failed to track activity:', error);
   }
