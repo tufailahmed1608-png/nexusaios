@@ -42,8 +42,8 @@ stages:
               key: 'npm | "$(Agent.OS)" | package-lock.json'
               restoreKeys: |
                 npm | "$(Agent.OS)"
-              path: $(Pipeline.Workspace)/.npm
-            displayName: 'Cache npm'
+              path: $(Build.SourcesDirectory)/node_modules
+            displayName: 'Cache node_modules'
 
           - script: npm ci
             displayName: 'Install dependencies'
@@ -64,8 +64,8 @@ stages:
               key: 'npm | "$(Agent.OS)" | package-lock.json'
               restoreKeys: |
                 npm | "$(Agent.OS)"
-              path: $(Pipeline.Workspace)/.npm
-            displayName: 'Cache npm'
+              path: $(Build.SourcesDirectory)/node_modules
+            displayName: 'Cache node_modules'
 
           - script: npm ci
             displayName: 'Install dependencies'
@@ -105,8 +105,8 @@ stages:
               key: 'npm | "$(Agent.OS)" | package-lock.json'
               restoreKeys: |
                 npm | "$(Agent.OS)"
-              path: $(Pipeline.Workspace)/.npm
-            displayName: 'Cache npm'
+              path: $(Build.SourcesDirectory)/node_modules
+            displayName: 'Cache node_modules'
 
           - script: npm ci
             displayName: 'Install dependencies'
