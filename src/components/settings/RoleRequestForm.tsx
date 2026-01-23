@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -37,7 +37,7 @@ const RoleRequestForm = ({ userId, currentRole }: RoleRequestFormProps) => {
   const [submitting, setSubmitting] = useState(false);
   const [selectedRole, setSelectedRole] = useState<AppRole | ''>('');
 
-  const fetchRequests = async () => {
+  const fetchRequests = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('role_requests')
@@ -52,11 +52,11 @@ const RoleRequestForm = ({ userId, currentRole }: RoleRequestFormProps) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
 
   useEffect(() => {
     fetchRequests();
-  }, [userId]);
+  }, [userId, fetchRequests]);
 
   const handleSubmit = async () => {
     if (!selectedRole) {
