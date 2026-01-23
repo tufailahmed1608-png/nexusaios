@@ -155,7 +155,7 @@ const Index = () => {
             <AIControlsView />
           </ProtectedFeature>
         );
-      case 'tenantSettings':
+      case 'tenantSettings': {
         const TenantSettings = lazy(() => import('@/components/admin/TenantSettings'));
         return (
           <ProtectedFeature feature="tenantSettings">
@@ -164,6 +164,7 @@ const Index = () => {
             </Suspense>
           </ProtectedFeature>
         );
+      }
       case 'settings':
         return (
           <div className="flex items-center justify-center h-full text-muted-foreground">

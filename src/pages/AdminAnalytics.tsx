@@ -52,7 +52,7 @@ const AdminAnalytics = () => {
     const fetchActivities = async () => {
       try {
         const { data, error } = await supabase
-          .from('user_activities' as any)
+          .from('user_activities')
           .select('*')
           .gte('created_at', subDays(new Date(), 30).toISOString())
           .order('created_at', { ascending: false });
