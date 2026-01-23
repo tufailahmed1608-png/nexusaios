@@ -3,6 +3,7 @@ import { TrendingUp, TrendingDown, Minus, Folder, CheckCircle, Zap, DollarSign }
 import type { KPI } from '@/data/mockData';
 import { WhyAmISeeingThis, createRoleBasedReason, createPersonalizationReason } from '@/components/ai/WhyAmISeeingThis';
 import { useUserRole } from '@/hooks/useUserRole';
+import type { AppRole } from '@/lib/permissions';
 
 interface KPICardProps {
   kpi: KPI;
@@ -21,7 +22,7 @@ const getKpiReasons = (kpiTitle: string, role: string) => {
   
   // Add role-based reason
   if (role) {
-    reasons.push(createRoleBasedReason(role as any, 'dashboard KPIs'));
+    reasons.push(createRoleBasedReason(role as AppRole, 'dashboard KPIs'));
   }
   
   // Add personalization reasons based on KPI type
