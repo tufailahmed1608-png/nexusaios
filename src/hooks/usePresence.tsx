@@ -48,8 +48,8 @@ export const usePresence = (currentView?: string) => {
         const state = presenceChannel.presenceState();
         const users: PresenceUser[] = [];
         
-        Object.values(state).forEach((presences: any[]) => {
-          presences.forEach((presence) => {
+        Object.values(state).forEach((presences) => {
+          (presences as unknown as PresenceUser[]).forEach((presence) => {
             if (presence.id !== user.id) {
               users.push(presence);
             }
