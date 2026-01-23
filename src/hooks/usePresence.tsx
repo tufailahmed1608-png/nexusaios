@@ -83,7 +83,8 @@ export const usePresence = (currentView?: string) => {
     if (channel && currentView) {
       trackPresence(channel, currentView);
     }
-  }, [channel, currentView, trackPresence]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [channel, trackPresence]);
 
   const updateStatus = async (status: 'online' | 'away' | 'busy') => {
     if (!channel || !user) return;

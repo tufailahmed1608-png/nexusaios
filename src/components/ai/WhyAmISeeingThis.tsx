@@ -112,36 +112,42 @@ export const WhyAmISeeingThis = ({
 };
 
 // Preset reasons for common scenarios
+// eslint-disable-next-line react-refresh/only-export-components
 export const createRoleBasedReason = (role: AppRole, feature: string): VisibilityReason => ({
   type: 'role',
   title: 'Role-based access',
   description: `${getRoleDisplayName(role)} role has access to ${feature}`,
 });
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const createOwnershipReason = (ownerType: string): VisibilityReason => ({
   type: 'ownership',
   title: 'You created this',
   description: `This ${ownerType} belongs to you`,
 });
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const createAIReason = (aiType: string): VisibilityReason => ({
   type: 'ai',
   title: 'AI recommendation',
   description: `AI suggested this ${aiType} based on your activity and preferences`,
 });
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const createFilterReason = (filterName: string): VisibilityReason => ({
   type: 'filter',
   title: 'Active filter',
   description: `Matches your current "${filterName}" filter`,
 });
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const createTimeReason = (timeframe: string): VisibilityReason => ({
   type: 'time',
   title: 'Recent activity',
   description: `Active within the last ${timeframe}`,
 });
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const createPersonalizationReason = (basis: string): VisibilityReason => ({
   type: 'personalization',
   title: 'Personalized for you',

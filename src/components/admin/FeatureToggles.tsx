@@ -67,7 +67,7 @@ const FeatureToggles = () => {
       });
 
       // Override with database values if they exist
-      (data || []).forEach((roleDef: any) => {
+      (data || []).forEach((roleDef) => {
         const role = roleDef.role as AppRole;
         if (MANAGEABLE_ROLES.includes(role) && roleDef.permissions) {
           // Permissions is stored as an array of enabled features

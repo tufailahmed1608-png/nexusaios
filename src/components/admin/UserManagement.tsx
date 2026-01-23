@@ -48,7 +48,7 @@ const UserManagement = ({ currentUserId }: UserManagementProps) => {
 
       // Fetch all admin roles
       const { data: roles, error: rolesError } = await supabase
-        .from('user_roles' as any)
+        .from('user_roles')
         .select('user_id, role')
         .eq('role', 'admin');
 
@@ -86,7 +86,7 @@ const UserManagement = ({ currentUserId }: UserManagementProps) => {
       if (currentlyAdmin) {
         // Remove admin role
         const { error } = await supabase
-          .from('user_roles' as any)
+          .from('user_roles')
           .delete()
           .eq('user_id', userId)
           .eq('role', 'admin');
@@ -96,8 +96,8 @@ const UserManagement = ({ currentUserId }: UserManagementProps) => {
       } else {
         // Add admin role
         const { error } = await supabase
-          .from('user_roles' as any)
-          .insert({ user_id: userId, role: 'admin' } as any);
+          .from('user_roles')
+          .insert({ user_id: userId, role: 'admin' });
 
         if (error) throw error;
         toast.success('Admin role granted');
