@@ -24,7 +24,6 @@ pool:
 
 variables:
   nodeVersion: '20.x'
-  pnpmVersion: '8'
 
 stages:
   - stage: CI
@@ -38,24 +37,18 @@ stages:
               versionSpec: '$(nodeVersion)'
             displayName: 'Install Node.js'
 
-          - script: npm install -g pnpm@$(pnpmVersion)
-            displayName: 'Install pnpm'
-
           - task: Cache@2
             inputs:
-              key: 'pnpm | "$(Agent.OS)" | pnpm-lock.yaml'
+              key: 'npm | "$(Agent.OS)" | package-lock.json'
               restoreKeys: |
-                pnpm | "$(Agent.OS)"
-              path: $(Pipeline.Workspace)/.pnpm-store
-            displayName: 'Cache pnpm store'
+                npm | "$(Agent.OS)"
+              path: $(Pipeline.Workspace)/.npm
+            displayName: 'Cache npm'
 
-          - script: pnpm config set store-dir $(Pipeline.Workspace)/.pnpm-store
-            displayName: 'Configure pnpm store'
-
-          - script: pnpm install --frozen-lockfile
+          - script: npm ci
             displayName: 'Install dependencies'
 
-          - script: pnpm lint
+          - script: npm run lint
             displayName: 'Run ESLint'
 
       - job: TypeCheck
@@ -66,24 +59,18 @@ stages:
               versionSpec: '$(nodeVersion)'
             displayName: 'Install Node.js'
 
-          - script: npm install -g pnpm@$(pnpmVersion)
-            displayName: 'Install pnpm'
-
           - task: Cache@2
             inputs:
-              key: 'pnpm | "$(Agent.OS)" | pnpm-lock.yaml'
+              key: 'npm | "$(Agent.OS)" | package-lock.json'
               restoreKeys: |
-                pnpm | "$(Agent.OS)"
-              path: $(Pipeline.Workspace)/.pnpm-store
-            displayName: 'Cache pnpm store'
+                npm | "$(Agent.OS)"
+              path: $(Pipeline.Workspace)/.npm
+            displayName: 'Cache npm'
 
-          - script: pnpm config set store-dir $(Pipeline.Workspace)/.pnpm-store
-            displayName: 'Configure pnpm store'
-
-          - script: pnpm install --no-frozen-lockfile
+          - script: npm ci
             displayName: 'Install dependencies'
 
-          - script: pnpm tsc --noEmit
+          - script: npx tsc --noEmit
             displayName: 'TypeScript check'
 
       - job: SecurityScan
@@ -94,13 +81,10 @@ stages:
               versionSpec: '$(nodeVersion)'
             displayName: 'Install Node.js'
 
-          - script: npm install -g pnpm@$(pnpmVersion)
-            displayName: 'Install pnpm'
-
-          - script: pnpm install --no-frozen-lockfile
+          - script: npm ci
             displayName: 'Install dependencies'
 
-          - script: pnpm audit --audit-level=high || true
+          - script: npm audit --audit-level=high || true
             displayName: 'npm audit'
             continueOnError: true
 
@@ -116,24 +100,18 @@ stages:
               versionSpec: '$(nodeVersion)'
             displayName: 'Install Node.js'
 
-          - script: npm install -g pnpm@$(pnpmVersion)
-            displayName: 'Install pnpm'
-
           - task: Cache@2
             inputs:
-              key: 'pnpm | "$(Agent.OS)" | pnpm-lock.yaml'
+              key: 'npm | "$(Agent.OS)" | package-lock.json'
               restoreKeys: |
-                pnpm | "$(Agent.OS)"
-              path: $(Pipeline.Workspace)/.pnpm-store
-            displayName: 'Cache pnpm store'
+                npm | "$(Agent.OS)"
+              path: $(Pipeline.Workspace)/.npm
+            displayName: 'Cache npm'
 
-          - script: pnpm config set store-dir $(Pipeline.Workspace)/.pnpm-store
-            displayName: 'Configure pnpm store'
-
-          - script: pnpm install --no-frozen-lockfile
+          - script: npm ci
             displayName: 'Install dependencies'
 
-          - script: pnpm build
+          - script: npm run build
             displayName: 'Build'
             env:
               VITE_SUPABASE_URL: $(VITE_SUPABASE_URL)

@@ -13,8 +13,6 @@ variables:
   - group: nexus-staging-secrets
   - name: nodeVersion
     value: '20.x'
-  - name: pnpmVersion
-    value: '8'
   - name: environment
     value: 'staging'
   - name: azureRegion
@@ -32,23 +30,18 @@ stages:
               versionSpec: '$(nodeVersion)'
             displayName: 'Install Node.js'
 
-          - script: npm install -g pnpm@$(pnpmVersion)
-            displayName: 'Install pnpm'
-
           - task: Cache@2
             inputs:
-              key: 'pnpm | "$(Agent.OS)" | pnpm-lock.yaml'
+              key: 'npm | "$(Agent.OS)" | package-lock.json'
               restoreKeys: |
-                pnpm | "$(Agent.OS)"
-              path: $(Pipeline.Workspace)/.pnpm-store
-            displayName: 'Cache pnpm store'
+                npm | "$(Agent.OS)"
+              path: $(Pipeline.Workspace)/.npm
+            displayName: 'Cache npm'
 
-          - script: |
-              pnpm config set store-dir $(Pipeline.Workspace)/.pnpm-store
-              pnpm install --no-frozen-lockfile
+          - script: npm ci
             displayName: 'Install dependencies'
 
-          - script: pnpm build
+          - script: npm run build
             displayName: 'Build application'
             env:
               VITE_SUPABASE_URL: $(VITE_SUPABASE_URL)
@@ -208,16 +201,13 @@ stages:
               versionSpec: '$(nodeVersion)'
             displayName: 'Install Node.js'
 
-          - script: npm install -g pnpm@$(pnpmVersion)
-            displayName: 'Install pnpm'
-
           - script: |
-              pnpm install --no-frozen-lockfile
-              pnpm exec playwright install --with-deps chromium
+              npm ci
+              npx playwright install --with-deps chromium
             displayName: 'Install dependencies'
 
           - script: |
-              pnpm exec playwright test --project=chromium
+              npx playwright test --project=chromium
             displayName: 'Run E2E tests'
             env:
               BASE_URL: https://nexus-$(environment).azurestaticapps.net
