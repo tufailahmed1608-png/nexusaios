@@ -7,7 +7,7 @@ trigger:
       - main
 
 pool:
-  vmImage: 'ubuntu-latest'
+  name: 'azurepipeline'
 
 variables:
   - group: nexus-staging-secrets
