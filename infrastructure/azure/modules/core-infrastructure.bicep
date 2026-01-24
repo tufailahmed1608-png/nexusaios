@@ -62,8 +62,12 @@ resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
 // Key Vault
 // ============================================================================
 
+// Key Vault names must be 3-24 alphanumeric characters
+var keyVaultNameRaw = 'kv${replace(projectName, '-', '')}${uniqueSuffix}'
+var keyVaultNameSafe = take(keyVaultNameRaw, 24)
+
 resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
-  name: 'kv-${projectName}-${uniqueSuffix}'
+  name: keyVaultNameSafe
   location: location
   tags: tags
   properties: {
