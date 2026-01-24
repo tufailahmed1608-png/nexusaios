@@ -120,20 +120,13 @@ resource diagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-pr
       {
         category: 'PostgreSQLLogs'
         enabled: true
-        retentionPolicy: {
-          days: 30
-          enabled: true
-        }
+        // Note: retentionPolicy is deprecated for new diagnostic settings - use Log Analytics workspace retention instead
       }
     ]
     metrics: [
       {
         category: 'AllMetrics'
         enabled: true
-        retentionPolicy: {
-          days: 30
-          enabled: true
-        }
       }
     ]
   }
