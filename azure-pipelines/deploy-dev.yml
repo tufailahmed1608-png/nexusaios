@@ -105,19 +105,39 @@ stages:
               scriptType: 'bash'
               scriptLocation: 'inlineScript'
               inlineScript: |
+                echo "Discovering PostgreSQL server..."
+                RG_NAME="rg-nexus-os-$(environment)"
+                
+                # Dynamically discover PostgreSQL server FQDN
+                DB_HOST=$(az postgres flexible-server list \
+                  --resource-group "$RG_NAME" \
+                  --query "[0].fullyQualifiedDomainName" -o tsv)
+                
+                if [ -z "$DB_HOST" ]; then
+                  echo "##[error]No PostgreSQL Flexible Server found in resource group $RG_NAME"
+                  exit 1
+                fi
+                
+                echo "Found PostgreSQL server: $DB_HOST"
+                
                 echo "Running database migrations..."
                 for migration in infrastructure/azure/database/migrations/*.sql; do
                   if [ -f "$migration" ]; then
                     echo "Executing: $migration"
                     PGPASSWORD="$(DB_PASSWORD)" psql \
-                      -h "$(DB_HOST)" \
+                      -h "$DB_HOST" \
                       -U "$(DB_USER)" \
                       -d nexus_$(environment) \
                       -f "$migration" \
                       --single-transaction
+                    
+                    if [ $? -ne 0 ]; then
+                      echo "##[error]Migration failed: $migration"
+                      exit 1
+                    fi
                   fi
                 done
-                echo "Migrations completed."
+                echo "Migrations completed successfully."
             displayName: 'Execute migrations'
 
   - stage: Deploy_Frontend
