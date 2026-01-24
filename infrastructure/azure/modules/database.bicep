@@ -82,28 +82,30 @@ resource database 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2023-06-0
 }
 
 // ============================================================================
-// PostgreSQL Extensions
-// ============================================================================
-
-resource uuidExtension 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2023-06-01-preview' = {
-  parent: postgresServer
-  name: 'azure.extensions'
-  properties: {
-    value: 'UUID-OSSP,PGCRYPTO,PG_TRGM'
-    source: 'user-override'
-  }
-}
-
-// ============================================================================
-// Firewall Rules
+// Firewall Rules (deploy after database to avoid race condition)
 // ============================================================================
 
 resource allowAzureServices 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2023-06-01-preview' = {
   parent: postgresServer
   name: 'AllowAzureServices'
+  dependsOn: [database]
   properties: {
     startIpAddress: '0.0.0.0'
     endIpAddress: '0.0.0.0'
+  }
+}
+
+// ============================================================================
+// PostgreSQL Extensions (deploy after firewall rules to avoid race condition)
+// ============================================================================
+
+resource uuidExtension 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2023-06-01-preview' = {
+  parent: postgresServer
+  name: 'azure.extensions'
+  dependsOn: [allowAzureServices]
+  properties: {
+    value: 'UUID-OSSP,PGCRYPTO,PG_TRGM'
+    source: 'user-override'
   }
 }
 
