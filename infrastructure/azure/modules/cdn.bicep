@@ -133,6 +133,7 @@ resource storageOrigin 'Microsoft.Cdn/profiles/originGroups/origins@2023-05-01' 
 resource defaultRoute 'Microsoft.Cdn/profiles/afdEndpoints/routes@2023-05-01' = {
   parent: frontDoorEndpoint
   name: 'route-default'
+  dependsOn: [staticWebAppOrigin] // Ensure origin exists before route
   properties: {
     originGroup: {
       id: staticWebAppOriginGroup.id
@@ -162,7 +163,7 @@ resource defaultRoute 'Microsoft.Cdn/profiles/afdEndpoints/routes@2023-05-01' = 
 resource assetsRoute 'Microsoft.Cdn/profiles/afdEndpoints/routes@2023-05-01' = {
   parent: frontDoorEndpoint
   name: 'route-assets'
-  dependsOn: [defaultRoute]
+  dependsOn: [defaultRoute, storageOrigin] // Ensure origin exists before route
   properties: {
     originGroup: {
       id: storageOriginGroup.id
