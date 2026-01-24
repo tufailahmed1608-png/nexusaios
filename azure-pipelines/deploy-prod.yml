@@ -204,20 +204,44 @@ stages:
       - job: DeployFunctionsSlot
         displayName: 'Deploy to Staging Slot'
         steps:
+          - script: |
+              echo "Installing Azure CLI..."
+              curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+            displayName: 'Install Azure CLI'
+
           - task: NodeTool@0
             inputs:
               versionSpec: '$(nodeVersion)'
             displayName: 'Install Node.js'
 
-          - task: AzureFunctionApp@2
+          - task: AzureCLI@2
             inputs:
-              connectedServiceNameARM: 'azure-subscription-prod'
-              appType: 'functionApp'
-              appName: 'nexus-$(environment)-func'
-              deployToSlotOrASE: true
-              slotName: 'staging'
-              package: '$(System.DefaultWorkingDirectory)/supabase/functions'
-              runtimeStack: 'NODE|20'
+              azureSubscription: 'azure-subscription-prod'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                echo "Getting Function App name from resource group..."
+                FUNC_APP_NAME=$(az functionapp list \
+                  --resource-group "rg-nexus-os-$(environment)" \
+                  --query "[0].name" -o tsv)
+                
+                if [ -z "$FUNC_APP_NAME" ]; then
+                  echo "##[error]No Function App found in rg-nexus-os-$(environment)"
+                  exit 1
+                fi
+                
+                echo "Deploying to Function App staging slot: $FUNC_APP_NAME"
+                
+                # Create deployment package
+                cd $(System.DefaultWorkingDirectory)/supabase/functions
+                zip -r ../../functions.zip .
+                cd ../..
+                
+                az functionapp deployment source config-zip \
+                  --name "$FUNC_APP_NAME" \
+                  --resource-group "rg-nexus-os-$(environment)" \
+                  --slot staging \
+                  --src functions.zip
             displayName: 'Deploy to staging slot'
 
   - stage: Deploy_Frontend_Slot
@@ -232,12 +256,40 @@ stages:
             artifact: webapp
             displayName: 'Download webapp artifact'
 
-          - task: AzureStaticWebApp@0
+          - script: |
+              echo "Installing Azure CLI..."
+              curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+              echo "Installing SWA CLI..."
+              npm install -g @azure/static-web-apps-cli
+            displayName: 'Install Azure CLI and SWA CLI'
+
+          - task: AzureCLI@2
             inputs:
-              app_location: '$(Pipeline.Workspace)/webapp'
-              skip_app_build: true
-              azure_static_web_apps_api_token: $(AZURE_SWA_TOKEN_STAGING)
-              deployment_environment: 'staging'
+              azureSubscription: 'azure-subscription-prod'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                echo "Getting Static Web App deployment token..."
+                SWA_NAME=$(az staticwebapp list \
+                  --resource-group "rg-nexus-os-$(environment)" \
+                  --query "[0].name" -o tsv)
+                
+                if [ -z "$SWA_NAME" ]; then
+                  echo "##[error]No Static Web App found in rg-nexus-os-$(environment)"
+                  exit 1
+                fi
+                
+                echo "Found Static Web App: $SWA_NAME"
+                
+                DEPLOYMENT_TOKEN=$(az staticwebapp secrets list \
+                  --name "$SWA_NAME" \
+                  --resource-group "rg-nexus-os-$(environment)" \
+                  --query "properties.apiKey" -o tsv)
+                
+                echo "Deploying to staging environment..."
+                swa deploy "$(Pipeline.Workspace)/webapp" \
+                  --deployment-token "$DEPLOYMENT_TOKEN" \
+                  --env staging
             displayName: 'Deploy to staging environment'
 
   - stage: Health_Check_Staging
@@ -325,11 +377,40 @@ stages:
             artifact: webapp
             displayName: 'Download webapp artifact'
 
-          - task: AzureStaticWebApp@0
+          - script: |
+              echo "Installing Azure CLI..."
+              curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+              echo "Installing SWA CLI..."
+              npm install -g @azure/static-web-apps-cli
+            displayName: 'Install Azure CLI and SWA CLI'
+
+          - task: AzureCLI@2
             inputs:
-              app_location: '$(Pipeline.Workspace)/webapp'
-              skip_app_build: true
-              azure_static_web_apps_api_token: $(AZURE_SWA_TOKEN)
+              azureSubscription: 'azure-subscription-prod'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                echo "Getting Static Web App deployment token..."
+                SWA_NAME=$(az staticwebapp list \
+                  --resource-group "rg-nexus-os-$(environment)" \
+                  --query "[0].name" -o tsv)
+                
+                if [ -z "$SWA_NAME" ]; then
+                  echo "##[error]No Static Web App found in rg-nexus-os-$(environment)"
+                  exit 1
+                fi
+                
+                echo "Found Static Web App: $SWA_NAME"
+                
+                DEPLOYMENT_TOKEN=$(az staticwebapp secrets list \
+                  --name "$SWA_NAME" \
+                  --resource-group "rg-nexus-os-$(environment)" \
+                  --query "properties.apiKey" -o tsv)
+                
+                echo "Deploying to production..."
+                swa deploy "$(Pipeline.Workspace)/webapp" \
+                  --deployment-token "$DEPLOYMENT_TOKEN" \
+                  --env production
             displayName: 'Deploy to production'
 
   - stage: Post_Deploy_Validation
