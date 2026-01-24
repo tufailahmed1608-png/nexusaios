@@ -15,6 +15,9 @@ param primaryLocation string = 'uaenorth'
 @description('Azure OpenAI region (Sweden Central for availability)')
 param openAILocation string = 'swedencentral'
 
+@description('Static Web App region (limited availability - using West Europe)')
+param staticWebAppLocation string = 'westeurope'
+
 @description('Project name prefix')
 param projectName string = 'nexus-os'
 
@@ -128,7 +131,7 @@ module staticWebApp 'modules/static-web-app.bicep' = {
   name: 'static-web-app'
   scope: resourceGroup
   params: {
-    location: primaryLocation
+    location: staticWebAppLocation // Static Web Apps not available in uaenorth
     projectName: projectName
     environment: environment
     functionsHostname: functions.outputs.functionAppHostname
