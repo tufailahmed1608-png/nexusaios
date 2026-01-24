@@ -135,7 +135,9 @@ stages:
           - script: |
               echo "Installing Azure CLI..."
               curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-            displayName: 'Install Azure CLI'
+              echo "Installing SWA CLI..."
+              npm install -g @azure/static-web-apps-cli
+            displayName: 'Install Azure CLI and SWA CLI'
 
           - task: AzureCLI@2
             inputs:
@@ -143,12 +145,27 @@ stages:
               scriptType: 'bash'
               scriptLocation: 'inlineScript'
               inlineScript: |
-                echo "Deploying to Azure Static Web App..."
-                az staticwebapp deploy \
-                  --name "swa-nexus-os-$(environment)" \
+                echo "Getting Static Web App deployment token..."
+                SWA_NAME=$(az staticwebapp list \
                   --resource-group "rg-nexus-os-$(environment)" \
-                  --source "$(Pipeline.Workspace)/webapp" \
-                  --no-build
+                  --query "[0].name" -o tsv)
+                
+                if [ -z "$SWA_NAME" ]; then
+                  echo "##[error]No Static Web App found in rg-nexus-os-$(environment)"
+                  exit 1
+                fi
+                
+                echo "Found Static Web App: $SWA_NAME"
+                
+                DEPLOYMENT_TOKEN=$(az staticwebapp secrets list \
+                  --name "$SWA_NAME" \
+                  --resource-group "rg-nexus-os-$(environment)" \
+                  --query "properties.apiKey" -o tsv)
+                
+                echo "Deploying to Azure Static Web App..."
+                swa deploy "$(Pipeline.Workspace)/webapp" \
+                  --deployment-token "$DEPLOYMENT_TOKEN" \
+                  --env production
             displayName: 'Deploy to Azure Static Web Apps'
 
   - stage: Deploy_Functions
