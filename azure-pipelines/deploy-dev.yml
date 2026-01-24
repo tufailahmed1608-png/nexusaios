@@ -205,9 +205,11 @@ stages:
         displayName: 'Deploy Functions'
         steps:
           - script: |
-              echo "Installing Azure CLI..."
+              echo "Installing Azure CLI and zip..."
+              sudo apt-get update
+              sudo apt-get install -y zip
               curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-            displayName: 'Install Azure CLI'
+            displayName: 'Install Azure CLI and zip'
 
           - task: NodeTool@0
             inputs:
