@@ -159,18 +159,43 @@ stages:
       - job: DeployFunctions
         displayName: 'Deploy Functions'
         steps:
+          - script: |
+              echo "Installing Azure CLI..."
+              curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+            displayName: 'Install Azure CLI'
+
           - task: NodeTool@0
             inputs:
               versionSpec: '$(nodeVersion)'
             displayName: 'Install Node.js'
 
-          - task: AzureFunctionApp@2
+          - task: AzureCLI@2
             inputs:
-              connectedServiceNameARM: 'azure-subscription-dev'
-              appType: 'functionApp'
-              appName: 'nexus-$(environment)-func'
-              package: '$(System.DefaultWorkingDirectory)/supabase/functions'
-              runtimeStack: 'NODE|20'
+              azureSubscription: 'azure-subscription-dev'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                echo "Getting Function App name from resource group..."
+                FUNC_APP_NAME=$(az functionapp list \
+                  --resource-group "rg-nexus-os-$(environment)" \
+                  --query "[0].name" -o tsv)
+                
+                if [ -z "$FUNC_APP_NAME" ]; then
+                  echo "##[error]No Function App found in rg-nexus-os-$(environment)"
+                  exit 1
+                fi
+                
+                echo "Deploying to Function App: $FUNC_APP_NAME"
+                
+                # Create deployment package
+                cd $(System.DefaultWorkingDirectory)/supabase/functions
+                zip -r ../../functions.zip .
+                cd ../..
+                
+                az functionapp deployment source config-zip \
+                  --name "$FUNC_APP_NAME" \
+                  --resource-group "rg-nexus-os-$(environment)" \
+                  --src functions.zip
             displayName: 'Deploy Azure Functions'
 
   - stage: Smoke_Tests
