@@ -1,5 +1,6 @@
-# azure-pipelines/deploy-dev.yml
-# Development Environment Deployment Pipeline
+# =========================================================
+# Nexus OS – DEV Deployment
+# =========================================================
 
 trigger:
   branches:
@@ -7,451 +8,79 @@ trigger:
       - develop
 
 pool:
-  name: 'azurepipeline'
+  name: azurepipeline
 
 variables:
   - group: nexus-dev-secrets
-  - name: nodeVersion
-    value: '20.x'
   - name: environment
-    value: 'dev'
+    value: dev
   - name: azureRegion
-    value: 'swedencentral'
+    value: swedencentral
 
 stages:
+  # ---------------------------
+  # BUILD
+  # ---------------------------
   - stage: Build
-    displayName: 'Build Application'
+    displayName: Build
     jobs:
       - job: Build
-        displayName: 'Build'
         steps:
-          - task: NodeTool@0
-            inputs:
-              versionSpec: '$(nodeVersion)'
-            displayName: 'Install Node.js'
+          - template: templates/build.yml
 
-          - task: Cache@2
-            inputs:
-              key: 'npm | "$(Agent.OS)" | package-lock.json'
-              restoreKeys: |
-                npm | "$(Agent.OS)"
-              path: $(Build.SourcesDirectory)/node_modules
-            displayName: 'Cache node_modules'
-
-          - script: npm ci
-            displayName: 'Install dependencies'
-
-          - script: npm run build
-            displayName: 'Build application'
-            env:
-              VITE_SUPABASE_URL: $(VITE_SUPABASE_URL)
-              VITE_SUPABASE_PUBLISHABLE_KEY: $(VITE_SUPABASE_PUBLISHABLE_KEY)
-
-          - publish: dist
-            artifact: webapp
-            displayName: 'Publish webapp artifact'
-
+  # ---------------------------
+  # INFRASTRUCTURE
+  # ---------------------------
   - stage: Deploy_Infrastructure
-    displayName: 'Deploy Infrastructure'
+    displayName: Deploy Infrastructure (DEV)
     dependsOn: Build
-    condition: succeeded()
     jobs:
-      - job: DeployBicep
-        displayName: 'Deploy Bicep Templates'
+      - job: Infra
         steps:
-          - script: |
-              echo "Installing Azure CLI..."
-              curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-              az --version
-            displayName: 'Install Azure CLI'
+          - template: templates/deploy-infrastructure.yml
+            parameters:
+              azureSubscription: azure-subscription-dev
+              location: $(azureRegion)
+              templateFile: infrastructure/azure/main.bicep
+              parametersFile: infrastructure/azure/parameters/dev.bicepparam
+              deploymentName: nexus-dev-$(Build.BuildId)
 
-          - task: AzureCLI@2
-            inputs:
-              azureSubscription: 'azure-subscription-dev'
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
-              inlineScript: |
-                echo "Deploying infrastructure to $(environment)..."
-                az deployment sub create \
-                  --location $(azureRegion) \
-                  --template-file infrastructure/azure/main.bicep \
-                  --parameters infrastructure/azure/parameters/dev.bicepparam \
-                  --parameters postgresAdminLogin="$(DB_USER)" \
-                  --parameters postgresAdminPassword="$(DB_PASSWORD)" \
-                  --name "nexus-$(environment)-$(Build.BuildId)"
-            displayName: 'Deploy Bicep'
-
+  # ---------------------------
+  # DATABASE
+  # ---------------------------
   - stage: Deploy_Database
-    displayName: 'Run Database Migrations'
+    displayName: Database Migrations (DEV)
     dependsOn: Deploy_Infrastructure
-    condition: succeeded()
     jobs:
-      - job: Migrate
-        displayName: 'Run Migrations'
+      - job: Database
         steps:
-          - script: |
-              echo "Installing Azure CLI..."
-              curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-            displayName: 'Install Azure CLI'
+          - template: templates/deploy-database.yml
+            parameters:
+              environment: dev
 
-          - script: |
-              sudo apt-get update
-              sudo apt-get install -y postgresql-client
-            displayName: 'Install PostgreSQL client'
-
-          - task: AzureCLI@2
-            inputs:
-              azureSubscription: 'azure-subscription-dev'
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
-              inlineScript: |
-                echo "Discovering PostgreSQL server..."
-                RG_NAME="rg-nexus-os-$(environment)"
-                
-                # Dynamically discover PostgreSQL server FQDN
-                DB_HOST=$(az postgres flexible-server list \
-                  --resource-group "$RG_NAME" \
-                  --query "[0].fullyQualifiedDomainName" -o tsv)
-                
-                if [ -z "$DB_HOST" ]; then
-                  echo "##[error]No PostgreSQL Flexible Server found in resource group $RG_NAME"
-                  exit 1
-                fi
-                
-                echo "Found PostgreSQL server: $DB_HOST"
-                
-                # Dynamically discover PostgreSQL server name for database listing
-                SERVER_NAME=$(az postgres flexible-server list \
-                  --resource-group "$RG_NAME" \
-                  --query "[0].name" -o tsv)
-                
-                # Dynamically discover database name (Bicep creates 'nexus_os')
-                DB_NAME=$(az postgres flexible-server db list \
-                  --resource-group "$RG_NAME" \
-                  --server-name "$SERVER_NAME" \
-                  --query "[?name!='azure_maintenance' && name!='postgres'].name | [0]" -o tsv)
-                
-                if [ -z "$DB_NAME" ]; then
-                  echo "##[error]No application database found on server $SERVER_NAME"
-                  exit 1
-                fi
-                
-                echo "Found database: $DB_NAME"
-                
-                echo "Running database migrations..."
-                for migration in infrastructure/azure/database/migrations/*.sql; do
-                  if [ -f "$migration" ]; then
-                    echo "Executing: $migration"
-                    PGPASSWORD="$(DB_PASSWORD)" psql \
-                      -h "$DB_HOST" \
-                      -U "$(DB_USER)" \
-                      -d "$DB_NAME" \
-                      -f "$migration" \
-                      --single-transaction
-                    
-                    if [ $? -ne 0 ]; then
-                      echo "##[error]Migration failed: $migration"
-                      exit 1
-                    fi
-                  fi
-                done
-                echo "Migrations completed successfully."
-            displayName: 'Execute migrations'
-
+  # ---------------------------
+  # FRONTEND
+  # ---------------------------
   - stage: Deploy_Frontend
-    displayName: 'Deploy Frontend'
+    displayName: Deploy Frontend (DEV)
     dependsOn: Deploy_Database
-    condition: succeeded()
     jobs:
-      - job: DeploySWA
-        displayName: 'Deploy to Static Web App'
+      - job: Frontend
         steps:
-          - download: current
-            artifact: webapp
-            displayName: 'Download webapp artifact'
+          - template: templates/deploy-swa.yml
+            parameters:
+              environmentName: DEV
+              staticWebAppToken: $(STATIC_WEB_APP_TOKEN)
 
-          - script: |
-              echo "Installing Azure CLI..."
-              curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-            displayName: 'Install Azure CLI'
-
-          - task: NodeTool@0
-            inputs:
-              versionSpec: '$(nodeVersion)'
-            displayName: 'Install Node.js'
-
-          - script: |
-              echo "Installing SWA CLI..."
-              npm install -g @azure/static-web-apps-cli
-            displayName: 'Install SWA CLI'
-
-          - task: AzureCLI@2
-            inputs:
-              azureSubscription: 'azure-subscription-dev'
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
-              inlineScript: |
-                echo "Getting Static Web App deployment token..."
-                SWA_NAME=$(az staticwebapp list \
-                  --resource-group "rg-nexus-os-$(environment)" \
-                  --query "[0].name" -o tsv)
-                
-                if [ -z "$SWA_NAME" ]; then
-                  echo "##[error]No Static Web App found in rg-nexus-os-$(environment)"
-                  exit 1
-                fi
-                
-                echo "Found Static Web App: $SWA_NAME"
-                
-                DEPLOYMENT_TOKEN=$(az staticwebapp secrets list \
-                  --name "$SWA_NAME" \
-                  --resource-group "rg-nexus-os-$(environment)" \
-                  --query "properties.apiKey" -o tsv)
-                
-                echo "Deploying to Azure Static Web App..."
-                echo "Artifact contents:"
-                ls -la "$(Pipeline.Workspace)/webapp"
-                
-                swa deploy \
-                  --app-location "$(Pipeline.Workspace)/webapp" \
-                  --deployment-token "$DEPLOYMENT_TOKEN" \
-                  --env production \
-                  --verbose
-            displayName: 'Deploy to Azure Static Web Apps'
-
-  - stage: Deploy_Functions
-    displayName: 'Deploy Azure Functions'
-    dependsOn: Deploy_Database
-    condition: succeeded()
-    jobs:
-      - job: DeployFunctions
-        displayName: 'Deploy Functions'
-        steps:
-          - script: |
-              echo "Installing Azure CLI and zip..."
-              sudo apt-get update
-              sudo apt-get install -y zip
-              curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-            displayName: 'Install Azure CLI and zip'
-
-          - task: NodeTool@0
-            inputs:
-              versionSpec: '$(nodeVersion)'
-            displayName: 'Install Node.js'
-
-          - task: AzureCLI@2
-            inputs:
-              azureSubscription: 'azure-subscription-dev'
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
-              inlineScript: |
-                echo "Getting Function App name from resource group..."
-                FUNC_APP_NAME=$(az functionapp list \
-                  --resource-group "rg-nexus-os-$(environment)" \
-                  --query "[0].name" -o tsv)
-                
-                if [ -z "$FUNC_APP_NAME" ]; then
-                  echo "##[error]No Function App found in rg-nexus-os-$(environment)"
-                  exit 1
-                fi
-                
-                echo "Deploying to Function App: $FUNC_APP_NAME"
-                
-                # Create deployment package
-                cd $(System.DefaultWorkingDirectory)/supabase/functions
-                zip -r ../../functions.zip .
-                cd ../..
-                
-                az functionapp deployment source config-zip \
-                  --name "$FUNC_APP_NAME" \
-                  --resource-group "rg-nexus-os-$(environment)" \
-                  --src functions.zip
-            displayName: 'Deploy Azure Functions'
-
+  # ---------------------------
+  # SMOKE TESTS
+  # ---------------------------
   - stage: Smoke_Tests
-    displayName: 'Smoke Tests'
-    dependsOn:
-      - Deploy_Frontend
-      - Deploy_Functions
-    condition: succeeded()
+    displayName: Smoke Tests (DEV)
+    dependsOn: Deploy_Frontend
     jobs:
-      - job: HealthCheck
-        displayName: 'Health Checks'
+      - job: Health
         steps:
-          - script: |
-              echo "Installing Azure CLI..."
-              curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-            displayName: 'Install Azure CLI'
-
-          - task: AzureCLI@2
-            inputs:
-              azureSubscription: 'azure-subscription-dev'
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
-              inlineScript: |
-                echo "Discovering deployed resources..."
-                RG_NAME="rg-nexus-os-$(environment)"
-                
-                # Get Static Web App URL dynamically
-                SWA_NAME=$(az staticwebapp list \
-                  --resource-group "$RG_NAME" \
-                  --query "[0].name" -o tsv)
-                
-                SWA_URL=$(az staticwebapp show \
-                  --name "$SWA_NAME" \
-                  --resource-group "$RG_NAME" \
-                  --query "defaultHostname" -o tsv)
-                
-                FRONTEND_URL="https://$SWA_URL"
-                
-                # Get Function App URL dynamically
-                FUNC_APP_NAME=$(az functionapp list \
-                  --resource-group "$RG_NAME" \
-                  --query "[0].name" -o tsv)
-                
-                FUNC_URL=$(az functionapp show \
-                  --name "$FUNC_APP_NAME" \
-                  --resource-group "$RG_NAME" \
-                  --query "defaultHostName" -o tsv)
-                
-                API_URL="https://$FUNC_URL/api/health"
-                
-                echo ""
-                echo "=========================================="
-                echo "🚀 DEPLOYMENT COMPLETE"
-                echo "=========================================="
-                echo ""
-                echo "📱 Frontend URL: $FRONTEND_URL"
-                echo "⚡ API URL: https://$FUNC_URL"
-                echo ""
-                echo "=========================================="
-                echo ""
-                
-                # Set output variables for notification stage
-                echo "##vso[task.setvariable variable=SWA_URL;isOutput=true]$FRONTEND_URL"
-                echo "##vso[task.setvariable variable=API_URL;isOutput=true]https://$FUNC_URL"
-                
-                echo "Running health checks..."
-                
-                # Frontend health check
-                for i in {1..5}; do
-                  STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$FRONTEND_URL")
-                  if [ "$STATUS" = "200" ]; then
-                    echo "✅ Frontend is healthy ($FRONTEND_URL)"
-                    break
-                  fi
-                  echo "Attempt $i: Frontend returned $STATUS, retrying..."
-                  sleep 10
-                done
-                
-                if [ "$STATUS" != "200" ]; then
-                  echo "##[warning]Frontend health check failed after 5 attempts"
-                fi
-                
-                # API health check
-                for i in {1..5}; do
-                  STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$API_URL")
-                  if [ "$STATUS" = "200" ]; then
-                    echo "✅ API is healthy ($API_URL)"
-                    break
-                  fi
-                  echo "Attempt $i: API returned $STATUS, retrying..."
-                  sleep 10
-                done
-                
-                if [ "$STATUS" != "200" ]; then
-                  echo "##[warning]API health check failed after 5 attempts"
-                fi
-            name: urls
-            displayName: 'Discover URLs and run health checks'
-
-  - stage: E2E_Tests
-    displayName: 'E2E Tests'
-    dependsOn: Smoke_Tests
-    condition: succeeded()
-    jobs:
-      - job: PlaywrightTests
-        displayName: 'Run Playwright Tests'
-        steps:
-          - script: |
-              echo "Installing Azure CLI..."
-              curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-            displayName: 'Install Azure CLI'
-
-          - task: NodeTool@0
-            inputs:
-              versionSpec: '$(nodeVersion)'
-            displayName: 'Install Node.js'
-
-          - script: npm ci
-            displayName: 'Install dependencies'
-
-          - script: npx playwright install --with-deps chromium
-            displayName: 'Install Playwright browsers'
-
-          - task: AzureCLI@2
-            inputs:
-              azureSubscription: 'azure-subscription-dev'
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
-              inlineScript: |
-                echo "Getting deployed URL for E2E tests..."
-                RG_NAME="rg-nexus-os-$(environment)"
-                
-                SWA_NAME=$(az staticwebapp list \
-                  --resource-group "$RG_NAME" \
-                  --query "[0].name" -o tsv)
-                
-                SWA_URL=$(az staticwebapp show \
-                  --name "$SWA_NAME" \
-                  --resource-group "$RG_NAME" \
-                  --query "defaultHostname" -o tsv)
-                
-                export BASE_URL="https://$SWA_URL"
-                echo "Running E2E tests against: $BASE_URL"
-                
-                npx playwright test --reporter=html || true
-            displayName: 'Run E2E tests'
-
-          - publish: playwright-report
-            artifact: playwright-report
-            displayName: 'Publish Playwright report'
-            condition: always()
-
-  - stage: Notify
-    displayName: 'Notify'
-    dependsOn: E2E_Tests
-    condition: always()
-    variables:
-      SWA_URL: $[ stageDependencies.Smoke_Tests.HealthCheck.outputs['urls.SWA_URL'] ]
-      API_URL: $[ stageDependencies.Smoke_Tests.HealthCheck.outputs['urls.API_URL'] ]
-    jobs:
-      - job: SlackNotify
-        displayName: 'Send Notification'
-        steps:
-          - script: |
-              if [ "$(Agent.JobStatus)" = "Succeeded" ]; then
-                STATUS="✅ Success"
-                COLOR="good"
-              else
-                STATUS="❌ Failed"
-                COLOR="danger"
-              fi
-              
-              curl -X POST "$(SLACK_WEBHOOK_URL)" \
-                -H "Content-Type: application/json" \
-                -d "{
-                  \"attachments\": [{
-                    \"color\": \"$COLOR\",
-                    \"title\": \"Nexus OS - Dev Deployment\",
-                    \"text\": \"$STATUS\",
-                    \"fields\": [
-                      {\"title\": \"Environment\", \"value\": \"$(environment)\", \"short\": true},
-                      {\"title\": \"Build\", \"value\": \"$(Build.BuildId)\", \"short\": true},
-                      {\"title\": \"Frontend URL\", \"value\": \"$(SWA_URL)\", \"short\": false},
-                      {\"title\": \"API URL\", \"value\": \"$(API_URL)\", \"short\": false}
-                    ]
-                  }]
-                }"
-            displayName: 'Send Slack notification'
-            condition: and(always(), ne(variables['SLACK_WEBHOOK_URL'], ''))
+          - template: templates/health-check.yml
+            parameters:
+              environment: dev

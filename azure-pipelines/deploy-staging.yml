@@ -1,396 +1,68 @@
-# azure-pipelines/deploy-staging.yml
-# Staging Environment Deployment Pipeline
+# =========================================================
+# Nexus OS – STAGING Deployment
+# =========================================================
 
-trigger:
-  branches:
-    include:
-      - main
+trigger: none # usually manual or pipeline-to-pipeline
 
 pool:
-  name: 'azurepipeline'
+  name: azurepipeline
 
 variables:
   - group: nexus-staging-secrets
-  - name: nodeVersion
-    value: '20.x'
   - name: environment
-    value: 'staging'
+    value: staging
   - name: azureRegion
-    value: 'swedencentral'
+    value: swedencentral
 
 stages:
   - stage: Build
-    displayName: 'Build Application'
+    displayName: Build
     jobs:
       - job: Build
-        displayName: 'Build'
         steps:
-          - task: NodeTool@0
-            inputs:
-              versionSpec: '$(nodeVersion)'
-            displayName: 'Install Node.js'
-
-          - task: Cache@2
-            inputs:
-              key: 'npm | "$(Agent.OS)" | package-lock.json'
-              restoreKeys: |
-                npm | "$(Agent.OS)"
-              path: $(Build.SourcesDirectory)/node_modules
-            displayName: 'Cache node_modules'
-
-          - script: npm ci
-            displayName: 'Install dependencies'
-
-          - script: npm run build
-            displayName: 'Build application'
-            env:
-              VITE_SUPABASE_URL: $(VITE_SUPABASE_URL)
-              VITE_SUPABASE_PUBLISHABLE_KEY: $(VITE_SUPABASE_PUBLISHABLE_KEY)
-
-          - publish: dist
-            artifact: webapp
-            displayName: 'Publish webapp artifact'
-
-  - stage: Approval
-    displayName: 'Staging Approval'
-    dependsOn: Build
-    jobs:
-      - deployment: ApproveStaging
-        displayName: 'Approve Staging Deployment'
-        environment: 'staging'
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - script: echo "Staging deployment approved"
-                  displayName: 'Approval confirmed'
-
-  - stage: Backup_Database
-    displayName: 'Backup Database'
-    dependsOn: Approval
-    condition: succeeded()
-    jobs:
-      - job: BackupDB
-        displayName: 'Create Database Backup'
-        steps:
-          - script: |
-              echo "Installing Azure CLI..."
-              curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-            displayName: 'Install Azure CLI'
-
-          - task: AzureCLI@2
-            inputs:
-              azureSubscription: 'azure-subscription-staging'
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
-              inlineScript: |
-                echo "Creating database backup..."
-                az postgres flexible-server backup create \
-                  --resource-group rg-nexus-$(environment) \
-                  --name nexus-$(environment)-db \
-                  --backup-name pre-deploy-$(Build.BuildId) \
-                  || echo "Backup creation skipped or failed - continuing deployment"
-            displayName: 'Backup PostgreSQL'
+          - template: templates/build.yml
 
   - stage: Deploy_Infrastructure
-    displayName: 'Deploy Infrastructure'
-    dependsOn: Backup_Database
-    condition: succeeded()
+    displayName: Deploy Infrastructure (STAGING)
+    dependsOn: Build
     jobs:
-      - job: DeployBicep
-        displayName: 'Deploy Bicep Templates'
+      - job: Infra
         steps:
-          - script: |
-              echo "Installing Azure CLI..."
-              curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-            displayName: 'Install Azure CLI'
-
-          - task: AzureCLI@2
-            inputs:
-              azureSubscription: 'azure-subscription-staging'
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
-              inlineScript: |
-                echo "Deploying infrastructure to $(environment)..."
-                az deployment sub create \
-                  --location $(azureRegion) \
-                  --template-file infrastructure/azure/main.bicep \
-                  --parameters infrastructure/azure/parameters/staging.bicepparam \
-                  --parameters postgresAdminLogin="$(DB_USER)" \
-                  --parameters postgresAdminPassword="$(DB_PASSWORD)" \
-                  --name "nexus-$(environment)-$(Build.BuildId)"
-            displayName: 'Deploy Bicep'
+          - template: templates/deploy-infrastructure.yml
+            parameters:
+              azureSubscription: azure-subscription-staging
+              location: $(azureRegion)
+              templateFile: infrastructure/azure/main.bicep
+              parametersFile: infrastructure/azure/parameters/staging.bicepparam
+              deploymentName: nexus-staging-$(Build.BuildId)
 
   - stage: Deploy_Database
-    displayName: 'Run Database Migrations'
+    displayName: Database Migrations (STAGING)
     dependsOn: Deploy_Infrastructure
-    condition: succeeded()
     jobs:
-      - job: Migrate
-        displayName: 'Run Migrations'
+      - job: Database
         steps:
-          - script: |
-              echo "Installing Azure CLI and PostgreSQL client..."
-              curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-              sudo apt-get update
-              sudo apt-get install -y postgresql-client
-            displayName: 'Install Azure CLI and PostgreSQL client'
-
-          - task: AzureCLI@2
-            inputs:
-              azureSubscription: 'azure-subscription-staging'
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
-              inlineScript: |
-                echo "Discovering PostgreSQL server..."
-                RG_NAME="rg-nexus-os-$(environment)"
-                
-                # Dynamically discover PostgreSQL server FQDN
-                DB_HOST=$(az postgres flexible-server list \
-                  --resource-group "$RG_NAME" \
-                  --query "[0].fullyQualifiedDomainName" -o tsv)
-                
-                if [ -z "$DB_HOST" ]; then
-                  echo "##[error]No PostgreSQL Flexible Server found in resource group $RG_NAME"
-                  exit 1
-                fi
-                
-                echo "Found PostgreSQL server: $DB_HOST"
-                
-                # Dynamically discover PostgreSQL server name for database listing
-                SERVER_NAME=$(az postgres flexible-server list \
-                  --resource-group "$RG_NAME" \
-                  --query "[0].name" -o tsv)
-                
-                # Dynamically discover database name (Bicep creates 'nexus_os')
-                DB_NAME=$(az postgres flexible-server db list \
-                  --resource-group "$RG_NAME" \
-                  --server-name "$SERVER_NAME" \
-                  --query "[?name!='azure_maintenance' && name!='postgres'].name | [0]" -o tsv)
-                
-                if [ -z "$DB_NAME" ]; then
-                  echo "##[error]No application database found on server $SERVER_NAME"
-                  exit 1
-                fi
-                
-                echo "Found database: $DB_NAME"
-                
-                echo "Running database migrations..."
-                for migration in infrastructure/azure/database/migrations/*.sql; do
-                  if [ -f "$migration" ]; then
-                    echo "Executing: $migration"
-                    PGPASSWORD="$(DB_PASSWORD)" psql \
-                      -h "$DB_HOST" \
-                      -U "$(DB_USER)" \
-                      -d "$DB_NAME" \
-                      -f "$migration" \
-                      --single-transaction
-                    
-                    if [ $? -ne 0 ]; then
-                      echo "##[error]Migration failed: $migration"
-                      exit 1
-                    fi
-                  fi
-                done
-                echo "Migrations completed successfully."
-            displayName: 'Execute migrations'
+          - template: templates/deploy-database.yml
+            parameters:
+              environment: staging
 
   - stage: Deploy_Frontend
-    displayName: 'Deploy Frontend'
+    displayName: Deploy Frontend (STAGING)
     dependsOn: Deploy_Database
-    condition: succeeded()
     jobs:
-      - job: DeploySWA
-        displayName: 'Deploy to Static Web App'
+      - job: Frontend
         steps:
-          - download: current
-            artifact: webapp
-            displayName: 'Download webapp artifact'
+          - template: templates/deploy-swa.yml
+            parameters:
+              environmentName: STAGING
+              staticWebAppToken: $(STATIC_WEB_APP_TOKEN)
 
-          - script: |
-              echo "Installing Azure CLI..."
-              curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-            displayName: 'Install Azure CLI'
-
-          - task: NodeTool@0
-            inputs:
-              versionSpec: '$(nodeVersion)'
-            displayName: 'Install Node.js'
-
-          - script: |
-              echo "Installing SWA CLI..."
-              npm install -g @azure/static-web-apps-cli
-            displayName: 'Install SWA CLI'
-
-          - task: AzureCLI@2
-            inputs:
-              azureSubscription: 'azure-subscription-staging'
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
-              inlineScript: |
-                echo "Getting Static Web App deployment token..."
-                SWA_NAME=$(az staticwebapp list \
-                  --resource-group "rg-nexus-os-$(environment)" \
-                  --query "[0].name" -o tsv)
-                
-                if [ -z "$SWA_NAME" ]; then
-                  echo "##[error]No Static Web App found in rg-nexus-os-$(environment)"
-                  exit 1
-                fi
-                
-                echo "Found Static Web App: $SWA_NAME"
-                
-                DEPLOYMENT_TOKEN=$(az staticwebapp secrets list \
-                  --name "$SWA_NAME" \
-                  --resource-group "rg-nexus-os-$(environment)" \
-                  --query "properties.apiKey" -o tsv)
-                
-                echo "Deploying to Azure Static Web App..."
-                swa deploy "$(Pipeline.Workspace)/webapp" \
-                  --deployment-token "$DEPLOYMENT_TOKEN" \
-                  --env production
-            displayName: 'Deploy to Azure Static Web Apps'
-
-  - stage: Deploy_Functions
-    displayName: 'Deploy Azure Functions'
-    dependsOn: Deploy_Database
-    condition: succeeded()
+  - stage: Smoke_Tests
+    displayName: Smoke Tests (STAGING)
+    dependsOn: Deploy_Frontend
     jobs:
-      - job: DeployFunctions
-        displayName: 'Deploy Functions'
+      - job: Health
         steps:
-          - script: |
-              echo "Installing Azure CLI and zip..."
-              sudo apt-get update
-              sudo apt-get install -y zip
-              curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-            displayName: 'Install Azure CLI and zip'
-
-          - task: NodeTool@0
-            inputs:
-              versionSpec: '$(nodeVersion)'
-            displayName: 'Install Node.js'
-
-          - task: AzureCLI@2
-            inputs:
-              azureSubscription: 'azure-subscription-staging'
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
-              inlineScript: |
-                echo "Getting Function App name from resource group..."
-                FUNC_APP_NAME=$(az functionapp list \
-                  --resource-group "rg-nexus-os-$(environment)" \
-                  --query "[0].name" -o tsv)
-                
-                if [ -z "$FUNC_APP_NAME" ]; then
-                  echo "##[error]No Function App found in rg-nexus-os-$(environment)"
-                  exit 1
-                fi
-                
-                echo "Deploying to Function App: $FUNC_APP_NAME"
-                
-                # Create deployment package
-                cd $(System.DefaultWorkingDirectory)/supabase/functions
-                zip -r ../../functions.zip .
-                cd ../..
-                
-                az functionapp deployment source config-zip \
-                  --name "$FUNC_APP_NAME" \
-                  --resource-group "rg-nexus-os-$(environment)" \
-                  --src functions.zip
-            displayName: 'Deploy Azure Functions'
-
-  - stage: E2E_Tests
-    displayName: 'E2E Tests'
-    dependsOn:
-      - Deploy_Frontend
-      - Deploy_Functions
-    condition: succeeded()
-    jobs:
-      - job: PlaywrightTests
-        displayName: 'Run Playwright Tests'
-        steps:
-          - script: |
-              echo "Installing Azure CLI..."
-              curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-            displayName: 'Install Azure CLI'
-
-          - task: NodeTool@0
-            inputs:
-              versionSpec: '$(nodeVersion)'
-            displayName: 'Install Node.js'
-
-          - script: npm ci
-            displayName: 'Install dependencies'
-
-          - script: npx playwright install --with-deps chromium
-            displayName: 'Install Playwright browsers'
-
-          - task: AzureCLI@2
-            inputs:
-              azureSubscription: 'azure-subscription-staging'
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
-              inlineScript: |
-                echo "Getting deployed URL for E2E tests..."
-                RG_NAME="rg-nexus-os-$(environment)"
-                
-                SWA_NAME=$(az staticwebapp list \
-                  --resource-group "$RG_NAME" \
-                  --query "[0].name" -o tsv)
-                
-                SWA_URL=$(az staticwebapp show \
-                  --name "$SWA_NAME" \
-                  --resource-group "$RG_NAME" \
-                  --query "defaultHostname" -o tsv)
-                
-                export BASE_URL="https://$SWA_URL"
-                echo "Running E2E tests against: $BASE_URL"
-                
-                npx playwright test --reporter=html || true
-            displayName: 'Run E2E tests'
-
-          - task: PublishTestResults@2
-            inputs:
-              testResultsFormat: 'JUnit'
-              testResultsFiles: '**/test-results/*.xml'
-            condition: always()
-            displayName: 'Publish test results'
-
-          - publish: playwright-report
-            artifact: playwright-report
-            condition: always()
-            displayName: 'Publish Playwright report'
-
-  - stage: Notify
-    displayName: 'Notify'
-    dependsOn: E2E_Tests
-    condition: always()
-    jobs:
-      - job: SlackNotify
-        displayName: 'Send Notification'
-        steps:
-          - script: |
-              if [ "$(Agent.JobStatus)" = "Succeeded" ]; then
-                STATUS="✅ Success"
-                COLOR="good"
-              else
-                STATUS="❌ Failed"
-                COLOR="danger"
-              fi
-              
-              curl -X POST "$(SLACK_WEBHOOK_URL)" \
-                -H "Content-Type: application/json" \
-                -d "{
-                  \"attachments\": [{
-                    \"color\": \"$COLOR\",
-                    \"title\": \"Nexus OS - Staging Deployment\",
-                    \"text\": \"$STATUS\",
-                    \"fields\": [
-                      {\"title\": \"Environment\", \"value\": \"$(environment)\", \"short\": true},
-                      {\"title\": \"Build\", \"value\": \"$(Build.BuildId)\", \"short\": true}
-                    ]
-                  }]
-                }"
-            displayName: 'Send Slack notification'
-            condition: and(always(), ne(variables['SLACK_WEBHOOK_URL'], ''))
+          - template: templates/health-check.yml
+            parameters:
+              environment: staging
