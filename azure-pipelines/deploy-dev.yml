@@ -209,9 +209,14 @@ stages:
                   --query "properties.apiKey" -o tsv)
                 
                 echo "Deploying to Azure Static Web App..."
-                swa deploy "$(Pipeline.Workspace)/webapp" \
+                echo "Artifact contents:"
+                ls -la "$(Pipeline.Workspace)/webapp"
+                
+                swa deploy \
+                  --app-location "$(Pipeline.Workspace)/webapp" \
                   --deployment-token "$DEPLOYMENT_TOKEN" \
-                  --env production
+                  --env production \
+                  --verbose
             displayName: 'Deploy to Azure Static Web Apps'
 
   - stage: Deploy_Functions
