@@ -1,91 +1,16 @@
-# azure-pipelines/templates/deploy-swa.yml
-# Reusable template for deploying Static Web Apps
-
 parameters:
-  - name: environment
-    type: string
-  - name: azureSubscription
-    type: string
-  - name: resourceGroupName
-    type: string
-  - name: artifactName
-    type: string
-    default: 'webapp'
+  environmentName: ""
+  artifactName: "webapp"
+  staticWebAppToken: ""
 
 steps:
   - download: current
     artifact: ${{ parameters.artifactName }}
-    displayName: 'Download build artifact'
+    displayName: Download frontend artifact
 
-  - script: |
-      curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-    displayName: 'Install Azure CLI'
-
-  - task: AzureCLI@2
-    displayName: 'Discover SWA and Deploy'
+  - task: AzureStaticWebApp@0
+    displayName: Deploy Static Web App (${{ parameters.environmentName }})
     inputs:
-      azureSubscription: ${{ parameters.azureSubscription }}
-      scriptType: 'bash'
-      scriptLocation: 'inlineScript'
-      inlineScript: |
-        set -e
-        
-        echo "🔍 Discovering Static Web App in resource group: ${{ parameters.resourceGroupName }}"
-        
-        # Get SWA name dynamically
-        SWA_NAME=$(az staticwebapp list \
-          --resource-group "${{ parameters.resourceGroupName }}" \
-          --query "[0].name" -o tsv)
-        
-        if [ -z "$SWA_NAME" ]; then
-          echo "❌ Error: No Static Web App found in resource group ${{ parameters.resourceGroupName }}"
-          exit 1
-        fi
-        
-        echo "✅ Found Static Web App: $SWA_NAME"
-        
-        # Get deployment token
-        DEPLOYMENT_TOKEN=$(az staticwebapp secrets list \
-          --name "$SWA_NAME" \
-          --resource-group "${{ parameters.resourceGroupName }}" \
-          --query "properties.apiKey" -o tsv)
-        
-        if [ -z "$DEPLOYMENT_TOKEN" ]; then
-          echo "❌ Error: Failed to retrieve deployment token"
-          exit 1
-        fi
-        
-        echo "🔑 Retrieved deployment token"
-        
-        # Install SWA CLI
-        npm install -g @azure/static-web-apps-cli
-        
-        # Debug: List artifact contents
-        echo "📦 Artifact contents:"
-        ls -la $(Pipeline.Workspace)/${{ parameters.artifactName }}
-        
-        # Deploy to SWA
-        echo "🚀 Deploying to Static Web App..."
-        swa deploy $(Pipeline.Workspace)/${{ parameters.artifactName }} \
-          --deployment-token "$DEPLOYMENT_TOKEN" \
-          --env "${{ parameters.environment }}" \
-          --verbose
-        
-        # Output deployed URL
-        SWA_URL=$(az staticwebapp show \
-          --name "$SWA_NAME" \
-          --resource-group "${{ parameters.resourceGroupName }}" \
-          --query "defaultHostname" -o tsv)
-        
-        echo "✅ Deployment complete!"
-        echo "🌐 Application URL: https://$SWA_URL"
-        echo "##vso[task.setvariable variable=SWA_URL;isOutput=true]https://$SWA_URL"
-    name: deployStep
-
-  - script: |
-      echo "📋 Deployment Summary"
-      echo "====================="
-      echo "Environment: ${{ parameters.environment }}"
-      echo "Resource Group: ${{ parameters.resourceGroupName }}"
-      echo "Deployed URL: $(deployStep.SWA_URL)"
-    displayName: 'Deployment Summary'
+      app_location: "$(Pipeline.Workspace)/${{ parameters.artifactName }}"
+      output_location: "."
+      azure_static_web_apps_api_token: ${{ parameters.staticWebAppToken }}
