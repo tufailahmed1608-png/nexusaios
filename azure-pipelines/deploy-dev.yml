@@ -120,6 +120,24 @@ stages:
                 
                 echo "Found PostgreSQL server: $DB_HOST"
                 
+                # Dynamically discover PostgreSQL server name for database listing
+                SERVER_NAME=$(az postgres flexible-server list \
+                  --resource-group "$RG_NAME" \
+                  --query "[0].name" -o tsv)
+                
+                # Dynamically discover database name (Bicep creates 'nexus_os')
+                DB_NAME=$(az postgres flexible-server db list \
+                  --resource-group "$RG_NAME" \
+                  --server-name "$SERVER_NAME" \
+                  --query "[?name!='azure_maintenance' && name!='postgres'].name | [0]" -o tsv)
+                
+                if [ -z "$DB_NAME" ]; then
+                  echo "##[error]No application database found on server $SERVER_NAME"
+                  exit 1
+                fi
+                
+                echo "Found database: $DB_NAME"
+                
                 echo "Running database migrations..."
                 for migration in infrastructure/azure/database/migrations/*.sql; do
                   if [ -f "$migration" ]; then
@@ -127,7 +145,7 @@ stages:
                     PGPASSWORD="$(DB_PASSWORD)" psql \
                       -h "$DB_HOST" \
                       -U "$(DB_USER)" \
-                      -d nexus_$(environment) \
+                      -d "$DB_NAME" \
                       -f "$migration" \
                       --single-transaction
                     
