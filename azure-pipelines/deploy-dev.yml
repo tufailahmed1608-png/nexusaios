@@ -274,37 +274,99 @@ stages:
         displayName: 'Health Checks'
         steps:
           - script: |
-              echo "Running health checks..."
-              
-              # Frontend health check
-              FRONTEND_URL="https://nexus-$(environment).azurestaticapps.net"
-              for i in {1..5}; do
-                STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$FRONTEND_URL")
-                if [ "$STATUS" = "200" ]; then
-                  echo "✅ Frontend is healthy"
-                  break
+              echo "Installing Azure CLI..."
+              curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+            displayName: 'Install Azure CLI'
+
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: 'azure-subscription-dev'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                echo "Discovering deployed resources..."
+                RG_NAME="rg-nexus-os-$(environment)"
+                
+                # Get Static Web App URL dynamically
+                SWA_NAME=$(az staticwebapp list \
+                  --resource-group "$RG_NAME" \
+                  --query "[0].name" -o tsv)
+                
+                SWA_URL=$(az staticwebapp show \
+                  --name "$SWA_NAME" \
+                  --resource-group "$RG_NAME" \
+                  --query "defaultHostname" -o tsv)
+                
+                FRONTEND_URL="https://$SWA_URL"
+                
+                # Get Function App URL dynamically
+                FUNC_APP_NAME=$(az functionapp list \
+                  --resource-group "$RG_NAME" \
+                  --query "[0].name" -o tsv)
+                
+                FUNC_URL=$(az functionapp show \
+                  --name "$FUNC_APP_NAME" \
+                  --resource-group "$RG_NAME" \
+                  --query "defaultHostName" -o tsv)
+                
+                API_URL="https://$FUNC_URL/api/health"
+                
+                echo ""
+                echo "=========================================="
+                echo "🚀 DEPLOYMENT COMPLETE"
+                echo "=========================================="
+                echo ""
+                echo "📱 Frontend URL: $FRONTEND_URL"
+                echo "⚡ API URL: https://$FUNC_URL"
+                echo ""
+                echo "=========================================="
+                echo ""
+                
+                # Set output variables for notification stage
+                echo "##vso[task.setvariable variable=SWA_URL;isOutput=true]$FRONTEND_URL"
+                echo "##vso[task.setvariable variable=API_URL;isOutput=true]https://$FUNC_URL"
+                
+                echo "Running health checks..."
+                
+                # Frontend health check
+                for i in {1..5}; do
+                  STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$FRONTEND_URL")
+                  if [ "$STATUS" = "200" ]; then
+                    echo "✅ Frontend is healthy ($FRONTEND_URL)"
+                    break
+                  fi
+                  echo "Attempt $i: Frontend returned $STATUS, retrying..."
+                  sleep 10
+                done
+                
+                if [ "$STATUS" != "200" ]; then
+                  echo "##[warning]Frontend health check failed after 5 attempts"
                 fi
-                echo "Attempt $i: Frontend returned $STATUS, retrying..."
-                sleep 10
-              done
-              
-              # API health check
-              API_URL="https://nexus-$(environment)-func.azurewebsites.net/api/health"
-              for i in {1..5}; do
-                STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$API_URL")
-                if [ "$STATUS" = "200" ]; then
-                  echo "✅ API is healthy"
-                  break
+                
+                # API health check
+                for i in {1..5}; do
+                  STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$API_URL")
+                  if [ "$STATUS" = "200" ]; then
+                    echo "✅ API is healthy ($API_URL)"
+                    break
+                  fi
+                  echo "Attempt $i: API returned $STATUS, retrying..."
+                  sleep 10
+                done
+                
+                if [ "$STATUS" != "200" ]; then
+                  echo "##[warning]API health check failed after 5 attempts"
                 fi
-                echo "Attempt $i: API returned $STATUS, retrying..."
-                sleep 10
-              done
-            displayName: 'Run health checks'
+            name: urls
+            displayName: 'Discover URLs and run health checks'
 
   - stage: Notify
     displayName: 'Notify'
     dependsOn: Smoke_Tests
     condition: always()
+    variables:
+      SWA_URL: $[ stageDependencies.Smoke_Tests.HealthCheck.outputs['urls.SWA_URL'] ]
+      API_URL: $[ stageDependencies.Smoke_Tests.HealthCheck.outputs['urls.API_URL'] ]
     jobs:
       - job: SlackNotify
         displayName: 'Send Notification'
@@ -327,7 +389,9 @@ stages:
                     \"text\": \"$STATUS\",
                     \"fields\": [
                       {\"title\": \"Environment\", \"value\": \"$(environment)\", \"short\": true},
-                      {\"title\": \"Build\", \"value\": \"$(Build.BuildId)\", \"short\": true}
+                      {\"title\": \"Build\", \"value\": \"$(Build.BuildId)\", \"short\": true},
+                      {\"title\": \"Frontend URL\", \"value\": \"$(SWA_URL)\", \"short\": false},
+                      {\"title\": \"API URL\", \"value\": \"$(API_URL)\", \"short\": false}
                     ]
                   }]
                 }"
