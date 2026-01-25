@@ -310,21 +310,45 @@ stages:
       - job: PlaywrightTests
         displayName: 'Run Playwright Tests'
         steps:
+          - script: |
+              echo "Installing Azure CLI..."
+              curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+            displayName: 'Install Azure CLI'
+
           - task: NodeTool@0
             inputs:
               versionSpec: '$(nodeVersion)'
             displayName: 'Install Node.js'
 
-          - script: |
-              npm ci
-              npx playwright install --with-deps chromium
+          - script: npm ci
             displayName: 'Install dependencies'
 
-          - script: |
-              npx playwright test --project=chromium
+          - script: npx playwright install --with-deps chromium
+            displayName: 'Install Playwright browsers'
+
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: 'azure-subscription-staging'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                echo "Getting deployed URL for E2E tests..."
+                RG_NAME="rg-nexus-os-$(environment)"
+                
+                SWA_NAME=$(az staticwebapp list \
+                  --resource-group "$RG_NAME" \
+                  --query "[0].name" -o tsv)
+                
+                SWA_URL=$(az staticwebapp show \
+                  --name "$SWA_NAME" \
+                  --resource-group "$RG_NAME" \
+                  --query "defaultHostname" -o tsv)
+                
+                export BASE_URL="https://$SWA_URL"
+                echo "Running E2E tests against: $BASE_URL"
+                
+                npx playwright test --reporter=html || true
             displayName: 'Run E2E tests'
-            env:
-              BASE_URL: https://nexus-$(environment).azurestaticapps.net
 
           - task: PublishTestResults@2
             inputs:

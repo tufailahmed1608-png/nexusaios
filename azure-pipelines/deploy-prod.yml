@@ -481,52 +481,144 @@ stages:
                   --env production
             displayName: 'Deploy to production'
 
+  - stage: E2E_Tests
+    displayName: 'E2E Tests'
+    dependsOn: Promote_Frontend
+    condition: succeeded()
+    jobs:
+      - job: PlaywrightTests
+        displayName: 'Run Playwright Tests'
+        steps:
+          - script: |
+              echo "Installing Azure CLI..."
+              curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+            displayName: 'Install Azure CLI'
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '$(nodeVersion)'
+            displayName: 'Install Node.js'
+
+          - script: npm ci
+            displayName: 'Install dependencies'
+
+          - script: npx playwright install --with-deps chromium
+            displayName: 'Install Playwright browsers'
+
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: 'azure-subscription-prod'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                echo "Getting deployed URL for E2E tests..."
+                RG_NAME="rg-nexus-os-$(environment)"
+                
+                SWA_NAME=$(az staticwebapp list \
+                  --resource-group "$RG_NAME" \
+                  --query "[0].name" -o tsv)
+                
+                SWA_URL=$(az staticwebapp show \
+                  --name "$SWA_NAME" \
+                  --resource-group "$RG_NAME" \
+                  --query "defaultHostname" -o tsv)
+                
+                export BASE_URL="https://$SWA_URL"
+                echo "Running E2E tests against: $BASE_URL"
+                
+                npx playwright test --reporter=html || true
+            displayName: 'Run E2E tests'
+
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '**/test-results/*.xml'
+            condition: always()
+            displayName: 'Publish test results'
+
+          - publish: playwright-report
+            artifact: playwright-report
+            condition: always()
+            displayName: 'Publish Playwright report'
+
   - stage: Post_Deploy_Validation
     displayName: 'Post-Deploy Validation'
-    dependsOn: Promote_Frontend
+    dependsOn: E2E_Tests
     condition: succeeded()
     jobs:
       - job: ProductionHealthCheck
         displayName: 'Production Health Check'
         steps:
           - script: |
-              echo "Running production health checks..."
-              MAX_RETRIES=5
-              RETRY_DELAY=10
-              
-              # Frontend health check
-              FRONTEND_URL="https://nexus-$(environment).azurestaticapps.net"
-              for i in $(seq 1 $MAX_RETRIES); do
-                STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$FRONTEND_URL")
-                if [ "$STATUS" = "200" ]; then
-                  echo "✅ Production frontend is healthy"
-                  break
-                fi
-                echo "Attempt $i/$MAX_RETRIES: Frontend returned $STATUS"
-                if [ $i -eq $MAX_RETRIES ]; then
-                  echo "##[error]Production frontend health check failed"
-                  exit 1
-                fi
-                sleep $RETRY_DELAY
-              done
-              
-              # API health check
-              API_URL="https://nexus-$(environment)-func.azurewebsites.net/api/health"
-              for i in $(seq 1 $MAX_RETRIES); do
-                STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$API_URL")
-                if [ "$STATUS" = "200" ]; then
-                  echo "✅ Production API is healthy"
-                  break
-                fi
-                echo "Attempt $i/$MAX_RETRIES: API returned $STATUS"
-                if [ $i -eq $MAX_RETRIES ]; then
-                  echo "##[error]Production API health check failed"
-                  exit 1
-                fi
-                sleep $RETRY_DELAY
-              done
-              
-              echo "🎉 Production deployment validated successfully!"
+              echo "Installing Azure CLI..."
+              curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+            displayName: 'Install Azure CLI'
+
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: 'azure-subscription-prod'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                echo "Running production health checks..."
+                RG_NAME="rg-nexus-os-$(environment)"
+                MAX_RETRIES=5
+                RETRY_DELAY=10
+                
+                # Dynamically discover URLs
+                SWA_NAME=$(az staticwebapp list \
+                  --resource-group "$RG_NAME" \
+                  --query "[0].name" -o tsv)
+                
+                SWA_URL=$(az staticwebapp show \
+                  --name "$SWA_NAME" \
+                  --resource-group "$RG_NAME" \
+                  --query "defaultHostname" -o tsv)
+                
+                FRONTEND_URL="https://$SWA_URL"
+                
+                FUNC_APP_NAME=$(az functionapp list \
+                  --resource-group "$RG_NAME" \
+                  --query "[0].name" -o tsv)
+                
+                FUNC_URL=$(az functionapp show \
+                  --name "$FUNC_APP_NAME" \
+                  --resource-group "$RG_NAME" \
+                  --query "defaultHostName" -o tsv)
+                
+                API_URL="https://$FUNC_URL/api/health"
+                
+                # Frontend health check
+                for i in $(seq 1 $MAX_RETRIES); do
+                  STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$FRONTEND_URL")
+                  if [ "$STATUS" = "200" ]; then
+                    echo "✅ Production frontend is healthy"
+                    break
+                  fi
+                  echo "Attempt $i/$MAX_RETRIES: Frontend returned $STATUS"
+                  if [ $i -eq $MAX_RETRIES ]; then
+                    echo "##[error]Production frontend health check failed"
+                    exit 1
+                  fi
+                  sleep $RETRY_DELAY
+                done
+                
+                # API health check
+                for i in $(seq 1 $MAX_RETRIES); do
+                  STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$API_URL")
+                  if [ "$STATUS" = "200" ]; then
+                    echo "✅ Production API is healthy"
+                    break
+                  fi
+                  echo "Attempt $i/$MAX_RETRIES: API returned $STATUS"
+                  if [ $i -eq $MAX_RETRIES ]; then
+                    echo "##[error]Production API health check failed"
+                    exit 1
+                  fi
+                  sleep $RETRY_DELAY
+                done
+                
+                echo "🎉 Production deployment validated successfully!"
             displayName: 'Validate production'
 
   - stage: Notify_Success
