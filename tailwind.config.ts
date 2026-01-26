@@ -56,22 +56,22 @@ export default {
   				DEFAULT: 'hsl(var(--card))',
   				foreground: 'hsl(var(--card-foreground))'
   			},
-			masira: {
-				sidebar: 'hsl(var(--masira-sidebar))',
-				'sidebar-foreground': 'hsl(var(--masira-sidebar-foreground))',
-				'sidebar-hover': 'hsl(var(--masira-sidebar-hover))',
-				'sidebar-active': 'hsl(var(--masira-sidebar-active))',
-				'kpi-positive': 'hsl(var(--masira-kpi-positive))',
-				'kpi-negative': 'hsl(var(--masira-kpi-negative))',
-				'kpi-neutral': 'hsl(var(--masira-kpi-neutral))',
-				'sentiment-positive': 'hsl(var(--masira-sentiment-positive))',
-				'sentiment-neutral': 'hsl(var(--masira-sentiment-neutral))',
-				'sentiment-negative': 'hsl(var(--masira-sentiment-negative))',
-				'priority-critical': 'hsl(var(--masira-priority-critical))',
-				'priority-high': 'hsl(var(--masira-priority-high))',
-				'priority-medium': 'hsl(var(--masira-priority-medium))',
-				'priority-low': 'hsl(var(--masira-priority-low))'
-			}
+  			masira: {
+  				sidebar: 'hsl(var(--masira-sidebar))',
+  				'sidebar-foreground': 'hsl(var(--masira-sidebar-foreground))',
+  				'sidebar-hover': 'hsl(var(--masira-sidebar-hover))',
+  				'sidebar-active': 'hsl(var(--masira-sidebar-active))',
+  				'kpi-positive': 'hsl(var(--masira-kpi-positive))',
+  				'kpi-negative': 'hsl(var(--masira-kpi-negative))',
+  				'kpi-neutral': 'hsl(var(--masira-kpi-neutral))',
+  				'sentiment-positive': 'hsl(var(--masira-sentiment-positive))',
+  				'sentiment-neutral': 'hsl(var(--masira-sentiment-neutral))',
+  				'sentiment-negative': 'hsl(var(--masira-sentiment-negative))',
+  				'priority-critical': 'hsl(var(--masira-priority-critical))',
+  				'priority-high': 'hsl(var(--masira-priority-high))',
+  				'priority-medium': 'hsl(var(--masira-priority-medium))',
+  				'priority-low': 'hsl(var(--masira-priority-low))'
+  			}
   		},
   		borderRadius: {
   			lg: 'var(--radius)',
@@ -80,7 +80,7 @@ export default {
   		},
   		fontFamily: {
   			sans: [
-  				'Lato',
+  				'Work Sans',
   				'ui-sans-serif',
   				'system-ui',
   				'-apple-system',
@@ -93,7 +93,7 @@ export default {
   				'sans-serif'
   			],
   			serif: [
-  				'EB Garamond',
+  				'Lora',
   				'ui-serif',
   				'Georgia',
   				'Cambria',
@@ -102,7 +102,7 @@ export default {
   				'serif'
   			],
   			mono: [
-  				'Fira Code',
+  				'Inconsolata',
   				'ui-monospace',
   				'SFMono-Regular',
   				'Menlo',
