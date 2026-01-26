@@ -1,68 +1,27 @@
-# =========================================================
-# Nexus OS – STAGING Deployment
-# =========================================================
-
-trigger: none # usually manual or pipeline-to-pipeline
-
-pool:
-  name: azurepipeline
-
-variables:
-  - group: nexus-staging-secrets
-  - name: environment
-    value: staging
-  - name: azureRegion
-    value: swedencentral
+trigger:
+  branches:
+    include:
+      - main
 
 stages:
-  - stage: Build
-    displayName: Build
-    jobs:
-      - job: Build
-        steps:
-          - template: templates/build.yml
+- stage: Deploy_Staging
+  displayName: Deploy STAGING
+  environment: staging
+  jobs:
+    - template: templates/deploy-infrastructure.yml
+      parameters:
+        environment: staging
+        azureSubscription: azure-subscription-staging
+        location: westeurope
+        templateFile: infrastructure/azure/main.bicep
+        parametersFile: infrastructure/azure/parameters/staging.bicepparam
+        deploymentName: nexus-staging-$(Build.BuildId)
 
-  - stage: Deploy_Infrastructure
-    displayName: Deploy Infrastructure (STAGING)
-    dependsOn: Build
-    jobs:
-      - job: Infra
-        steps:
-          - template: templates/deploy-infrastructure.yml
-            parameters:
-              azureSubscription: azure-subscription-staging
-              location: $(azureRegion)
-              templateFile: infrastructure/azure/main.bicep
-              parametersFile: infrastructure/azure/parameters/staging.bicepparam
-              deploymentName: nexus-staging-$(Build.BuildId)
+    - template: templates/deploy-frontend.yml
+      parameters:
+        environment: staging
+        azureSubscription: azure-subscription-staging
 
-  - stage: Deploy_Database
-    displayName: Database Migrations (STAGING)
-    dependsOn: Deploy_Infrastructure
-    jobs:
-      - job: Database
-        steps:
-          - template: templates/deploy-database.yml
-            parameters:
-              environment: staging
-
-  - stage: Deploy_Frontend
-    displayName: Deploy Frontend (STAGING)
-    dependsOn: Deploy_Database
-    jobs:
-      - job: Frontend
-        steps:
-          - template: templates/deploy-swa.yml
-            parameters:
-              environmentName: STAGING
-              staticWebAppToken: $(STATIC_WEB_APP_TOKEN)
-
-  - stage: Smoke_Tests
-    displayName: Smoke Tests (STAGING)
-    dependsOn: Deploy_Frontend
-    jobs:
-      - job: Health
-        steps:
-          - template: templates/health-check.yml
-            parameters:
-              environment: staging
+    - template: templates/e2e-tests.yml
+      parameters:
+        environment: staging
