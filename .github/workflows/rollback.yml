@@ -71,7 +71,7 @@ jobs:
     needs: [approval]
     steps:
       - name: Send alert
-        uses: slackapi/slack-github-action@v1.26.0
+        uses: slackapi/slack-github-action@v2.1.1
         if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
         with:
           payload: |
@@ -231,7 +231,7 @@ jobs:
           fi
 
       - name: Send notification
-        uses: slackapi/slack-github-action@v1.26.0
+        uses: slackapi/slack-github-action@v2.1.1
         if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
         with:
           payload: |
