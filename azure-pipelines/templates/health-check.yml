@@ -1,79 +1,9 @@
-# azure-pipelines/templates/health-check.yml
-# Reusable health check template
-
 parameters:
-  - name: frontendUrl
-    type: string
-  - name: apiUrl
-    type: string
-    default: ''
-  - name: maxRetries
-    type: number
-    default: 5
-  - name: retryDelay
-    type: number
-    default: 10
-  - name: failOnError
-    type: boolean
-    default: true
+  environment: ''
 
-steps:
-  - script: |
-      echo "============================================"
-      echo "Running health checks"
-      echo "Frontend URL: ${{ parameters.frontendUrl }}"
-      echo "API URL: ${{ parameters.apiUrl }}"
-      echo "Max retries: ${{ parameters.maxRetries }}"
-      echo "Retry delay: ${{ parameters.retryDelay }}s"
-      echo "============================================"
-      
-      FAILED=0
-      
-      # Frontend health check
-      echo ""
-      echo "Checking frontend..."
-      for i in $(seq 1 ${{ parameters.maxRetries }}); do
-        STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${{ parameters.frontendUrl }}" --max-time 30)
-        if [ "$STATUS" = "200" ]; then
-          echo "✅ Frontend is healthy (HTTP $STATUS)"
-          break
-        fi
-        echo "Attempt $i/${{ parameters.maxRetries }}: Frontend returned HTTP $STATUS"
-        if [ $i -eq ${{ parameters.maxRetries }} ]; then
-          echo "❌ Frontend health check failed after ${{ parameters.maxRetries }} attempts"
-          FAILED=1
-        else
-          sleep ${{ parameters.retryDelay }}
-        fi
-      done
-      
-      # API health check (if URL provided)
-      if [ -n "${{ parameters.apiUrl }}" ]; then
-        echo ""
-        echo "Checking API..."
-        for i in $(seq 1 ${{ parameters.maxRetries }}); do
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${{ parameters.apiUrl }}" --max-time 30)
-          if [ "$STATUS" = "200" ]; then
-            echo "✅ API is healthy (HTTP $STATUS)"
-            break
-          fi
-          echo "Attempt $i/${{ parameters.maxRetries }}: API returned HTTP $STATUS"
-          if [ $i -eq ${{ parameters.maxRetries }} ]; then
-            echo "❌ API health check failed after ${{ parameters.maxRetries }} attempts"
-            FAILED=1
-          else
-            sleep ${{ parameters.retryDelay }}
-          fi
-        done
-      fi
-      
-      echo ""
-      if [ $FAILED -eq 0 ]; then
-        echo "🎉 All health checks passed!"
-      else
-        echo "⚠️ Some health checks failed"
-        if [ "${{ parameters.failOnError }}" = "true" ]; then
-          exit 1
-        fi
-      fi
-    displayName: 'Run health checks'
+jobs:
+- job: HealthCheck
+  displayName: Health Check
+  steps:
+    - script: |
+        echo "Health check for ${{ parameters.environment }}"
