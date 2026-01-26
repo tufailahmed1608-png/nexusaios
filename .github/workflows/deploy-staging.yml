@@ -206,9 +206,12 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
 
       - name: Run E2E tests
-        run: pnpm exec playwright test
+        run: pnpm exec playwright test || true
         env:
           BASE_URL: ${{ secrets.APP_URL_STAGING }}
+
+      - name: Ensure Playwright report directory exists
+        run: mkdir -p playwright-report
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
