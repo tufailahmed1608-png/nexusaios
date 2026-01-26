@@ -1,0 +1,9 @@
+parameters:
+  environment: ''
+
+jobs:
+- job: E2E
+  displayName: E2E Tests
+  steps:
+    - script: |
+        echo "Running E2E tests for ${{ parameters.environment }}"
