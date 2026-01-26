@@ -1,69 +1,24 @@
-# =========================================================
-# Nexus OS – PRODUCTION Deployment
-# =========================================================
-
-trigger: none # always manual / controlled
-
-pool:
-  name: azurepipeline
-
-variables:
-  - group: nexus-prod-secrets
-  - name: environment
-    value: prod
-  - name: azureRegion
-    value: swedencentral
+trigger: none
 
 stages:
-  - stage: Build
-    displayName: Build
-    jobs:
-      - job: Build
-        steps:
-          - template: templates/build.yml
+- stage: Deploy_Production
+  displayName: Deploy PRODUCTION
+  environment: production
+  jobs:
+    - template: templates/deploy-infrastructure.yml
+      parameters:
+        environment: prod
+        azureSubscription: azure-subscription-prod
+        location: westeurope
+        templateFile: infrastructure/azure/main.bicep
+        parametersFile: infrastructure/azure/parameters/prod.bicepparam
+        deploymentName: nexus-prod-$(Build.BuildId)
 
-  - stage: Deploy_Infrastructure
-    displayName: Deploy Infrastructure (PROD)
-    dependsOn: Build
-    jobs:
-      - job: Infra
-        steps:
-          - template: templates/deploy-infrastructure.yml
-            parameters:
-              azureSubscription: azure-subscription-prod
-              location: $(azureRegion)
-              templateFile: infrastructure/azure/main.bicep
-              parametersFile: infrastructure/azure/parameters/prod.bicepparam
-              deploymentName: nexus-prod-$(Build.BuildId)
+    - template: templates/deploy-frontend.yml
+      parameters:
+        environment: prod
+        azureSubscription: azure-subscription-prod
 
-  - stage: Deploy_Database
-    displayName: Database Migrations (PROD)
-    dependsOn: Deploy_Infrastructure
-    jobs:
-      - job: Database
-        steps:
-          - template: templates/deploy-database.yml
-            parameters:
-              environment: prod
-
-  - stage: Deploy_Frontend
-    displayName: Deploy Frontend (PROD)
-    dependsOn: Deploy_Database
-    environment: prod # 🔐 approval gate configured in Azure DevOps
-    jobs:
-      - job: Frontend
-        steps:
-          - template: templates/deploy-swa.yml
-            parameters:
-              environmentName: PROD
-              staticWebAppToken: $(STATIC_WEB_APP_TOKEN)
-
-  - stage: Smoke_Tests
-    displayName: Smoke Tests (PROD)
-    dependsOn: Deploy_Frontend
-    jobs:
-      - job: Health
-        steps:
-          - template: templates/health-check.yml
-            parameters:
-              environment: prod
+    - template: templates/health-check.yml
+      parameters:
+        environment: prod
