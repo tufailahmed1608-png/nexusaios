@@ -1,0 +1,18 @@
+parameters:
+  environment: ''
+  azureSubscription: ''
+
+jobs:
+- job: DeployFrontend
+  displayName: Deploy Static Web App
+  steps:
+    - download: current
+      artifact: webapp
+
+    - task: AzureCLI@2
+      inputs:
+        azureSubscription: ${{ parameters.azureSubscription }}
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          echo "Deploy frontend for ${{ parameters.environment }}"
