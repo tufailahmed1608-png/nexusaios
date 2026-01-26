@@ -1,86 +1,29 @@
-# =========================================================
-# Nexus OS – DEV Deployment
-# =========================================================
-
 trigger:
   branches:
     include:
       - develop
 
-pool:
-  name: azurepipeline
-
-variables:
-  - group: nexus-dev-secrets
-  - name: environment
-    value: dev
-  - name: azureRegion
-    value: swedencentral
-
 stages:
-  # ---------------------------
-  # BUILD
-  # ---------------------------
-  - stage: Build
-    displayName: Build
-    jobs:
-      - job: Build
-        steps:
-          - template: templates/build.yml
+- stage: Build
+  jobs:
+    - template: templates/build.yml
 
-  # ---------------------------
-  # INFRASTRUCTURE
-  # ---------------------------
-  - stage: Deploy_Infrastructure
-    displayName: Deploy Infrastructure (DEV)
-    dependsOn: Build
-    jobs:
-      - job: Infra
-        steps:
-          - template: templates/deploy-infrastructure.yml
-            parameters:
-              azureSubscription: azure-subscription-dev
-              location: $(azureRegion)
-              templateFile: infrastructure/azure/main.bicep
-              parametersFile: infrastructure/azure/parameters/dev.bicepparam
-              deploymentName: nexus-dev-$(Build.BuildId)
+- stage: Infra
+  dependsOn: Build
+  jobs:
+    - template: templates/deploy-infrastructure.yml
+      parameters:
+        environment: dev
+        azureSubscription: azure-subscription-dev
+        location: westeurope
+        templateFile: infrastructure/azure/main.bicep
+        parametersFile: infrastructure/azure/parameters/dev.bicepparam
+        deploymentName: nexus-dev-$(Build.BuildId)
 
-  # ---------------------------
-  # DATABASE
-  # ---------------------------
-  - stage: Deploy_Database
-    displayName: Database Migrations (DEV)
-    dependsOn: Deploy_Infrastructure
-    jobs:
-      - job: Database
-        steps:
-          - template: templates/deploy-database.yml
-            parameters:
-              environment: dev
-
-  # ---------------------------
-  # FRONTEND
-  # ---------------------------
-  - stage: Deploy_Frontend
-    displayName: Deploy Frontend (DEV)
-    dependsOn: Deploy_Database
-    jobs:
-      - job: Frontend
-        steps:
-          - template: templates/deploy-swa.yml
-            parameters:
-              environmentName: DEV
-              staticWebAppToken: $(STATIC_WEB_APP_TOKEN)
-
-  # ---------------------------
-  # SMOKE TESTS
-  # ---------------------------
-  - stage: Smoke_Tests
-    displayName: Smoke Tests (DEV)
-    dependsOn: Deploy_Frontend
-    jobs:
-      - job: Health
-        steps:
-          - template: templates/health-check.yml
-            parameters:
-              environment: dev
+- stage: Frontend
+  dependsOn: Infra
+  jobs:
+    - template: templates/deploy-frontend.yml
+      parameters:
+        environment: dev
+        azureSubscription: azure-subscription-dev
