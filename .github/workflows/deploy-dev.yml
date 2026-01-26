@@ -1,14 +1,12 @@
 name: Deploy to DEV
 
 on:
-  push:
-    branches: [develop]
   workflow_dispatch:
     inputs:
       skip_infrastructure:
         description: 'Skip infrastructure deployment'
         required: false
-        default: 'false'
+        default: false
         type: boolean
 
 concurrency:
