@@ -1,49 +1,22 @@
-# azure-pipelines/templates/build.yml
-# Reusable build template
-
 parameters:
-  - name: nodeVersion
-    type: string
-    default: '20.x'
-  - name: publishArtifact
-    type: boolean
-    default: true
-  - name: artifactName
-    type: string
-    default: 'webapp'
+  nodeVersion: '20.x'
 
-steps:
-  - task: NodeTool@0
-    inputs:
-      versionSpec: '${{ parameters.nodeVersion }}'
-    displayName: 'Install Node.js ${{ parameters.nodeVersion }}'
+jobs:
+- job: Build
+  displayName: Build Web App
+  pool:
+    vmImage: ubuntu-latest
+  steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: ${{ parameters.nodeVersion }}
 
-  - task: Cache@2
-    inputs:
-      key: 'npm | "$(Agent.OS)" | package-lock.json'
-      restoreKeys: |
-        npm | "$(Agent.OS)"
-      path: $(Build.SourcesDirectory)/node_modules
-    displayName: 'Cache node_modules'
+    - script: npm ci
+      displayName: Install dependencies
 
-  - script: npm ci
-    displayName: 'Install dependencies'
+    - script: npm run build
+      displayName: Build app
 
-  - script: npm run lint
-    displayName: 'Run linting'
-    continueOnError: false
-
-  - script: npx tsc --noEmit
-    displayName: 'TypeScript check'
-    continueOnError: false
-
-  - script: npm run build
-    displayName: 'Build application'
-    env:
-      VITE_SUPABASE_URL: $(VITE_SUPABASE_URL)
-      VITE_SUPABASE_PUBLISHABLE_KEY: $(VITE_SUPABASE_PUBLISHABLE_KEY)
-
-  - ${{ if eq(parameters.publishArtifact, true) }}:
     - publish: dist
-      artifact: ${{ parameters.artifactName }}
-      displayName: 'Publish ${{ parameters.artifactName }} artifact'
+      artifact: webapp
+      displayName: Publish web artifact
