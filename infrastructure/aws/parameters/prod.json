@@ -1,0 +1,22 @@
+[
+  {
+    "ParameterKey": "DatabaseInstanceClass",
+    "ParameterValue": "db.r6g.large"
+  },
+  {
+    "ParameterKey": "DatabaseAllocatedStorage",
+    "ParameterValue": "100"
+  },
+  {
+    "ParameterKey": "EnableMultiAZ",
+    "ParameterValue": "true"
+  },
+  {
+    "ParameterKey": "GitHubRepository",
+    "ParameterValue": "https://github.com/your-org/masira"
+  },
+  {
+    "ParameterKey": "GitHubBranch",
+    "ParameterValue": "main"
+  }
+]

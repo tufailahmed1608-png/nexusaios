@@ -1,0 +1,22 @@
+[
+  {
+    "ParameterKey": "DatabaseInstanceClass",
+    "ParameterValue": "db.t3.micro"
+  },
+  {
+    "ParameterKey": "DatabaseAllocatedStorage",
+    "ParameterValue": "20"
+  },
+  {
+    "ParameterKey": "EnableMultiAZ",
+    "ParameterValue": "false"
+  },
+  {
+    "ParameterKey": "GitHubRepository",
+    "ParameterValue": "https://github.com/your-org/masira"
+  },
+  {
+    "ParameterKey": "GitHubBranch",
+    "ParameterValue": "develop"
+  }
+]
