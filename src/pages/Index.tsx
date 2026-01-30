@@ -64,6 +64,7 @@ const Index = () => {
         ) : (
           <Dashboard onNavigateToSignals={() => setActiveView('signals')} />
         );
+      case 'inbox':
         return <SmartInbox />;
       case 'tasks':
         return <TaskBoard />;
