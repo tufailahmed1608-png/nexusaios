@@ -23,6 +23,7 @@ import ProductDemo from "./pages/ProductDemo";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import Integrations from "./pages/Integrations";
 import SignalEnginePage from "./pages/SignalEngine";
+import ArchitectureDiagrams from "./pages/ArchitectureDiagrams";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 
@@ -108,6 +109,7 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
+              <Route path="/architecture" element={<ArchitectureDiagrams />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
