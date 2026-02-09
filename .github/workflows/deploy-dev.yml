@@ -200,7 +200,7 @@ jobs:
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
     steps:
       - name: Send notification
-        uses: slackapi/slack-github-action@v1.26.0
+        uses: slackapi/slack-github-action@v2.1.1
         if: ${{ env.SLACK_WEBHOOK_URL != '' }}
         with:
           payload: |
