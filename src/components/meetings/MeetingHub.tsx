@@ -176,8 +176,27 @@ const MeetingHub = () => {
 
   const handleSyncTeams = async () => {
     setIsSyncing(true);
-    toast.info('Teams sync requires a Microsoft Graph access token. Configure in Integrations page.');
-    setIsSyncing(false);
+    try {
+      const { data, error } = await supabase.functions.invoke('teams-meetings-connector', {
+        body: { action: 'sync_meetings' },
+      });
+
+      if (error) throw error;
+
+      if (data?.success) {
+        const synced = data.data?.synced || 0;
+        toast.success(`Successfully synced ${synced} meetings from Microsoft Teams`);
+        await loadMeetings();
+      } else {
+        throw new Error(data?.error || 'Sync failed');
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('Teams sync error:', msg);
+      toast.error(`Teams sync failed: ${msg}`);
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   const handleAnalyze = async () => {
