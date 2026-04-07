@@ -25,14 +25,47 @@ interface GraphCallRecord {
 
 interface RequestBody {
   action: string;
-  access_token: string;
   date_from?: string;
   date_to?: string;
   meeting_id?: string;
   top?: number;
+  user_id?: string;
 }
 
 const GRAPH_BASE = "https://graph.microsoft.com/v1.0";
+
+async function getAccessToken(): Promise<string> {
+  const tenantId = Deno.env.get("AZURE_AD_TENANT_ID");
+  const clientId = Deno.env.get("AZURE_AD_CLIENT_ID");
+  const clientSecret = Deno.env.get("AZURE_AD_CLIENT_SECRET");
+
+  if (!tenantId || !clientId || !clientSecret) {
+    throw new Error("Azure AD credentials not configured. Set AZURE_AD_TENANT_ID, AZURE_AD_CLIENT_ID, and AZURE_AD_CLIENT_SECRET.");
+  }
+
+  const tokenUrl = `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`;
+
+  const params = new URLSearchParams({
+    client_id: clientId,
+    client_secret: clientSecret,
+    scope: "https://graph.microsoft.com/.default",
+    grant_type: "client_credentials",
+  });
+
+  const res = await fetch(tokenUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: params.toString(),
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`Failed to obtain access token [${res.status}]: ${errText}`);
+  }
+
+  const data = (await res.json()) as { access_token: string };
+  return data.access_token;
+}
 
 async function graphFetch(endpoint: string, token: string): Promise<unknown> {
   const res = await fetch(`${GRAPH_BASE}${endpoint}`, {
@@ -57,19 +90,16 @@ Deno.serve(async (req: Request) => {
 
   try {
     const body = (await req.json()) as RequestBody;
-    const { action, access_token, date_from, date_to, top = 50 } = body;
-
-    if (!access_token) {
-      return new Response(JSON.stringify({ error: "access_token is required" }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    const { action, date_from, date_to, top = 50, user_id } = body;
 
     if (!action) {
-      return new Response(JSON.stringify({ error: "action is required (sync_meetings, sync_calendar, get_transcript)" }), {
+      return new Response(JSON.stringify({ error: "action is required (sync_meetings, sync_calendar, get_transcript, get_recordings)" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Obtain access token via client credentials flow
+    const access_token = await getAccessToken();
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -80,17 +110,47 @@ Deno.serve(async (req: Request) => {
 
     switch (action) {
       case "sync_meetings": {
-        // Fetch online meetings and calendar events
-        const dateFilter = date_from && date_to
-          ? `?startDateTime=${date_from}&endDateTime=${date_to}&$top=${top}&$orderby=start/dateTime desc`
-          : `?$top=${top}&$orderby=start/dateTime desc`;
+        // For application permissions, use /users/{userId}/events or /users
+        // With client_credentials we need a specific user or use /users endpoint
+        const userPath = user_id ? `/users/${user_id}` : "/users";
 
-        const calendarEndpoint = date_from && date_to
-          ? `/me/calendarView${dateFilter}`
-          : `/me/events?$top=${top}&$orderby=start/dateTime desc&$filter=isOnlineMeeting eq true`;
+        let meetings: GraphMeeting[] = [];
 
-        const data = (await graphFetch(calendarEndpoint, access_token)) as { value: GraphMeeting[] };
-        const meetings = data.value || [];
+        if (user_id) {
+          // Sync a specific user's meetings
+          const dateFilter = date_from && date_to
+            ? `?startDateTime=${date_from}&endDateTime=${date_to}&$top=${top}&$orderby=start/dateTime desc`
+            : `?$top=${top}&$orderby=start/dateTime desc&$filter=isOnlineMeeting eq true`;
+
+          const calendarEndpoint = date_from && date_to
+            ? `${userPath}/calendarView${dateFilter}`
+            : `${userPath}/events?$top=${top}&$orderby=start/dateTime desc&$filter=isOnlineMeeting eq true`;
+
+          const data = (await graphFetch(calendarEndpoint, access_token)) as { value: GraphMeeting[] };
+          meetings = data.value || [];
+        } else {
+          // Try to list users and get meetings from the first few
+          try {
+            const usersData = (await graphFetch("/users?$top=10&$select=id,displayName,mail", access_token)) as {
+              value: Array<{ id: string; displayName?: string; mail?: string }>;
+            };
+
+            for (const u of (usersData.value || []).slice(0, 5)) {
+              try {
+                const eventsData = (await graphFetch(
+                  `/users/${u.id}/events?$top=${top}&$orderby=start/dateTime desc&$filter=isOnlineMeeting eq true`,
+                  access_token
+                )) as { value: GraphMeeting[] };
+                meetings.push(...(eventsData.value || []));
+              } catch {
+                // Skip users we can't access
+              }
+            }
+          } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message : String(err);
+            throw new Error(`Cannot list users. Provide a user_id or grant User.Read.All permission. Error: ${msg}`);
+          }
+        }
 
         const upsertData = meetings.map((m: GraphMeeting) => ({
           external_id: m.id,
@@ -128,12 +188,18 @@ Deno.serve(async (req: Request) => {
       }
 
       case "sync_calendar": {
-        // Fetch calendar view for a date range
         const from = date_from || new Date().toISOString();
         const to = date_to || new Date(Date.now() + 30 * 86400000).toISOString();
+        const userPath = user_id ? `/users/${user_id}` : "";
+
+        if (!user_id) {
+          return new Response(JSON.stringify({ error: "user_id is required for sync_calendar with application permissions" }), {
+            status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
 
         const data = (await graphFetch(
-          `/me/calendarView?startDateTime=${from}&endDateTime=${to}&$top=${top}&$orderby=start/dateTime`,
+          `${userPath}/calendarView?startDateTime=${from}&endDateTime=${to}&$top=${top}&$orderby=start/dateTime`,
           access_token
         )) as { value: GraphMeeting[] };
 
@@ -179,7 +245,6 @@ Deno.serve(async (req: Request) => {
           });
         }
 
-        // Try to get call records and transcripts
         try {
           const callRecords = (await graphFetch(
             `/communications/callRecords?$filter=id eq '${meeting_id}'`,
@@ -187,10 +252,10 @@ Deno.serve(async (req: Request) => {
           )) as { value: GraphCallRecord[] };
           result = { callRecords: callRecords.value };
         } catch {
-          // Fallback: try online meeting transcript
           try {
+            const userPrefix = user_id ? `/users/${user_id}` : "/me";
             const transcripts = (await graphFetch(
-              `/me/onlineMeetings/${meeting_id}/transcripts`,
+              `${userPrefix}/onlineMeetings/${meeting_id}/transcripts`,
               access_token
             )) as { value: unknown[] };
             result = { transcripts: transcripts.value };
@@ -200,7 +265,6 @@ Deno.serve(async (req: Request) => {
           }
         }
 
-        // Update meeting record with transcript if available
         if (result && typeof result === "object" && "transcripts" in result) {
           const transcriptData = result as { transcripts: Array<{ content?: string }> };
           const transcriptContent = transcriptData.transcripts?.[0]?.content;
@@ -224,8 +288,9 @@ Deno.serve(async (req: Request) => {
         }
 
         try {
+          const userPrefix = user_id ? `/users/${user_id}` : "/me";
           const recordings = (await graphFetch(
-            `/me/onlineMeetings/${meeting_id}/recordings`,
+            `${userPrefix}/onlineMeetings/${meeting_id}/recordings`,
             access_token
           )) as { value: Array<{ id: string; recordingContentUrl?: string; createdDateTime?: string }> };
 
