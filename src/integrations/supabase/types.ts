@@ -516,6 +516,84 @@ export type Database = {
         }
         Relationships: []
       }
+      meetings_sync: {
+        Row: {
+          ai_action_items: Json | null
+          ai_decisions: Json | null
+          ai_summary: string | null
+          attendees: Json | null
+          created_at: string
+          description: string | null
+          duration_minutes: number | null
+          end_time: string | null
+          external_id: string
+          id: string
+          join_url: string | null
+          metadata: Json | null
+          organizer: string | null
+          organizer_email: string | null
+          recording_status: string | null
+          recording_url: string | null
+          source: string
+          start_time: string | null
+          status: string | null
+          title: string
+          transcript: string | null
+          transcript_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          ai_action_items?: Json | null
+          ai_decisions?: Json | null
+          ai_summary?: string | null
+          attendees?: Json | null
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number | null
+          end_time?: string | null
+          external_id: string
+          id?: string
+          join_url?: string | null
+          metadata?: Json | null
+          organizer?: string | null
+          organizer_email?: string | null
+          recording_status?: string | null
+          recording_url?: string | null
+          source?: string
+          start_time?: string | null
+          status?: string | null
+          title: string
+          transcript?: string | null
+          transcript_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ai_action_items?: Json | null
+          ai_decisions?: Json | null
+          ai_summary?: string | null
+          attendees?: Json | null
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number | null
+          end_time?: string | null
+          external_id?: string
+          id?: string
+          join_url?: string | null
+          metadata?: Json | null
+          organizer?: string | null
+          organizer_email?: string | null
+          recording_status?: string | null
+          recording_url?: string | null
+          source?: string
+          start_time?: string | null
+          status?: string | null
+          title?: string
+          transcript?: string | null
+          transcript_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
