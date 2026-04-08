@@ -35,7 +35,7 @@ jobs:
           fi
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ steps.version.outputs.version }}
 
@@ -52,7 +52,7 @@ jobs:
     needs: [validate]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ needs.validate.outputs.version }}
 
@@ -128,7 +128,7 @@ jobs:
       function-app-name: ${{ steps.deploy.outputs.functionAppName }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ needs.validate.outputs.version }}
 
@@ -159,7 +159,7 @@ jobs:
     needs: [deploy-infrastructure]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ needs.validate.outputs.version }}
 
@@ -187,7 +187,7 @@ jobs:
     needs: [run-migrations]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ needs.validate.outputs.version }}
 
