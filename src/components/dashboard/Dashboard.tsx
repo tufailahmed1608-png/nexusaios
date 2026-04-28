@@ -5,6 +5,7 @@ import BudgetChart from './BudgetChart';
 import ProjectList from './ProjectList';
 import VelocityChart from './VelocityChart';
 import { SignalWidget } from '@/components/signals/SignalWidget';
+import SyncControlPanel from './SyncControlPanel';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Database, FileSpreadsheet } from 'lucide-react';
@@ -97,6 +98,9 @@ const Dashboard = ({ onNavigateToSignals }: DashboardProps) => {
           </div>
         </div>
       )}
+
+      {/* Sync controls */}
+      <SyncControlPanel />
 
       {/* KPI Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
